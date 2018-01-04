@@ -1,0 +1,87 @@
+.navbar-brand {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 1.6rem;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+    color: white;
+    font-weight: 800;
+}
+
+#mainBio .container h2, #projectsGames .container h2, #projectsGithub .container h2, #recentProjects h2, #contact h2  {
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+    color: black;
+    font-weight: 200;
+    padding: 30px 0 20px 0;
+    font-size: 50px; 
+}
+
+p {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 15.5px;
+    font-weight: 300; 
+}
+
+.figure-text {
+    font-size: 13.5px;
+}
+
+.figure-foot h4 a{
+    color: black;
+    text-transform: uppercase;
+    font-weight:400;
+    padding: 30px 0 20px 0;
+}
+
+.projectLink {
+    color: black;
+}
+
+#contact div{
+    background-color: #343a40;
+    color: white;
+}
+
+#contact h3 {
+    font-size: 1.6rem;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+    color: white;
+    font-weight: 800;
+}
+
+hr {
+    border: 0;
+}
+
+img {
+    opacity: 1.0;
+    transition: .5s ease;
+}
+
+img:hover {
+    opacity: .5;
+    transition: .5s ease;
+}
+
+@media (max-width: 978px) {
+    .container {
+      padding:0;
+      margin:0;
+    }
+
+    body {
+      padding:0;
+    }
+
+    .navbar-fixed-top, .navbar-fixed-bottom, .navbar-static-top {
+      margin-left: 0;
+      margin-right: 0;
+      margin-bottom:0;
+    }
+
+    section, footer {
+        padding-left: 9px;
+        padding-right: 9px;
+    }
+}
