@@ -1,385 +1,866 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <title>Arsenio Colon - Developer</title>
-    <!-- Required meta tags -->
-    <meta charset="utf-8">
-    <meta name="description" content="Arsenio Colon's Portfolio Page">
-    <meta name="keywords" content="HTML,CSS,Javascript,Arsenio,Colon,Front End,Developer,Back End,Freelance,Portfolio,Buffalo,New York">
-    <meta name="author" content="Arsenio Colon">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Arsenio Colon - Software Engineer</title>
+  <meta name="description" content="Arsenio Colon is a Software Engineer based in Buffalo, NY with experience in .NET, Azure, Unity, and AR/VR development." />
+  <meta property="og:title" content="Arsenio Colon - Software Engineer" />
+  <meta property="og:description" content="Software Engineer based in Buffalo, NY. Specializing in .NET, Azure, Unity, and AR/VR." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://arseniocolon.com" />
+  <meta property="og:image" content="https://arseniocolon.com/pic/headshot.PNG" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Arsenio Colon - Software Engineer" />
+  <meta name="twitter:description" content="Software Engineer based in Buffalo, NY. Specializing in .NET, Azure, Unity, and AR/VR." />
+  <meta name="twitter:image" content="https://arseniocolon.com/pic/headshot.PNG" />
+  <link rel="icon" type="image/svg+xml" href="pic/logo.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="font-awesome-4.7.0/css/font-awesome.min.css">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/css/bootstrap.min.css" integrity="sha384-Zug+QiDoJOrZ5t4lssLdxGhVrurbmBWopoEl+M6BdEfwnCJZtKxi1KgxUyJq13dy"
-        crossorigin="anonymous">
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-    <link rel="manifest" href="/manifest.json">
-    <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
-    <meta name="theme-color" content="#ffffff">
+    :root {
+      --bg: #faf9f7;
+      --surface: #f2f0ec;
+      --border: #e5e2db;
+      --text: #1a1814;
+      --muted: #6b6560;
+      --accent: #1a6b4a;
+      --accent-light: #e6f2ec;
+      --radius: 12px;
+      --max-w: 960px;
+    }
 
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      font-size: 16px;
+    }
+
+    /* NAV */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(255,255,255,0.9);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-inner {
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 0 2rem;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .nav-logo {
+      font-weight: 700;
+      font-size: 1rem;
+      letter-spacing: 0.02em;
+      text-decoration: none;
+      color: var(--text);
+    }
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+    .nav-links a {
+      text-decoration: none;
+      color: var(--muted);
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: color 0.15s;
+    }
+    .nav-links a:hover { color: var(--text); }
+
+    /* HAMBURGER */
+    .nav-toggle {
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 5px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0.4rem;
+      border-radius: 6px;
+      transition: background 0.15s;
+    }
+    .nav-toggle:hover { background: var(--surface); }
+    .nav-toggle span {
+      display: block;
+      width: 22px;
+      height: 2px;
+      background: var(--text);
+      border-radius: 2px;
+      transition: transform 0.25s, opacity 0.25s;
+      transform-origin: center;
+    }
+    .nav-toggle.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .nav-toggle.open span:nth-child(2) { opacity: 0; }
+    .nav-toggle.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+    /* MOBILE NAV DRAWER */
+    .mobile-nav {
+      display: none;
+      flex-direction: column;
+      background: rgba(255,255,255,0.97);
+      backdrop-filter: blur(12px);
+      border-top: 1px solid var(--border);
+      padding: 1rem 2rem 1.5rem;
+      gap: 0;
+    }
+    .mobile-nav.open { display: flex; }
+    .mobile-nav a {
+      text-decoration: none;
+      color: var(--muted);
+      font-size: 1rem;
+      font-weight: 500;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid var(--border);
+      transition: color 0.15s;
+    }
+    .mobile-nav a:last-child { border-bottom: none; }
+    .mobile-nav a:hover { color: var(--text); }
+
+    /* SECTIONS */
+    section {
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 3.5rem 2rem;
+    }
+
+    /* HERO */
+    #hero {
+      padding-top: 2.5rem;
+      padding-bottom: 3.5rem;
+    }
+    .hero-intro {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .hero-photo {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      object-fit: cover;
+      object-position: top;
+      border: 2px solid var(--border);
+      flex-shrink: 0;
+    }
+    .hero-eyebrow {
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 1.25rem;
+    }
+    h1 {
+      font-size: clamp(2.5rem, 6vw, 4rem);
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+      margin-bottom: 1.75rem;
+    }
+    h1 span { color: var(--accent); }
+    .hero-bio {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+    .hero-bio p {
+      color: var(--muted);
+      font-size: 1rem;
+      line-height: 1.75;
+    }
+    .skills-strip {
+      display: flex;
+      flex-wrap: nowrap;
+      gap: 0.4rem;
+      margin-top: 2rem;
+    }
+    @media (max-width: 760px) {
+      .skills-strip { flex-wrap: wrap; }
+    }
+    .skill-pill {
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: var(--muted);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 0.3rem 0.5rem;
+      white-space: nowrap;
+    }
+    .hero-cta {
+      margin-top: 2rem;
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.65rem 1.4rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.15s;
+      cursor: pointer;
+      border: none;
+    }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: #155a3e; }
+    .btn-ghost {
+      background: transparent;
+      color: var(--text);
+      border: 1.5px solid var(--border);
+    }
+    .btn-ghost:hover { border-color: #aaa; }
+
+    /* SECTION HEADERS */
+    .section-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 0.75rem;
+    }
+    h2 {
+      font-size: clamp(1.6rem, 4vw, 2.2rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.5rem;
+    }
+    h3.subsection {
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 1.25rem;
+      margin-top: 3rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    h3.subsection:first-of-type { margin-top: 0; }
+    .section-desc {
+      color: var(--muted);
+      margin-bottom: 3rem;
+      max-width: 520px;
+    }
+
+    /* DIVIDER */
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      max-width: var(--max-w);
+      margin: 0 auto;
+    }
+
+    /* EXPERIENCE TIMELINE */
+    .timeline {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    .timeline-item {
+      display: grid;
+      grid-template-columns: 160px 1fr;
+      gap: 2rem;
+      padding: 1.75rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .timeline-item:last-child { border-bottom: none; }
+    .timeline-date {
+      font-size: 0.82rem;
+      color: var(--muted);
+      font-weight: 500;
+      padding-top: 0.2rem;
+      line-height: 1.4;
+    }
+    .timeline-date span {
+      display: block;
+      font-size: 0.78rem;
+      margin-top: 0.2rem;
+      color: #999;
+    }
+    .timeline-body h4 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 0.2rem;
+    }
+    .timeline-body .company {
+      font-size: 0.88rem;
+      color: var(--accent);
+      font-weight: 500;
+      margin-bottom: 0.75rem;
+    }
+    .timeline-body ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+    .timeline-body ul li {
+      font-size: 0.88rem;
+      color: var(--muted);
+      line-height: 1.6;
+      padding-left: 1rem;
+      position: relative;
+    }
+    .timeline-body ul li::before {
+      content: '·';
+      position: absolute;
+      left: 0;
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    /* EDUCATION */
+    .edu-item {
+      display: grid;
+      grid-template-columns: 160px 1fr;
+      gap: 2rem;
+      padding: 1.75rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .edu-item:last-child { border-bottom: none; }
+    .edu-date {
+      font-size: 0.82rem;
+      color: var(--muted);
+      font-weight: 500;
+      padding-top: 0.2rem;
+      line-height: 1.4;
+    }
+    .edu-date span {
+      display: block;
+      font-size: 0.78rem;
+      margin-top: 0.2rem;
+      color: #999;
+    }
+    .edu-body h4 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 0.2rem;
+    }
+    .edu-body .school {
+      font-size: 0.88rem;
+      color: var(--accent);
+      font-weight: 500;
+      margin-bottom: 0.75rem;
+    }
+    .edu-body p {
+      font-size: 0.88rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    /* PROJECT GRID */
+    .project-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1.25rem;
+    }
+    .project-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      display: flex;
+      flex-direction: column;
+    }
+    .project-card:hover {
+      border-color: #ccc;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+    }
+    .project-card-img {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      object-fit: cover;
+      object-position: top;
+      display: block;
+      background: var(--border);
+    }
+    .project-card-body {
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+      flex: 1;
+    }
+    .project-tag {
+      display: inline-flex;
+      align-items: center;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      padding: 0.25rem 0.6rem;
+      border-radius: 4px;
+      background: var(--accent-light);
+      color: var(--accent);
+      width: fit-content;
+    }
+    .project-tag.game { background: #fef3e2; color: #c07a00; }
+    .project-tag.vr { background: #f0e8ff; color: #6d28d9; }
+    .project-card h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+    }
+    .project-card p {
+      font-size: 0.88rem;
+      color: var(--muted);
+      line-height: 1.65;
+      flex: 1;
+    }
+    .project-links {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      margin-top: 0.25rem;
+    }
+    .project-link {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--accent);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+    .project-link:hover { text-decoration: underline; }
+
+    /* CONTACT */
+    #contact .contact-grid {
+      display: flex;
+      gap: 1.25rem;
+      flex-wrap: wrap;
+      margin-top: 0.5rem;
+    }
+    .contact-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem 2rem;
+      text-decoration: none;
+      color: var(--text);
+      transition: border-color 0.15s, box-shadow 0.15s;
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+      min-width: 200px;
+    }
+    .contact-card:hover {
+      border-color: #ccc;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+    }
+    .contact-card-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .contact-card-value {
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: var(--accent);
+    }
+
+    /* FOOTER */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 2rem 2rem;
+      text-align: center;
+    }
+    footer p { color: var(--muted); font-size: 0.82rem; }
+
+    /* RESPONSIVE */
+    @media (max-width: 640px) {
+      .hero-bio { grid-template-columns: 1fr; }
+      .timeline-item { grid-template-columns: 1fr; gap: 0.25rem; }
+      .edu-item { grid-template-columns: 1fr; gap: 0.25rem; }
+      .nav-links { display: none; }
+      .nav-toggle { display: flex; }
+      #hero { padding-top: 1.5rem; }
+    }
+  </style>
 </head>
-
 <body>
 
-    <header>
-        <div class="container">
-            <nav class="navbar navbar-expand-lg navbar-dark  bg-dark">
-                <a class="navbar-brand" href="#">Arsenio Colon</a>
-                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false"
-                    aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
-                    <ul class="navbar-nav">
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true"
-                                aria-expanded="false">
-                                Projects
-                            </a>
-                            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                                <a class="dropdown-item" href="#recentProjects">Recent Projects</a>
-                                <a class="dropdown-item" href="#projectsGames">Games In Unity</a>
-                                <a class="dropdown-item" href="#projectsGithub">Github Projects</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#contact">Contact</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="Arsenio_Colon_resume.pdf" target="_blank">Resume</a>
-                        </li>
-                    </ul>
-                    </div>
-    </header>
+  <!-- NAV -->
+  <nav>
+    <div class="nav-inner">
+      <a class="nav-logo" href="#">Arsenio Colon</a>
+      <ul class="nav-links">
+        <li><a href="#experience">Experience</a></li>
+        <li><a href="#education">Education</a></li>
+        <li><a href="#projects">Projects</a></li>
+        <li><a href="#games">Games</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+      <button class="nav-toggle" aria-label="Toggle menu" aria-expanded="false">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div class="mobile-nav" id="mobileNav">
+      <a href="#experience" onclick="closeMobileNav()">Experience</a>
+      <a href="#education" onclick="closeMobileNav()">Education</a>
+      <a href="#projects" onclick="closeMobileNav()">Projects</a>
+      <a href="#games" onclick="closeMobileNav()">Games</a>
+      <a href="#contact" onclick="closeMobileNav()">Contact</a>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section id="hero">
+    <div class="hero-intro">
+      <img class="hero-photo" src="pic/headshot.PNG" alt="Arsenio Colon" />
+      <p class="hero-eyebrow" style="margin-bottom:0;">Software Engineer · Buffalo, NY</p>
+    </div>
+    <h1>Hi, I'm Arsenio.<br><span>I build things.</span></h1>
+      <div class="hero-bio">
+        <p>
+          Software Engineer with experience building backend systems, cloud services, and AR/VR applications.
+          I've worked across fintech, higher ed, and defense, shipping .NET microservices at ACV Auctions,
+          maintaining enterprise platforms at M&T Bank, and building AR/VR training tools for the U.S. Navy at RED-INC.
+        </p>
+        <p>
+          Outside of work, I have a deep love for games and interactive experiences. I've built Unity prototypes
+          for game jams, earned 2nd place in ACV's internal Hackathon with a VR tower-defense concept on Meta Quest 2,
+          and previously served as Secretary on the Board of
+          <a href="https://buffalogamespace.com" target="_blank" style="color:var(--accent);text-decoration:none;">Buffalo Game Space</a>,
+          a 501(c)(3) supporting local game developers and digital artists.
+        </p>
+      </div>
+      <div class="skills-strip">
+        <span class="skill-pill">C#</span>
+        <span class="skill-pill">.NET / ASP.NET</span>
+        <span class="skill-pill">Azure</span>
+        <span class="skill-pill">SQL</span>
+        <span class="skill-pill">Unity</span>
+        <span class="skill-pill">AR / VR</span>
+        <span class="skill-pill">Kubernetes</span>
+        <span class="skill-pill">JavaScript</span>
+        <span class="skill-pill">Git</span>
+        <span class="skill-pill">Datadog</span>
+      </div>
+      <div class="hero-cta">
+        <a href="#experience" class="btn btn-primary">View my work ↓</a>
+<a href="https://github.com/arseniocolon" target="_blank" class="btn btn-ghost">GitHub</a>
+        <a href="https://www.linkedin.com/in/arsenio-colon/" target="_blank" class="btn btn-ghost">LinkedIn</a>
+      </div>
+  </section>
+
+  <hr class="divider" />
+
+  <!-- EXPERIENCE -->
+  <section id="experience">
+    <p class="section-label">Career</p>
+    <h2>Work Experience</h2>
+    <p class="section-desc">A timeline of my professional roles and what I worked on.</p>
+
+    <div class="timeline">
+
+      <div class="timeline-item">
+        <div class="timeline-date">May 2024 – Dec 2024<span>Acara Solutions</span></div>
+        <div class="timeline-body">
+          <h4>Technical Engineer III — Contractor</h4>
+          <div class="company">Acara Solutions · Buffalo, NY</div>
+          <ul>
+            <li>Developed .NET-based automation integrated with Automic to scan for keyword files on Windows VMs and upload relationship manager data into Calypso, streamlining manual processes for the derivatives team at M&T Bank.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-date">Nov 2022 – May 2024<span>ACV Auctions</span></div>
+        <div class="timeline-body">
+          <h4>Software Engineer L2</h4>
+          <div class="company">ACV Auctions · Buffalo, NY</div>
+          <ul>
+            <li>Contributed to .NET-based Payment and Order microservices supporting ~2,000 daily transactions.</li>
+            <li>Migrated alerting and monitoring from NewRelic to Datadog, enhancing observability and reducing alert noise.</li>
+            <li>Responded to on-call incidents and monitored system health to ensure application stability.</li>
+            <li>Earned 2nd place in ACV's internal Hackathon for a Unity-based VR prototype using Meta Quest 2 hand tracking and passthrough.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-date">Jan 2021 – Nov 2022<span>M&T Bank</span></div>
+        <div class="timeline-body">
+          <h4>Software Engineer I</h4>
+          <div class="company">M&T Bank · Buffalo, NY</div>
+          <ul>
+            <li>Contributed to internal Windows and web applications using C#, MS-SQL, and Angular with a .NET Core Code First approach.</li>
+            <li>Selected for M&T's "EquityOne" sponsorship program recognizing high-potential internal leaders.</li>
+            <li>Volunteered for Cybersecurity Champions and Touchdown for Teachers programs, presenting Tech Talks and mentoring through internal Tech Academy workshops.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-date">Sep 2019 – Feb 2020<span>RED-INC</span></div>
+        <div class="timeline-body">
+          <h4>Software Developer</h4>
+          <div class="company">Research and Engineering Development, LLC · Buffalo, NY</div>
+          <ul>
+            <li>Developed AR/VR training modules for the U.S. Navy using Unity, C#, and XR Toolkit on Microsoft HoloLens and HTC Vive.</li>
+            <li>Coordinated with cross-disciplinary teams using Agile and Atlassian tools to align development goals and timelines.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-date">Feb 2018 – Sep 2019<span>Campus Labs</span></div>
+        <div class="timeline-body">
+          <h4>Software Developer</h4>
+          <div class="company">Campus Labs · Buffalo, NY</div>
+          <ul>
+            <li>Developed and deployed backend services using C# and Azure cloud pipelines via Azure DevOps for high-traffic education platforms.</li>
+            <li>Maintained the "Baseline" assessment platform built in ASP.NET, supporting over 1,400 public and private institutions.</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <hr class="divider" />
+
+  <!-- EDUCATION -->
+  <section id="education">
+    <p class="section-label">Academic</p>
+    <h2>Education</h2>
+    <p class="section-desc">My academic background and relevant coursework.</p>
+
+    <div class="timeline">
+
+      <div class="edu-item">
+        <div class="edu-date">Aug 2015 – Dec 2017<span>SUNY Buffalo State</span></div>
+        <div class="edu-body">
+          <h4>Bachelor of Science, Computer Information Systems</h4>
+          <div class="school">State University of New York College at Buffalo · Buffalo, NY</div>
+          <p>Coursework: Computer Information Processing I &amp; II, Computer Organization, System Analysis,
+          Microcomputer Applications, E-Commerce Systems &amp; Technology, Visual Basic Programming,
+          Operating Systems, Database Processing, Programming for the Internet Environment I &amp; II,
+          Data Communication</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <hr class="divider" />
+
+  <!-- PROJECTS -->
+  <section id="projects">
+    <p class="section-label">Work</p>
+    <h2>Projects</h2>
+    <p class="section-desc">A selection of client and personal projects I've built or contributed to.</p>
+
+    <div class="project-grid">
+
+      <div class="project-card">
+        <img class="project-card-img" src="pic/sightline.png" alt="Sightline" />
+        <div class="project-card-body">
+          <span class="project-tag">Client</span>
+          <h3>Sightline</h3>
+          <p>Portfolio website built with Squarespace for a full-service art consulting firm that helps clients find exceptional artwork for residences and businesses.</p>
+          <div class="project-links">
+            <a href="http://www.sightline.biz" target="_blank" class="project-link">Visit site ↗</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="project-card">
+        <img class="project-card-img" src="pic/schultz.png" alt="Schultz Optical" />
+        <div class="project-card-body">
+          <span class="project-tag">Client</span>
+          <h3>Schultz Optical</h3>
+          <p>Website built with Joomla for storefront locations in Boston, NY and Walden, NY. Also redesigned their logo.</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <hr class="divider" />
+
+  <!-- GAMES -->
+  <section id="games">
+    <p class="section-label">Unity</p>
+    <h2>Games I've Made</h2>
+    <p class="section-desc">Games built in Unity for game jams, hackathons, and fun.</p>
+
+    <h3 class="subsection">VR &amp; AR</h3>
+    <div class="project-grid">
+
+      <div class="project-card">
+        <img class="project-card-img" src="pic/make-game-on-real-table.png" alt="Make Game On Real Table" />
+        <div class="project-card-body">
+          <span class="project-tag vr">VR · Hackathon · 2nd Place</span>
+          <h3>Make Game On Real Table</h3>
+          <p>A VR tower defense game played on your real desk using Meta Quest 2 hand tracking and passthrough. Use hand gestures to place towers and defend against waves of trebuchets. Made with Joey Napoli for the ACV Auctions Spring Hackathon 2023.</p>
+          <div class="project-links">
+            <a href="https://klecoz.itch.io/make-game-on-real-table" target="_blank" class="project-link">Itch.io ↗</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="project-card">
+        <img class="project-card-img" src="pic/office-mistakes.png" alt="Office Mistakes" />
+        <div class="project-card-body">
+          <span class="project-tag vr">VR · BGSjam XV</span>
+          <h3>Office Mistakes</h3>
+          <p>You're in an office and objects are talking to you. Don't make the mistake of going into the wrong door or you'll get lava'd. Built for Oculus Quest.</p>
+          <div class="project-links">
+            <a href="https://klecoz.itch.io/office-mistakes" target="_blank" class="project-link">Itch.io ↗</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="project-card">
+        <img class="project-card-img" src="pic/repair-the-shape.png" alt="Repair the Shape" />
+        <div class="project-card-body">
+          <span class="project-tag vr">VR · Global Game Jam 2020</span>
+          <h3>Repair the Shape</h3>
+          <p>Use your hands to repair the shape. Built for Oculus Quest for Global Game Jam 2020.</p>
+          <div class="project-links">
+            <a href="https://klecoz.itch.io/repair-the-shape" target="_blank" class="project-link">Itch.io ↗</a>
+            <a href="https://github.com/Klecoz/Global-Game-Jam-2020" target="_blank" class="project-link">GitHub ↗</a>
+          </div>
+        </div>
+      </div>
+
     </div>
 
-    <section id="mainBio">
-        <div class="container">
-            <h2>Hi, I'm Arsenio. I'm a Developer.</h2>
+    <h3 class="subsection" style="margin-top:3rem;">Other Games</h3>
+    <div class="project-grid">
 
-
-            <div class="row">
-                <div class="col-md-5">
-                    <p>I'm a graduate from SUNY Buffalo State College with a Bachelor of Science in Computer Information
-                        Systems as of December 2017. I'm currently working as a Software Developer in the Buffalo, NY area. I love figuring out solutions to problems and
-                        learning new development languages.</p>
-                </div>
-                <div class="col-md-5">
-                    <p>I have an interest in Game Development using the Unity Development Platform and 
-                        I'm involved on the Board within the Buffalo Game Space,
-                        a 501(c)(3) non-profit dedicated to helping people make games,
-                        offering resources to game developers. You can check out some of the small game projects that I've helped create below. I love creating games just as much as I like making them!</p>
-                </div>
-            </div>
+      <div class="project-card">
+        <img class="project-card-img" src="pic/trance-mission.png" alt="Trance Mission" />
+        <div class="project-card-body">
+          <span class="project-tag game">Jam</span>
+          <h3>Trance Mission</h3>
+          <p>You're on a mission and you also like trance. Beat DJTranceEggs and get to the end!</p>
+          <div class="project-links">
+            <a href="https://klecoz.itch.io/trance-mission" target="_blank" class="project-link">Itch.io ↗</a>
+          </div>
         </div>
-    </section>
+      </div>
 
-    <section id="recentProjects">
-        <div class="container">
-            <h2>Recent Projects</h2>
-
-            <div class="row">
-                <div class="col-xs-12 col-sm-6 col-md-3">
-                    <figure class="figure">
-                        <div class="figure-thumb">
-                            <a href="http://www.sightline.biz/" target="_blank">
-                                <img src="pic/sightline.png" alt="Sightline" class="rounded mx-auto img-fluid"></img>
-                            </a>
-                        </div>
-                        <figcaption class="figure-foot">
-                            <h4>
-                                <a href="http://www.sightline.biz/" target="_blank">Sightline</a>
-                            </h4>
-                            <p class="figure-text">Created a portfolio website using Squarespace for a full-service art consulting firm that helps
-                                clients find exceptional artwork for residences and businesses.</p>
-                        </figcaption>
-                    </figure>
-                </div>
-
-                <div class="col-xs-12 col-sm-6 col-md-3">
-                    <figure class="figure">
-                        <div class="figure-thumb">
-                            <a href="http://www.drhornberger.com/" target="_blank">
-                                <img src="pic/schultz.png" alt="Schultz Optical" class="rounded mx-auto img-fluid"></img>
-                            </a>
-                        </div>
-                        <figcaption class="figure-foot">
-                            <h4>
-                                <a href="http://www.drhornberger.com/" target="_blank">Schultz Optical</a>
-                            </h4>
-                            <p class="figure-text">Created a website using Joomla for the client's storefronts located in Boston, NY and Walden,
-                                NY. Redesigned the logo as well.</p>
-                        </figcaption>
-                    </figure>
-                </div>
-                <div class="col-xs-12 col-sm-6 col-md-3">
-                    <figure class="figure">
-                        <div class="figure-thumb">
-                            <a href="https://buffalo-game-space.itch.io/2017-queen-city-high-school-game-jam" target="_blank">
-                                <img src="pic/birdthesquirrel.png" alt="Bird The Squirrel" class="rounded mx-auto img-fluid"></img>
-                            </a>
-                        </div>
-                        <figcaption class="figure-foot">
-                            <h4>
-                                <a href="https://buffalo-game-space.itch.io/2017-queen-city-high-school-game-jam" target="_blank">Bird The Squirrel</a>
-                            </h4>
-                            <p class="figure-text">Stock up on acorns for winter and evade the incoming cloud of CO2 in this woodsy platformer.
-                                Created by students from Frederick Law Olmsted School and assigned as a programmer to the
-                                group. Made for the Queen City High School Game Jam sponsored by AT&T.
-                                <hr>
-                                <a class="font-weight-bold projectLink" href="https://github.com/Klecoz/projectBird">GitHub Here</a>
-                            </p>
-                        </figcaption>
-                    </figure>
-                </div>
-
-                <div class="col-xs-12 col-sm-6 col-md-3">
-                    <figure class="figure">
-                        <div class="figure-thumb">
-                            <a href="https://github.com/Klecoz/shopcart" target="_blank">
-                                <img src="pic/shopcart.png" alt="shopcart" class="rounded mx-auto img-fluid"></img>
-                            </a>
-                        </div>
-                        <figcaption class="figure-foot">
-                            <h4>
-                                <a href="https://github.com/Klecoz/shopcart" target="_blank">Simple PHP Registration/Login Page</a>
-                            </h4>
-                            <p class="figure-text">A PHP project for my CIS475 Programming for the Internet Environment class. Demonstrates use
-                                of login/registration pages using superglobals and sessions.
-                                <hr>
-                                <a class="projectLink font-weight-bold" href="http://bscacad3.buffalostate.edu/~colonav01/shopcart.php">Live Version Here</a>
-                            </p>
-                        </figcaption>
-                    </figure>
-                </div>
-            </div>
-
+      <div class="project-card">
+        <img class="project-card-img" src="pic/birdthesquirrel.png" alt="Bird the Squirrel" />
+        <div class="project-card-body">
+          <span class="project-tag game">Platformer</span>
+          <h3>Bird the Squirrel</h3>
+          <p>Stock up on acorns and evade an incoming cloud of CO2. Made for the Queen City High School Game Jam sponsored by AT&T.</p>
         </div>
-    </section>
+      </div>
 
-    <section id="projectsGames">
-        <div class="container">
-            <h2>Games - Made In Unity</h2>
-
-            <div class="row">
-                <div class="col-xs-12 col-sm-6 col-md-3">
-                    <figure class="figure">
-                        <div class="figure-thumb">
-                            <a href="https://buffalo-game-space.itch.io/2017-queen-city-high-school-game-jam" target="_blank">
-                                <img src="pic/birdthesquirrel.png" alt="Bird The Squirrel" class="rounded mx-auto img-fluid"></img>
-                            </a>
-                        </div>
-                        <figcaption class="figure-foot">
-                            <h4>
-                                <a href="https://buffalo-game-space.itch.io/2017-queen-city-high-school-game-jam" target="_blank">Bird The Squirrel</a>
-                            </h4>
-                            <p class="figure-text">Stock up on acorns for winter and evade the incoming cloud of CO2 in this woodsy platformer.
-                                Created by students from Frederick Law Olmsted School and assigned as a programmer to the
-                                group. Made for the Queen City High School Game Jam sponsored by AT&T.
-                                <hr>
-                                <a class="font-weight-bold projectLink" href="https://github.com/Klecoz/projectBird">GitHub Here</a>
-                            </p>
-                        </figcaption>
-                    </figure>
-                </div>
-
-                <div class="col-xs-12 col-sm-6 col-md-3">
-                    <figure class="figure">
-                        <div class="figure-thumb">
-                            <a href="https://tigershark8980.itch.io/saimon-says" target="_blank">
-                                <img src="pic/saimonsays.png" alt="Saimon Says" class="rounded mx-auto img-fluid"></img>
-                            </a>
-                        </div>
-                        <figcaption class="figure-foot">
-                            <h4>
-                                <a href="https://tigershark8980.itch.io/saimon-says" target="_blank">SAIMON SAYS</a>
-                            </h4>
-                            <p class="figure-text">You are piloting a starship and an evil AI takes over and is making you press buttons but it
-                                keeps changing them around. Don't let the gauge run down! Code and Game Design done by me.</p>
-                        </figcaption>
-                    </figure>
-                </div>
-
-                <div class="col-xs-12 col-sm-6 col-md-3">
-                    <figure class="figure">
-                        <div class="figure-thumb">
-                            <a href="https://klecoz.itch.io/oscilloscoped" target="_blank">
-                                <img src="pic/oscilloscoped.png" alt="Oscilloscoped" class="rounded mx-auto img-fluid"></img>
-                            </a>
-                        </div>
-                        <figcaption class="figure-foot">
-                            <h4>
-                                <a href="https://klecoz.itch.io/oscilloscoped" target="_blank">Oscilloscope'd</a>
-                            </h4>
-                            <p class="figure-text">Originally made for the Global Game Jam 2017 event. Used as part of my Senior Seminar project
-                                at Buffalo State College.
-                                <br>
-                                <br>
-                                <a class="projectLink font-weight-bold" href="https://docs.google.com/presentation/d/1UUx2W8tygZzFmZ9GNU5BNIuQwHRlVA3e2UPxB-SgzZ0/edit?usp=sharing"
-                                    target="_blank">See my project poster!</a>
-                            </p>
-                        </figcaption>
-                    </figure>
-                </div>
-                <div class="col-xs-12 col-sm-6 col-md-3">
-                    <figure class="figure">
-                        <div class="figure-thumb">
-                            <a href="https://klecoz.itch.io/crowbar-puncher-9000" target="_blank">
-                                <img src="pic/crowbar.png" alt="Crowbar Puncher 9000" class="rounded mx-auto img-fluid"></img>
-                            </a>
-                        </div>
-                        <figcaption class="figure-foot">
-                            <h4>
-                                <a href="https://klecoz.itch.io/crowbar-puncher-9000" target="_blank">Crowbar Puncher 9000</a>
-                            </h4>
-                            <p class="figure-text">One of my first games in Unity. Made for QaziJam 8.</p>
-                        </figcaption>
-                    </figure>
-                </div>
-            </div>
-
+      <div class="project-card">
+        <img class="project-card-img" src="pic/saimonsays.png" alt="SAIMON SAYS" />
+        <div class="project-card-body">
+          <span class="project-tag game">Arcade</span>
+          <h3>SAIMON SAYS</h3>
+          <p>You're piloting a starship when an evil AI hijacks the controls and makes you press buttons, but keeps changing them. Don't let the gauge run down!</p>
+          <div class="project-links">
+            <a href="https://tigershark8980.itch.io/saimon-says" target="_blank" class="project-link">Itch.io ↗</a>
+          </div>
         </div>
-    </section>
+      </div>
 
-    <section id="projectsGithub">
-        <div class="container">
-            <h2>Projects on Github</h2>
-
-            <div class="row">
-                <div class="col-xs-12 col-sm-6 col-md-3">
-                    <figure class="figure">
-                        <div class="figure-thumb">
-                            <a href="https://github.com/Klecoz/Privilege-Game" target="_blank">
-                                <img src="pic/privilege.png" alt="Privilege Game" class="rounded mx-auto img-fluid"></img>
-                            </a>
-                        </div>
-                        <figcaption class="figure-foot">
-                            <h4>
-                                <a href="https://github.com/Klecoz/Privilege-Game" target="_blank">Privilege Simulator 9000</a>
-                            </h4>
-                            <p class="figure-text">A game based on the Privilege Activity made for my Sociology Final.</p>
-                        </figcaption>
-                    </figure>
-                </div>
-
-                <div class="col-xs-12 col-sm-6 col-md-3">
-                    <figure class="figure">
-                        <div class="figure-thumb">
-                            <a href="https://github.com/Klecoz/youtube-API-search" target="_blank">
-                                <img src="pic/youtube.png" alt="Youtube API Search" class="rounded mx-auto img-fluid"></img>
-                            </a>
-                        </div>
-                        <figcaption class="figure-foot">
-                            <h4>
-                                <a href="https://github.com/Klecoz/youtube-API-search" target="_blank">Youtube API Search</a>
-                            </h4>
-                            <p class="figure-text">Uses JSON and the Youtube API to search and display links/images.</p>
-                        </figcaption>
-                    </figure>
-                </div>
-
-                <div class="col-xs-12 col-sm-6 col-md-3">
-                    <figure class="figure">
-                        <div class="figure-thumb">
-                            <a href="https://github.com/Klecoz/quiz-app" target="_blank">
-                                <img src="pic/quizapp.png" alt="Beer Quiz App" class="rounded mx-auto img-fluid"></img>
-                            </a>
-                        </div>
-                        <figcaption class="figure-foot">
-                            <h4>
-                                <a href="https://github.com/Klecoz/quiz-app" target="_blank">Beer Quiz App</a>
-                            </h4>
-                            <p class="figure-text">A small Beer Quiz App made from jQuery and Javascript Objects.</p>
-                        </figcaption>
-                    </figure>
-                </div>
-                <div class="col-xs-12 col-sm-6 col-md-3">
-                    <figure class="figure">
-                        <div class="figure-thumb">
-                            <a href="https://github.com/Klecoz/hot-or-cold-starter" target="_blank">
-                                <img src="pic/hotcold.png" alt="Hot or Cold" class="rounded mx-auto img-fluid"></img>
-                            </a>
-                        </div>
-                        <figcaption class="figure-foot">
-                            <h4>
-                                <a href="https://github.com/Klecoz/hot-or-cold-starter" target="_blank">Hot or Cold Game</a>
-                            </h4>
-                            <p class="figure-text">Forked HTML/CSS files from the Hot or cold starter page and wrote javascript to compliment the
-                                game. Part of Thinkful's FEWD course.</p>
-                        </figcaption>
-                    </figure>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-xs-12 col-sm-6 col-md-3">
-                    <figure class="figure">
-                        <div class="figure-thumb">
-                            <a href="https://github.com/Klecoz/list-app" target="_blank">
-                                <img src="pic/listmaker.png" alt="Listmaker App" class="rounded mx-auto img-fluid"></img>
-                            </a>
-                        </div>
-                        <figcaption class="figure-foot">
-                            <h4>
-                                <a href="https://github.com/Klecoz/list-app" target="_blank">Listmaker App</a>
-                            </h4>
-                            <p class="figure-text">A list app made with HTML/CSS/jQuery. Part of a Thinkful FEWD project.</p>
-                        </figcaption>
-                    </figure>
-                </div>
-
-            </div>
-
+      <div class="project-card">
+        <img class="project-card-img" src="pic/oscilloscoped.png" alt="Oscilloscope'd" />
+        <div class="project-card-body">
+          <span class="project-tag game">Global Game Jam 2017</span>
+          <h3>Oscilloscope'd</h3>
+          <p>Made for Global Game Jam 2017 and used as part of a Senior Seminar capstone at Buffalo State College. Presented at three regional conferences.</p>
+          <div class="project-links">
+            <a href="https://klecoz.itch.io/oscilloscoped" target="_blank" class="project-link">Itch.io ↗</a>
+          </div>
         </div>
-    </section>
+      </div>
 
-    <footer id="contact">
-        <div class="container pb-3 pt-3">
-            <div class="row">
-
-                <div class="col-sm-6">
-                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d93532.55571230847!2d-78.93448170796943!3d42.89621760332011!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89d3126152dfe5a1%3A0x982304a5181f8171!2sBuffalo%2C+NY!5e0!3m2!1sen!2sus!4v1515023635397"
-                        width="100%" height="450" frameborder="0" style="border:0" allowfullscreen></iframe>
-
-                </div>
-
-                <div class="col-sm-6">
-                    <h3>Contact Me</h3>
-
-                    <form action="https://formspree.io/arseniocolon@gmail.com" method="POST">
-                        <div class="form-group">
-                            <label for="nameInput">Name:</label>
-                            <input name="Name" type="name" class="form-control" id="nameInput" aria-describedby="nameHelp" placeholder="Enter Your Name.">
-                        </div>
-                        <div class="form-group">
-                            <label for="emailInput">Email:</label>
-                            <input name="_replyto" type="email" class="form-control" id="emailInput" placeholder="Enter Your Email">
-                        </div>
-                        <input type="text" name="_gotcha" style="display:none" />
-                        <div class="form-group">
-                            <label for="textBody">Message</label>
-                            <textarea name="body" class="form-control" id="textBody" rows="3" placeholder="Your Message."></textarea>
-                        </div>
-
-                        <button type="submit" class="btn btn-primary float-right" value="send">Submit</button>
-                    </form>
-                </div>
-            </div>
+      <div class="project-card">
+        <img class="project-card-img" src="pic/crowbar.png" alt="Crowbar Puncher 9000" />
+        <div class="project-card-body">
+          <span class="project-tag game">Jam</span>
+          <h3>Crowbar Puncher 9000</h3>
+          <p>One of my first Unity games. Made for QaziJam 8.</p>
+          <div class="project-links">
+            <a href="https://klecoz.itch.io/crowbar-puncher-9000" target="_blank" class="project-link">Itch.io ↗</a>
+          </div>
         </div>
-    </footer>
+      </div>
 
-    <!-- Optional JavaScript -->
-    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
-        crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
-        crossorigin="anonymous"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/js/bootstrap.min.js" integrity="sha384-a5N7Y/aK3qNeh15eJKGWxsqtnX/wWdSZSKp+81YjTmS15nvnvxKHuzaWwXHDli+4"
-        crossorigin="anonymous"></script>
+    </div>
+  </section>
+
+  <hr class="divider" />
+
+  <!-- CONTACT -->
+  <section id="contact">
+    <p class="section-label">Get in touch</p>
+    <h2>Contact</h2>
+    <p class="section-desc">Feel free to reach out — I'm always open to new opportunities and conversations.</p>
+    <div class="contact-grid">
+      <a href="https://www.linkedin.com/in/arsenio-colon/" target="_blank" class="contact-card">
+        <span class="contact-card-label">LinkedIn</span>
+        <span class="contact-card-value">/in/arsenio-colon</span>
+      </a>
+      <a href="https://github.com/arseniocolon" target="_blank" class="contact-card">
+        <span class="contact-card-label">GitHub</span>
+        <span class="contact-card-value">github.com/arseniocolon</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>Arsenio Colon · Software Engineer · Buffalo, NY · &copy; 2026</p>
+  </footer>
+
+  <script>
+    const toggle = document.querySelector('.nav-toggle');
+    const mobileNav = document.getElementById('mobileNav');
+
+    toggle.addEventListener('click', () => {
+      const isOpen = mobileNav.classList.toggle('open');
+      toggle.classList.toggle('open', isOpen);
+      toggle.setAttribute('aria-expanded', isOpen);
+    });
+
+    function closeMobileNav() {
+      mobileNav.classList.remove('open');
+      toggle.classList.remove('open');
+      toggle.setAttribute('aria-expanded', 'false');
+    }
+  </script>
+
 </body>
-
 </html>
