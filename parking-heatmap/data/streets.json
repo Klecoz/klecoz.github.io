@@ -1,0 +1,22 @@
+{
+  "ELMWOOD AVE":   {"display":"Elmwood Ave",   "count":18420, "rank":1,  "topViolations":[{"desc":"Expired Meter","count":7820},{"desc":"Street Cleaning","count":4910},{"desc":"No Standing","count":2640}]},
+  "MAIN ST":       {"display":"Main St",       "count":16280, "rank":2,  "topViolations":[{"desc":"Expired Meter","count":6510},{"desc":"No Standing","count":3940},{"desc":"Snow Emergency","count":2120}]},
+  "DELAWARE AVE":  {"display":"Delaware Ave",  "count":14110, "rank":3,  "topViolations":[{"desc":"Expired Meter","count":5240},{"desc":"Street Cleaning","count":3680},{"desc":"Overnight Parking","count":2310}]},
+  "ALLEN ST":      {"display":"Allen St",      "count":12780, "rank":4,  "topViolations":[{"desc":"Street Cleaning","count":5120},{"desc":"Expired Meter","count":4380},{"desc":"Fire Hydrant","count":1240}]},
+  "CHIPPEWA ST":   {"display":"Chippewa St",   "count":11630, "rank":5,  "topViolations":[{"desc":"No Standing","count":4780},{"desc":"Expired Meter","count":3920},{"desc":"Overnight Parking","count":1480}]},
+  "HERTEL AVE":    {"display":"Hertel Ave",    "count":10840, "rank":6,  "topViolations":[{"desc":"Street Cleaning","count":4520},{"desc":"Expired Meter","count":3210},{"desc":"Snow Emergency","count":1640}]},
+  "NIAGARA ST":    {"display":"Niagara St",    "count":9710,  "rank":7,  "topViolations":[{"desc":"Overnight Parking","count":3850},{"desc":"Expired Meter","count":2740},{"desc":"Street Cleaning","count":1880}]},
+  "BAILEY AVE":    {"display":"Bailey Ave",    "count":8920,  "rank":8,  "topViolations":[{"desc":"Overnight Parking","count":3420},{"desc":"Street Cleaning","count":2680},{"desc":"No Standing","count":1410}]},
+  "GRANT ST":      {"display":"Grant St",      "count":8140,  "rank":9,  "topViolations":[{"desc":"Street Cleaning","count":3210},{"desc":"Expired Meter","count":2480},{"desc":"Overnight Parking","count":1340}]},
+  "BIDWELL PKWY":  {"display":"Bidwell Pkwy",  "count":7280,  "rank":10, "topViolations":[{"desc":"Street Cleaning","count":2980},{"desc":"Overnight Parking","count":2140},{"desc":"No Standing","count":1080}]},
+  "RICHMOND AVE":  {"display":"Richmond Ave",  "count":6820,  "rank":11, "topViolations":[{"desc":"Street Cleaning","count":2740},{"desc":"Overnight Parking","count":1980},{"desc":"Expired Meter","count":1240}]},
+  "AUBURN AVE":    {"display":"Auburn Ave",    "count":5940,  "rank":12, "topViolations":[{"desc":"Street Cleaning","count":2480},{"desc":"Overnight Parking","count":1720},{"desc":"No Standing","count":840}]},
+  "FRANKLIN ST":   {"display":"Franklin St",   "count":5410,  "rank":13, "topViolations":[{"desc":"Expired Meter","count":2380},{"desc":"No Standing","count":1640},{"desc":"Street Cleaning","count":920}]},
+  "PEARL ST":      {"display":"Pearl St",      "count":4920,  "rank":14, "topViolations":[{"desc":"Expired Meter","count":2140},{"desc":"No Standing","count":1480},{"desc":"Snow Emergency","count":680}]},
+  "WASHINGTON ST": {"display":"Washington St", "count":4380,  "rank":15, "topViolations":[{"desc":"Expired Meter","count":1820},{"desc":"No Standing","count":1340},{"desc":"Fire Hydrant","count":540}]},
+  "PORTER AVE":    {"display":"Porter Ave",    "count":3940,  "rank":16, "topViolations":[{"desc":"Street Cleaning","count":1680},{"desc":"Overnight Parking","count":1120},{"desc":"No Standing","count":620}]},
+  "WEST FERRY ST": {"display":"West Ferry St", "count":3520,  "rank":17, "topViolations":[{"desc":"Street Cleaning","count":1480},{"desc":"Overnight Parking","count":980},{"desc":"Expired Meter","count":580}]},
+  "ASHLAND AVE":   {"display":"Ashland Ave",   "count":3120,  "rank":18, "topViolations":[{"desc":"Street Cleaning","count":1340},{"desc":"Overnight Parking","count":880},{"desc":"No Standing","count":480}]},
+  "NORWOOD AVE":   {"display":"Norwood Ave",   "count":2780,  "rank":19, "topViolations":[{"desc":"Street Cleaning","count":1180},{"desc":"Overnight Parking","count":820},{"desc":"No Standing","count":420}]},
+  "POTOMAC AVE":   {"display":"Potomac Ave",   "count":2410,  "rank":20, "topViolations":[{"desc":"Street Cleaning","count":1020},{"desc":"Overnight Parking","count":680},{"desc":"Expired Meter","count":380}]}
+}
