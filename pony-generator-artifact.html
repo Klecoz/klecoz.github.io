@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Brony Name Generator</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #faf9f7;
+    --surface: #f2f0ec;
+    --border: #e5e2db;
+    --text: #1a1814;
+    --muted: #6b6560;
+    --accent: #1a6b4a;
+    --accent-light: #e6f2ec;
+    --radius: 12px;
+  }
+
+  body {
+    font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1.25rem;
+  }
+
+  .wrap { width: 100%; max-width: 480px; }
+
+  .eyebrow {
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.75rem;
+    text-align: center;
+  }
+  h1 {
+    font-size: clamp(2.2rem, 7vw, 3rem);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    text-align: center;
+    margin-bottom: 1rem;
+  }
+  h1 span { color: var(--accent); }
+  .desc {
+    color: var(--muted);
+    text-align: center;
+    margin: 0 auto 2rem;
+    max-width: 360px;
+    font-size: 0.95rem;
+  }
+
+  .controls {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-bottom: 2rem;
+  }
+  .text-input {
+    flex: 1;
+    min-width: 200px;
+    font-family: inherit;
+    font-size: 0.95rem;
+    color: var(--text);
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 0.65rem 1rem;
+    transition: border-color 0.15s;
+  }
+  .text-input:focus { outline: none; border-color: var(--accent); }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.65rem 1.4rem;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.15s;
+    cursor: pointer;
+    border: none;
+  }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: #155a3e; }
+  .btn-ghost { background: transparent; color: var(--text); border: 1.5px solid var(--border); }
+  .btn-ghost:hover { border-color: #aaa; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 2.5rem 2rem;
+    text-align: center;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+    animation: pop 0.35s ease;
+  }
+  @keyframes pop {
+    from { opacity: 0; transform: translateY(12px) scale(0.97); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .emoji { font-size: 3.5rem; line-height: 1; margin-bottom: 1rem; }
+  .name {
+    font-size: clamp(1.8rem, 6vw, 2.6rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--accent);
+    margin-bottom: 1rem;
+  }
+  .meta {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 1.25rem;
+  }
+  .tag {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 0.3rem 0.7rem;
+    border-radius: 999px;
+    background: var(--accent-light);
+    color: var(--accent);
+  }
+  .tag.cutie { background: #f0e8ff; color: #6d28d9; }
+  .flavor {
+    font-size: 0.92rem;
+    color: var(--muted);
+    line-height: 1.65;
+    margin-bottom: 1.75rem;
+  }
+  .actions { display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; }
+  .copied { color: var(--accent) !important; border-color: var(--accent) !important; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <p class="eyebrow">Just for fun</p>
+    <h1>Brony Name<br><span>Generator</span></h1>
+    <p class="desc">Every pony deserves a name, a type, and a cutie mark. Enter your name for a result that's all your own, or leave it blank for pure chance.</p>
+
+    <div class="controls">
+      <input type="text" id="input" class="text-input" placeholder="Your name (optional)" maxlength="40" autocomplete="off" aria-label="Your name, optional" />
+      <button id="generate" class="btn btn-primary">Generate ✨</button>
+    </div>
+
+    <div id="result" class="card" hidden>
+      <div class="emoji" id="emoji" aria-hidden="true">🦄</div>
+      <p class="name" id="name"></p>
+      <div class="meta">
+        <span class="tag" id="type"></span>
+        <span class="tag cutie" id="cutie"></span>
+      </div>
+      <p class="flavor" id="flavor"></p>
+      <div class="actions">
+        <button id="again" class="btn btn-ghost">Again ↻</button>
+        <button id="copy" class="btn btn-ghost">Copy ⧉</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+  const FIRST = ['Twilight','Rainbow','Sugar','Star','Moon','Sunny','Berry','Crystal','Apple','Cloud','Misty','Pinkie','Lucky','Velvet','Honey','Maple','Aurora','Coco','Daisy','Ember','Frost','Golden','Ivory','Jade','Lilac','Minty','Petal','Ruby','Silver','Cinnamon','Breezy','Glitter'];
+  const SECOND = ['Sparkle','Dash','Pie','Shine','Heart','Bloom','Hooves','Mane','Dust','Glow','Song','Wing','Swirl','Beam','Drop','Whisper','Dancer','Charm','Breeze','Blossom','Storm','Twist','Gleam','Spark','Feather','Galaxy','Melody','Frost','Petals','Spice','Berry','Light'];
+  const TYPES = [
+    { name: 'Earth Pony', emoji: '🐴', flavor: 'grounded, hardworking, and impossibly strong of heart.' },
+    { name: 'Pegasus', emoji: '🪽', flavor: 'born for the skies, fast as a summer storm and twice as bold.' },
+    { name: 'Unicorn', emoji: '🦄', flavor: 'a natural with magic, curious and clever to the last sparkle.' },
+    { name: 'Alicorn', emoji: '👑', flavor: 'wings AND a horn — destined for something legendary.' },
+  ];
+  const CUTIE_MARKS = ['a shooting star','three apples','a rainbow bolt','a swirl of music notes','a glowing crystal','a single rose','a crescent moon','a balloon trio','a lightning cloud','a honeybee','a snowflake','a paint splash','a compass rose','a butterfly','a teacup','a constellation','a maple leaf','a heart of gems','a feather quill','a sunburst'];
+
+  const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
+  // Same name always yields the same pony, but feels random across names.
+  function seededPick(arr, seed, salt) {
+    let hash = salt >>> 0;
+    for (let i = 0; i < seed.length; i++) hash = (hash * 31 + seed.charCodeAt(i)) >>> 0;
+    return arr[hash % arr.length];
+  }
+
+  function generate(seed) {
+    if (seed) return {
+      name: seededPick(FIRST, seed, 7) + ' ' + seededPick(SECOND, seed, 13),
+      type: seededPick(TYPES, seed, 29),
+      cutie: seededPick(CUTIE_MARKS, seed, 53),
+    };
+    return { name: pick(FIRST) + ' ' + pick(SECOND), type: pick(TYPES), cutie: pick(CUTIE_MARKS) };
+  }
+
+  const $ = (id) => document.getElementById(id);
+  const input = $('input'), result = $('result'), copyBtn = $('copy');
+  let current = null;
+
+  function resetCopy() { copyBtn.textContent = 'Copy ⧉'; copyBtn.classList.remove('copied'); }
+
+  function render() {
+    const seed = input.value.trim().toLowerCase();
+    const pony = generate(seed);
+    current = pony;
+    $('emoji').textContent = pony.type.emoji;
+    $('name').textContent = pony.name;
+    $('type').textContent = pony.type.name;
+    $('cutie').textContent = 'Cutie mark: ' + pony.cutie;
+    $('flavor').textContent = pony.name + ' is a ' + pony.type.name.toLowerCase() + ' — ' + pony.type.flavor;
+    result.hidden = false;
+    result.style.animation = 'none'; void result.offsetWidth; result.style.animation = '';
+    resetCopy();
+  }
+
+  $('generate').addEventListener('click', render);
+  $('again').addEventListener('click', render);
+  input.addEventListener('keydown', (e) => { if (e.key === 'Enter') render(); });
+
+  copyBtn.addEventListener('click', async () => {
+    if (!current) return;
+    const text = 'My pony name is ' + current.name + ', a ' + current.type.name + ' with a cutie mark of ' + current.cutie + '.';
+    try {
+      await navigator.clipboard.writeText(text);
+      copyBtn.textContent = 'Copied! ✓'; copyBtn.classList.add('copied');
+    } catch (e) {
+      copyBtn.textContent = 'Copy failed';
+    }
+    setTimeout(resetCopy, 1800);
+  });
+</script>
+</body>
+</html>
