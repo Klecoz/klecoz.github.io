@@ -9,12 +9,30 @@ const stack = [
   { group: 'Tools', items: ['Azure DevOps', 'Datadog', 'Git', 'Claude Code', 'Unity'] },
 ];
 
-const community = [
+type CommunityEntry = {
+  what: string;
+  where: string;
+  note: string;
+  /** The organisation's own site. */
+  href?: string;
+  /** A third-party quote that substantiates the entry. Beats asserting it. */
+  quote?: { text: string; source: string; href: string };
+  /** A plain source link, where there's nothing worth quoting. */
+  cite?: { label: string; href: string };
+};
+
+const community: CommunityEntry[] = [
   {
     what: 'Secretary, Board of Directors',
     where: 'Buffalo Game Space',
     note: 'A 501(c)(3) supporting local game developers and digital artists.',
     href: 'https://buffalogamespace.com',
+    // WGRZ prints "Colon" without the accent. Quoted text stays as printed.
+    quote: {
+      text: '“Buffalo is in a real great need for developers, musicians, artists. And like, I don’t think that’s gonna stop any time soon.”',
+      source: 'WGRZ · November 2019',
+      href: 'https://www.wgrz.com/article/news/education/high-school-students-develop-video-games-at-buffalo-stem-event/71-d052e91e-0184-40a8-9695-23b4a66e1b41',
+    },
   },
   {
     what: 'Tech Talks and Tech Academy mentoring',
@@ -22,9 +40,13 @@ const community = [
     note: 'Ran internal workshops and mentored people moving into engineering.',
   },
   {
-    what: 'Cybersecurity Champions, Touchdown for Teachers',
+    what: 'Touchdown for Teachers',
     where: 'M&T Bank',
-    note: 'Volunteer programs on security awareness and classroom support.',
+    note: 'Volunteer program getting supplies and support into local classrooms.',
+    cite: {
+      label: 'LinkedIn',
+      href: 'https://www.linkedin.com/posts/lindsay-gorman-480907224_thank-you-to-our-colleagues-arsenio-col%C3%B3n-share-6885293169357926400-4Ned/',
+    },
   },
 ];
 ---
@@ -56,12 +78,14 @@ const community = [
           <p>
             I&rsquo;m a .NET engineer in Buffalo. Most of my work is backend and internal
             platforms, the kind of thing other teams end up depending on without thinking
-            about it. Right now I&rsquo;m at Seneca Gaming, where I own a platform end to end.
+            about it. Right now I&rsquo;m at Seneca Gaming, where I take ownership of our
+            internal SharePoint IAM platform, built a visual IT Reporting and Incident
+            Dashboard for leadership, and help out with Nintex/WEBCON workflows. My vision
+            is to be more proactive and less reactive.
           </p>
           <p>
-            I got my start making games for jams, and did AR/VR work for a few years before
-            moving to backend. I still poke at Unity now and then, but it&rsquo;s not really
-            what I do anymore.
+            I got my start making games for jams, and did AR/VR work for a few years while
+            weaving in front-end and backend web development in my day to day.
           </p>
           <div class="hero-cta">
             <a class="btn-primary" href="#work">See the work</a>
@@ -89,12 +113,13 @@ const community = [
 
   <!-- ============ HOW I WORK ============ -->
   <section class="how">
-    <div class="wrap how-in">
-      <p class="label">How I work</p>
+    <div class="wrap how-in reveal">
+      <h2 class="label how-h">How I work</h2>
       <p class="how-text">
-        I use AI tooling every day, mostly Claude Code. It&rsquo;s good for scaffolding, big
-        refactors, and finding my way around code I didn&rsquo;t write. I read everything
-        before it ships.
+        I use AI tooling every day, mostly Claude Code CLI. It&rsquo;s good for scaffolding,
+        big refactors, and finding my way around code I didn&rsquo;t write. It&rsquo;s changed
+        my workflow from thinking about coding to thinking about how Systems and People work
+        together.
       </p>
     </div>
   </section>
@@ -102,7 +127,9 @@ const community = [
   <!-- ============ WORK ============ -->
   <section class="band" id="work">
     <div class="wrap">
-      <div class="section-head">
+      {/* The rows below carry their own reveal, so only the head gets one here —
+          nesting the two would stagger the same content twice. */}
+      <div class="section-head reveal">
         <h2>Work</h2>
         <p class="label">Six roles · 2018 to now</p>
       </div>
@@ -112,7 +139,7 @@ const community = [
 
   <!-- ============ EDUCATION + COMMUNITY ============ -->
   <section class="band">
-    <div class="wrap pair">
+    <div class="wrap pair reveal">
       <div>
         <div class="section-head">
           <h2>Education</h2>
@@ -128,6 +155,12 @@ const community = [
           <li>
             Senior seminar capstone shipped as a playable game and was shown at three regional
             conferences.
+            <a
+              class="cite"
+              href="https://undergraduateresearch.buffalostate.edu/sites/undergraduateresearch/files/documents/SRCC2017program.pdf#page=39"
+            >
+              Buffalo State SRCC 2017 <span class="weight">· PDF 12MB</span>
+            </a>
           </li>
         </ul>
       </div>
@@ -145,6 +178,19 @@ const community = [
                   {c.href ? <a href={c.href}>{c.where}</a> : c.where}
                 </p>
                 <p class="c-note">{c.note}</p>
+                {c.quote && (
+                  <blockquote class="pull">
+                    <p>{c.quote.text}</p>
+                    <footer>
+                      <a href={c.quote.href}>{c.quote.source}</a>
+                    </footer>
+                  </blockquote>
+                )}
+                {c.cite && (
+                  <a class="cite" href={c.cite.href}>
+                    {c.cite.label}
+                  </a>
+                )}
               </li>
             ))
           }
@@ -155,7 +201,7 @@ const community = [
 
   <!-- ============ SIDE PROJECTS TEASER ============ -->
   <section class="teaser">
-    <div class="wrap teaser-in">
+    <div class="wrap teaser-in reveal">
       <div>
         <p class="label">Side projects</p>
         <h2 class="teaser-h">Eight games and a couple of client sites</h2>
@@ -170,7 +216,7 @@ const community = [
 
   <!-- ============ CONTACT ============ -->
   <section class="band" id="contact">
-    <div class="wrap">
+    <div class="wrap reveal">
       <div class="section-head">
         <h2>Contact</h2>
       </div>
@@ -307,6 +353,9 @@ const community = [
     gap: var(--s-4);
     padding-block: var(--s-8);
   }
+  /* An h2 so the section lands in the document outline; .label carries the look,
+     so the display-face line-height from the base h2 rule gets undone here. */
+  .how-h { line-height: 1.65; }
   .how-text {
     max-width: var(--measure);
     font-size: var(--t-lg);
@@ -317,9 +366,11 @@ const community = [
   .band { padding-block: var(--s-16); }
 
   /* ---------- education + community ---------- */
+  /* min() on the track minimum, or the two columns refuse to shrink below 19rem
+     and the page scrolls sideways at 320px. */
   .pair {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(19rem, 100%), 1fr));
     gap: var(--s-16) var(--s-12);
   }
   .edu-when {
@@ -369,6 +420,49 @@ const community = [
   }
   .c-note { font-size: 0.9375rem; }
 
+  /* ---------- citations ----------
+     One treatment for every source on the page, so three references don't read
+     as three one-offs. The arrow marks it as leaving the site. */
+  .cite {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.4em;
+    margin-top: var(--s-2);
+    padding-bottom: 0.15em;
+    font-family: var(--f-data);
+    font-size: var(--t-xs);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-decoration: none;
+    border-bottom: 1px solid var(--rule);
+    transition: color var(--dur-fast) var(--ease),
+                border-color var(--dur-fast) var(--ease);
+  }
+  .cite:hover { color: var(--fg); border-bottom-color: var(--accent); }
+  .cite::after { content: '↗'; font-size: 0.9em; color: var(--accent); }
+  /* The file weight is a warning, not a label — 12MB on cellular is an ambush. */
+  .cite .weight { color: var(--rail); letter-spacing: 0.04em; }
+
+  /* A board seat is easy to assert; this is someone else confirming it. The only
+     third-party voice on the site, so it gets the accent rule. */
+  .pull {
+    margin: var(--s-4) 0 0;
+    padding-left: var(--s-4);
+    border-left: 3px solid var(--accent);
+  }
+  .pull p { font-size: var(--t-base); line-height: 1.55; color: var(--fg); }
+  .pull footer {
+    margin-top: var(--s-2);
+    font-family: var(--f-data);
+    font-size: var(--t-xs);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .pull footer a { text-decoration: none; border-bottom: 1px solid var(--rule); }
+  .pull footer a:hover { border-bottom-color: var(--accent); }
+
   /* ---------- teaser: full-bleed band breaks the stack ---------- */
   .teaser {
     background: var(--surface);
@@ -406,6 +500,30 @@ const community = [
   }
   .links li { display: grid; gap: 0.125rem; }
   .links a { font-size: var(--t-base); }
+
+  /* ---------- print ---------- */
+  @media print {
+    /* Navigation, not information — a paper CTA goes nowhere. */
+    .hero-cta,
+    .teaser .btn-primary { display: none; }
+
+    /* The arrow is a screen affordance, and these hrefs run past 100 characters —
+       the WGRZ one alone takes three lines and swamps the quote. Killed rather
+       than printed, because the visible label already names the source. These
+       need page-level specificity to beat the global a[href^=http] rule. */
+    .cite::after,
+    .pull footer a::after { content: none; }
+    .cite { border-bottom: none; padding-bottom: 0; }
+
+    /* On screen the surface bands break the vertical stack; on paper the rules
+       already do that, and a tinted block just costs ink. */
+    .how,
+    .teaser { background: none; }
+
+    .hero { padding-block: 0 var(--s-8); }
+    .hero-grid { gap: var(--s-6); }
+    .hero-role { padding-bottom: var(--s-4); }
+  }
 
   /* ---------- narrow ---------- */
   @media (max-width: 52rem) {

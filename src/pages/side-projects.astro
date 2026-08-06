@@ -19,6 +19,7 @@ const clients = await Promise.all(
 <Base
   title="Side projects — Arsenio Colón"
   description="Unity games built for game jams and hackathons between 2016 and 2023, plus a couple of client sites."
+  ogImage="/og-side-projects.png"
 >
   <section class="head">
     <div class="wrap">
@@ -146,13 +147,15 @@ const clients = await Promise.all(
     border-block: 1px solid var(--rule);
   }
 
+  /* min() on the track minimum, or the grid refuses to shrink below 18rem and
+     the page scrolls sideways on a 360px phone. */
   .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(min(18rem, 100%), 1fr));
     gap: var(--s-8) var(--s-6);
   }
   .grid-wide {
-    grid-template-columns: repeat(auto-fill, minmax(22rem, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(min(22rem, 100%), 1fr));
   }
 
   .card {

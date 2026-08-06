@@ -11,7 +11,12 @@
     "deploy": "git push origin master && gh workflow run deploy.yml --ref master && echo '\\nDeploy dispatched. Watch it with: gh run watch'"
   },
   "dependencies": {
+    "@astrojs/sitemap": "^3.7.3",
     "astro": "^7.2.0",
     "sharp": "^0.35.3"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "typescript": "^6.0.3"
   }
 }

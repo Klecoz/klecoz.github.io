@@ -42,7 +42,6 @@
 
 /* ---------- layer 1: primitives ---------- */
 :root {
-  --steel-50:  #f7f9f9;
   --steel-100: #f1f3f4;
   --steel-200: #e4e9eb;
   --steel-300: #d2d8db;
@@ -106,8 +105,8 @@
   --accent-hover: var(--amber-600);
   /* Amber as a *background* needs the darker step so light text clears 4.5:1. */
   --accent-solid: var(--amber-600);
+  --focus: var(--amber-500);
   --rail: var(--rail-light);
-  --shadow: 0 1px 2px rgb(18 26 30 / 0.05), 0 4px 12px rgb(18 26 30 / 0.06);
   color-scheme: light;
 }
 
@@ -124,8 +123,8 @@
     --accent-hover: var(--amber-300);
     /* On dark the bright amber already clears 4.5:1 behind dark text. */
     --accent-solid: var(--amber-400);
+    --focus: var(--amber-400);
     --rail: var(--rail-dark);
-    --shadow: 0 1px 2px rgb(0 0 0 / 0.4), 0 4px 12px rgb(0 0 0 / 0.3);
     color-scheme: dark;
   }
 }
@@ -143,8 +142,8 @@
   --accent-hover: var(--amber-300);
   /* On dark the bright amber already clears 4.5:1 behind dark text. */
   --accent-solid: var(--amber-400);
+  --focus: var(--amber-400);
   --rail: var(--rail-dark);
-  --shadow: 0 1px 2px rgb(0 0 0 / 0.4), 0 4px 12px rgb(0 0 0 / 0.3);
   color-scheme: dark;
 }
 :root[data-theme='light'] {
@@ -159,8 +158,8 @@
   --accent-hover: var(--amber-600);
   /* Amber as a *background* needs the darker step so light text clears 4.5:1. */
   --accent-solid: var(--amber-600);
+  --focus: var(--amber-500);
   --rail: var(--rail-light);
-  --shadow: 0 1px 2px rgb(18 26 30 / 0.05), 0 4px 12px rgb(18 26 30 / 0.06);
   color-scheme: light;
 }
 
@@ -205,7 +204,7 @@ a {
 a:hover { color: var(--accent-hover); text-decoration-color: currentColor; }
 
 :where(a, button, [tabindex]):focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--focus);
   outline-offset: 3px;
 }
 
@@ -281,4 +280,82 @@ button { font: inherit; color: inherit; }
     scroll-behavior: auto !important;
   }
   .reveal { opacity: 1; transform: none; }
+}
+
+/* ---------- print ----------
+   The brief rules out a resume PDF, so this is the paper copy — recruiters do hit
+   Cmd-P. Two things drive the rules below. First, .reveal sits at opacity 0 until
+   IntersectionObserver fires, so printing an unscrolled page would otherwise drop
+   the entire timeline. Second, browsers strip backgrounds when printing, so
+   anything leaning on one for contrast has to be restated in its own component.
+   Sizing is retuned at the token layer, which reaches every consumer at once. */
+@media print {
+  @page { margin: 1.5cm; }
+
+  :root {
+    --bg: #fff;
+    --surface: #fff;
+    --surface-sunk: #fff;
+    --fg: #000;
+    --muted: #333;
+    --rule: #999;
+    --rule-heavy: #000;
+    --accent: #000;
+    --accent-hover: #000;
+    --accent-solid: #000;
+    --rail: #999;
+    color-scheme: light;
+
+    /* vw-based clamps resolve against the page box and get unpredictable. */
+    --t-display: 2.75rem;
+    --t-2xl: 1.5rem;
+    --t-xl: 1.15rem;
+
+    /* Screen rhythm wastes paper. */
+    --s-8: 1rem;
+    --s-12: 1.25rem;
+    --s-16: 1.5rem;
+    --s-24: 2rem;
+    --s-32: 2.5rem;
+    --gutter: 0;
+  }
+
+  body {
+    background: #fff;
+    color: #000;
+    font-size: 10.5pt;
+    line-height: 1.5;
+  }
+
+  /* Never print a page still waiting on the scroll observer. */
+  .reveal,
+  .reveal.is-in { opacity: 1 !important; transform: none !important; }
+
+  /* Screen-only chrome. */
+  header,
+  .skip { display: none !important; }
+
+  /* Hrefs are invisible on paper. Excluded below: the contact list already prints
+     its URL as the link text, and buttons are navigation, not references. */
+  a { text-decoration: none; }
+  a[href^='http']::after {
+    content: ' <' attr(href) '>';
+    font-size: 0.82em;
+    letter-spacing: 0;
+    word-break: break-all;
+  }
+  /* Qualified with `a` on purpose: the rule above is (0,1,2) thanks to the
+     attribute selector, so a bare `.btn-ghost::after` at (0,1,1) would lose. */
+  .links a::after,
+  a.btn-primary::after,
+  a.btn-ghost::after { content: none; }
+
+  /* Keep a record whole rather than split across a page break. */
+  li,
+  .section-head,
+  h1, h2, h3 { break-inside: avoid; }
+  h1, h2, h3 { break-after: avoid; }
+  p { orphans: 3; widows: 3; }
+
+  img { max-height: 7cm; }
 }

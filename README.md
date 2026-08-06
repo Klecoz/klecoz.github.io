@@ -6,9 +6,13 @@ Personal site. [Astro](https://astro.build), static output, no backend. Lives at
 ```
 npm install
 npm run dev        # http://localhost:4321, hot reload
+npm run check      # astro check — typechecks .astro files and content collections
 npm run build      # → dist/
 npm run preview    # serve dist/ exactly as production will
 ```
+
+`npm run check` is currently clean at zero errors, warnings and hints, and CI runs it before
+the build — so anything it reports is a real regression, not pre-existing noise.
 
 ---
 
@@ -25,6 +29,7 @@ build — see below.
 ```
 .github/workflows/deploy.yml
    ├─ npm ci
+   ├─ npm run check           ← typecheck; fails the build on a real regression
    ├─ npm run build           → dist/
    ├─ assert dist/CNAME       ← fails the build if the domain would break
    ├─ upload-pages-artifact
@@ -175,15 +180,25 @@ Two rules that are easy to break by accident:
    one to use when amber is a *background* — the lighter step doesn't clear 4.5:1 contrast
    behind light text.
 
-### The social card
+### The social cards
 
-`public/og.png` is generated, not hand-drawn:
+`public/og.png` and `public/og-side-projects.png` are generated, not hand-drawn — one card per
+route, so a link to `/side-projects` doesn't preview as the homepage:
 
 ```bash
 npm install --no-save satori && node scripts/make-og.mjs && npm uninstall satori
 ```
 
-Only needed if the name, title or palette changes.
+Only needed if a title or the palette changes. satori stays out of `dependencies` deliberately,
+which is also why the cards are committed rather than built — see the header comment in
+`scripts/make-og.mjs`. Pages pick their card with the `ogImage` prop on `Base.astro`.
+
+### Icons
+
+`public/logo.svg` is the mark: Barlow Condensed "A" on the ink ground with the amber rail the
+timeline uses. `favicon-32.png` covers engines that ignore an SVG icon, and
+`apple-touch-icon.png` is flattened to 180×180 because iOS drops transparency and masks the
+result into a squircle. Regenerate the PNGs from the SVG with `sharp` if the mark changes.
 
 ---
 
@@ -205,6 +220,18 @@ would warn about them.
 
 **Fonts are self-hosted** in `public/fonts/` (104 KB, seven faces, Latin subset). No Google
 Fonts request at runtime, by design.
+
+**There is a print stylesheet, and it is load-bearing.** `.reveal` elements sit at `opacity: 0`
+until IntersectionObserver fires, so without the `@media print` block in `tokens.css` anyone who
+hit Cmd-P before scrolling got a page with no timeline on it at all. The block also forces the
+light tokens, drops the nav and the CTAs, restates the amber `Current` chip as an outline
+(backgrounds don't print), and suppresses the citation URLs, which run past 100 characters.
+The brief rules out a resume PDF; this is the paper copy instead.
+
+**The sitemap is generated**, by `@astrojs/sitemap`. `public/sitemap.xml` used to be
+hand-written with a frozen `lastmod` and was deleted. `robots.txt` points at
+`/sitemap-index.xml`. A `serialize` hook strips the trailing slash so the sitemap and the
+canonical tags agree on one URL per page.
 
 ---
 

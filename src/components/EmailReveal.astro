@@ -87,6 +87,15 @@ const tail = encoded.slice(split);
     color: var(--muted);
     max-width: 46ch;
   }
+
+  @media print {
+    /* The address isn't in the HTML until someone clicks, so on paper there is
+       genuinely nothing to print — a "Show email" button least of all. The
+       contact list below it carries LinkedIn and GitHub. If the reader did
+       reveal it first, .addr is a real link and prints. */
+    .btn,
+    .reveal-wrap :global(.copy) { display: none; }
+  }
 </style>
 
 <script>

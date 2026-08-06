@@ -8,11 +8,16 @@ interface Props {
   description: string;
   /** Person JSON-LD belongs on the homepage only. */
   person?: boolean;
+  /**
+   * Root-relative social card. Cards are committed, not built — see
+   * scripts/make-og.mjs for why satori stays out of dependencies.
+   */
+  ogImage?: string;
 }
 
-const { title, description, person = false } = Astro.props;
+const { title, description, person = false, ogImage = '/og.png' } = Astro.props;
 const canonical = new URL(Astro.url.pathname, Astro.site).href.replace(/\/$/, '') || Astro.site!.href;
-const ogImage = new URL('/og.png', Astro.site).href;
+const ogImageUrl = new URL(ogImage, Astro.site).href;
 
 const personLd = {
   '@context': 'https://schema.org',
@@ -20,7 +25,7 @@ const personLd = {
   name: 'Arsenio Colón',
   alternateName: 'Arsenio Colon',
   url: 'https://arseniocolon.com',
-  image: ogImage,
+  image: ogImageUrl,
   jobTitle: 'Software Developer II',
   worksFor: { '@type': 'Organization', name: 'Seneca Gaming Corporation' },
   address: {
@@ -34,11 +39,19 @@ const personLd = {
     name: 'State University of New York College at Buffalo',
   },
   knowsAbout: ['C#', '.NET', 'ASP.NET Core', 'SQL', 'Azure DevOps', 'Unity'],
+  // Profiles he controls. Press coverage is `subjectOf`, not this.
   sameAs: [
     'https://www.linkedin.com/in/arsenio-colon/',
     'https://github.com/Klecoz',
     'https://klecoz.itch.io',
   ],
+  subjectOf: {
+    '@type': 'NewsArticle',
+    headline: 'High school students develop video games at Buffalo STEM event',
+    datePublished: '2019-11-23',
+    url: 'https://www.wgrz.com/article/news/education/high-school-students-develop-video-games-at-buffalo-stem-event/71-d052e91e-0184-40a8-9695-23b4a66e1b41',
+    publisher: { '@type': 'Organization', name: 'WGRZ' },
+  },
 };
 ---
 
@@ -55,34 +68,50 @@ const personLd = {
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
-    <meta property="og:image" content={ogImage} />
+    <meta property="og:image" content={ogImageUrl} />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
-    <meta name="twitter:image" content={ogImage} />
+    <meta name="twitter:image" content={ogImageUrl} />
 
+    {/* Both variants ship so a JS-less visitor still follows their OS. Once a theme
+        has been stored, the script below rewrites both to the same value — otherwise
+        the browser chrome keeps tracking the OS and disagrees with the toggle.
+        Mirrors --steel-100 / --steel-950 in tokens.css; keep them in step. */}
     <meta name="theme-color" content="#f1f3f4" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#0d1215" media="(prefers-color-scheme: dark)" />
 
+    {/* SVG first for anything modern; the 32px PNG covers Safari and the older
+        engines that ignore an SVG icon. iOS masks apple-touch-icon into a
+        squircle and drops transparency, so that one is flattened on the ink
+        ground rather than left to be matted black. */}
     <link rel="icon" type="image/svg+xml" href="/logo.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     {/* No font preloads: the stylesheet is inlined, so @font-face is already in
         the first parse. Preloading on top of that just warns about unused hints. */}
 
-    {person && <script type="application/ld+json" set:html={JSON.stringify(personLd)} />}
+    {person && <script is:inline type="application/ld+json" set:html={JSON.stringify(personLd)} />}
 
-    {/* Applies the stored theme before first paint so there's no flash. */}
+    {/* Applies the stored theme before first paint so there's no flash, and pins the
+        browser chrome to it so a dark page never sits under a white status bar. */}
     <script is:inline>
       (function () {
         try {
           var t = localStorage.getItem('theme');
-          if (t === 'dark' || t === 'light') document.documentElement.dataset.theme = t;
+          if (t !== 'dark' && t !== 'light') return;
+          document.documentElement.dataset.theme = t;
+          var c = t === 'dark' ? '#0d1215' : '#f1f3f4';
+          var metas = document.querySelectorAll('meta[name="theme-color"]');
+          for (var i = 0; i < metas.length; i++) metas[i].setAttribute('content', c);
         } catch (e) {}
       })();
     </script>
 
     <script
+      is:inline
       data-goatcounter="https://arseniocolon.goatcounter.com/count"
       async
       src="//gc.zgo.at/count.js"></script>

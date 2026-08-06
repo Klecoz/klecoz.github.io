@@ -181,6 +181,28 @@ const rendered = await Promise.all(
     background: var(--rule);
   }
 
+  /* ---- print ---- */
+  @media print {
+    /* The rail is the signature detail and it's drawn with backgrounds, which
+       browsers strip when printing. Opt these hairlines back in — a few pixels
+       of ink to keep the structure that makes the timeline readable. */
+    .tick::before,
+    .tick::after,
+    .rail::after {
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    /* Chip text is --bg against an amber fill. Drop the fill and it's white on
+       white, so restate it as an outline. */
+    .now {
+      color: #000;
+      background: none;
+      border: 1px solid #000;
+      padding: 0 0.3125rem;
+    }
+  }
+
   /* ---- narrow ---- */
   @media (max-width: 44rem) {
     .role {

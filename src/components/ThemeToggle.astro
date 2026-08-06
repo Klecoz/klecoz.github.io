@@ -71,6 +71,16 @@
     btn.setAttribute('aria-pressed', String(current() === 'dark'));
   };
 
+  // The metas ship with media queries so no-JS visitors follow their OS. Once the
+  // toggle has an opinion, both get the same value or the chrome contradicts it.
+  // Mirrors --steel-100 / --steel-950 in tokens.css; keep them in step.
+  const paintChrome = (theme: string) => {
+    const colour = theme === 'dark' ? '#0d1215' : '#f1f3f4';
+    document
+      .querySelectorAll<HTMLMetaElement>('meta[name="theme-color"]')
+      .forEach((m) => m.setAttribute('content', colour));
+  };
+
   btn?.addEventListener('click', () => {
     const next = current() === 'dark' ? 'light' : 'dark';
     root.dataset.theme = next;
@@ -79,6 +89,7 @@
     } catch {
       /* private mode — the toggle still works for this page view */
     }
+    paintChrome(next);
     sync();
   });
 

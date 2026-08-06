@@ -75,8 +75,13 @@ Corrections from Arsenio, binding on all future work:
 - **AI use gets stated, not sold.** He wants it known that Claude Code is part of his daily
   workflow, phrased as a fact about the toolchain rather than a pitch. *Why:* he asked for it
   explicitly but flagged he wasn't sure how to phrase it without it sounding bad.
-- **Seneca is detailed in the timeline, general in the bio.** Full system names in the role entry;
-  the bio stays high-altitude. *Why:* he asked to generalize the bio specifically, then separately
-  chose to keep full detail on the timeline entry.
-- **No "open to work" banner and no resume PDF.** Contact links do that work. *Why:* a status
-  line goes stale and a PDF drifts out of sync with the site.
+- **Seneca is named in full in the bio too.** *Reversed 2026-08-06.* The bio used to stay
+  high-altitude while the timeline carried the system names; he rewrote it to name the SharePoint
+  IAM platform, the IT Reporting and Incident Dashboard, and Nintex/WEBCON directly, and chose to
+  keep the overlap with the timeline. Don't re-generalize it.
+- **The bio and How I work are his own words.** Both were supplied verbatim and go in unedited
+  apart from proper-noun casing. *Why:* he wrote them himself; a rewrite pass would sand off the
+  voice this brief exists to protect.
+- **No "open to work" banner and no resume PDF.** Contact links do that work, and `@media print`
+  in `tokens.css` covers anyone who wants a paper copy. *Why:* a status line goes stale and a PDF
+  drifts out of sync with the site — a print stylesheet can't.

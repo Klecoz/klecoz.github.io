@@ -1,6 +1,7 @@
 /**
- * Regenerates public/og.png — the 1200x630 social card, in the Steel design
- * language. Only needs rerunning if the name, title or palette changes.
+ * Regenerates the 1200x630 social cards in the Steel design language — one per
+ * route, so a link to /side-projects doesn't preview as the homepage. Only needs
+ * rerunning if a title or the palette changes.
  *
  *   npm install --no-save satori
  *   node scripts/make-og.mjs
@@ -9,6 +10,7 @@
  * satori is deliberately not a dependency: it's a few MB, is used once in a
  * blue moon, and would otherwise be installed on every CI run for nothing.
  * It converts text to SVG paths, so the rasterised PNG needs no fonts present.
+ * That also rules out generating these at build time — the cards are committed.
  */
 import sharp from 'sharp';
 import { mkdirSync, existsSync, readFileSync, writeFileSync } from 'node:fs';
@@ -61,7 +63,27 @@ const AMBER = '#a97400';
 const el = (type, props) => ({ type, props });
 const text = (t, style) => el('div', { style, children: t });
 
-const svg = await satori(
+// One per route. `display` is sized to fit on one line at 1200px — keep it short.
+const CARDS = [
+  {
+    out: 'public/og.png',
+    eyebrow: 'BUFFALO, NY',
+    display: 'ARSENIO COLÓN',
+    rule: 620,
+    sub: '.NET Engineer · Full Stack',
+    url: 'arseniocolon.com',
+  },
+  {
+    out: 'public/og-side-projects.png',
+    eyebrow: 'ARSENIO COLÓN',
+    display: 'SIDE PROJECTS',
+    rule: 560,
+    sub: 'Games, jams and client work',
+    url: 'arseniocolon.com/side-projects',
+  },
+];
+
+const card = (c) =>
   el('div', {
     style: {
       width: 1200,
@@ -93,38 +115,41 @@ const svg = await satori(
           height: 630,
         },
         children: [
-          text('BUFFALO, NY', {
+          text(c.eyebrow, {
             fontFamily: 'IBM Plex Mono', fontSize: 21, letterSpacing: 4, color: MUTED, marginBottom: 26,
           }),
-          text('ARSENIO COLÓN', {
+          text(c.display, {
             fontFamily: 'Barlow Condensed', fontSize: 148, fontWeight: 700,
             lineHeight: 0.9, letterSpacing: -1, color: INK,
           }),
           el('div', {
-            style: { display: 'flex', width: 620, height: 3, background: INK, marginTop: 34, marginBottom: 26 },
+            style: { display: 'flex', width: c.rule, height: 3, background: INK, marginTop: 34, marginBottom: 26 },
           }),
-          text('.NET Engineer · Full Stack', {
+          text(c.sub, {
             fontFamily: 'Barlow Condensed', fontSize: 48, fontWeight: 700, color: MUTED,
           }),
-          text('arseniocolon.com', {
+          text(c.url, {
             fontFamily: 'IBM Plex Mono', fontSize: 22, letterSpacing: 2, color: AMBER, marginTop: 40,
           }),
         ],
       }),
     ],
-  }),
-  {
-    width: 1200,
-    height: 630,
-    fonts: FACES.map((f) => ({
-      name: f.name,
-      data: readFileSync(join(FONT_DIR, f.file)),
-      weight: f.weight,
-      style: 'normal',
-    })),
-  }
-);
+  });
 
-const out = process.argv[2] ?? 'public/og.png';
-await sharp(Buffer.from(svg)).png({ compressionLevel: 9 }).toFile(out);
-console.log(`wrote ${out}`);
+const fonts = FACES.map((f) => ({
+  name: f.name,
+  data: readFileSync(join(FONT_DIR, f.file)),
+  weight: f.weight,
+  style: 'normal',
+}));
+
+// A single path argument overrides the first card's destination, which keeps the
+// old `node scripts/make-og.mjs some/other.png` behaviour working.
+const override = process.argv[2];
+
+for (const [i, c] of CARDS.entries()) {
+  const svg = await satori(card(c), { width: 1200, height: 630, fonts });
+  const out = i === 0 && override ? override : c.out;
+  await sharp(Buffer.from(svg)).png({ compressionLevel: 9 }).toFile(out);
+  console.log(`wrote ${out}`);
+}

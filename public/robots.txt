@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://arseniocolon.com/sitemap.xml
+Sitemap: https://arseniocolon.com/sitemap-index.xml

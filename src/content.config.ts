@@ -1,4 +1,7 @@
-import { defineCollection, z } from 'astro:content';
+import { defineCollection } from 'astro:content';
+// Not `z` from 'astro:content' — that re-export is deprecated and goes away in a
+// future major. 'astro/zod' is the same zod, without the deprecation.
+import { z } from 'astro/zod';
 import { glob } from 'astro/loaders';
 
 const experience = defineCollection({
@@ -32,7 +35,7 @@ const games = defineCollection({
       vr: z.boolean().default(false),
       image: image(),
       links: z
-        .array(z.object({ label: z.string(), href: z.string().url() }))
+        .array(z.object({ label: z.string(), href: z.url() }))
         .default([]),
     }),
 });
@@ -45,7 +48,7 @@ const clients = defineCollection({
       title: z.string(),
       year: z.string(),
       image: image(),
-      href: z.string().url().optional(),
+      href: z.url().optional(),
       /** false renders a plain "not online anymore" note instead of a link. */
       live: z.boolean().default(true),
     }),

@@ -32,6 +32,11 @@ jobs:
 
       - run: npm ci
 
+      # Catches broken content-collection references and bad component props
+      # before they reach the published site. Currently clean, so any failure
+      # here is a real regression.
+      - run: npm run check
+
       - run: npm run build
 
       # The custom domain lives in public/CNAME and must reach dist/.
