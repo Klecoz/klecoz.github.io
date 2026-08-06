@@ -1,0 +1,284 @@
+/* ============================================================
+   Steel — token spine. See .ui-craft/tokens.md for the rationale.
+   Light is the default; dark is a designed peer, not an inversion.
+   ============================================================ */
+
+/* ---------- fonts: self-hosted, latin subset, no CDN ---------- */
+@font-face {
+  font-family: 'Barlow';
+  src: url('/fonts/barlow-400.woff2') format('woff2');
+  font-weight: 400; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: 'Barlow';
+  src: url('/fonts/barlow-500.woff2') format('woff2');
+  font-weight: 500; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: 'Barlow';
+  src: url('/fonts/barlow-600.woff2') format('woff2');
+  font-weight: 600; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: 'Barlow Condensed';
+  src: url('/fonts/barlow-condensed-600.woff2') format('woff2');
+  font-weight: 600; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: 'Barlow Condensed';
+  src: url('/fonts/barlow-condensed-700.woff2') format('woff2');
+  font-weight: 700; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: 'IBM Plex Mono';
+  src: url('/fonts/plex-mono-400.woff2') format('woff2');
+  font-weight: 400; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: 'IBM Plex Mono';
+  src: url('/fonts/plex-mono-500.woff2') format('woff2');
+  font-weight: 500; font-style: normal; font-display: swap;
+}
+
+/* ---------- layer 1: primitives ---------- */
+:root {
+  --steel-50:  #f7f9f9;
+  --steel-100: #f1f3f4;
+  --steel-200: #e4e9eb;
+  --steel-300: #d2d8db;
+  --steel-500: #8b98a1;
+  --steel-600: #58656e;
+  --steel-800: #1e262b;
+  --steel-900: #141a1e;
+  --steel-950: #0d1215;
+  --ink:       #121a1e;
+  --chalk:     #e2e8eb;
+
+  --amber-600: #8a5e00;
+  --amber-500: #a97400;
+  --amber-400: #ffc53d;
+  --amber-300: #ffd470;
+
+  /* Rail: its own token because the date rail is the signature detail and gets
+     tuned independently of generic dividers. Balanced across themes at ~1.9:1. */
+  --rail-light: #aab5bc;
+  --rail-dark: #3a464e;
+
+  /* type */
+  --f-display: 'Barlow Condensed', 'Arial Narrow', system-ui, sans-serif;
+  --f-body: 'Barlow', system-ui, -apple-system, sans-serif;
+  --f-data: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  --t-xs: 0.6875rem;   /* 11px */
+  --t-sm: 0.8125rem;   /* 13px */
+  --t-base: 1.03125rem;/* 16.5px */
+  --t-lg: 1.1875rem;   /* 19px */
+  --t-xl: clamp(1.375rem, 2.2vw, 1.625rem);
+  --t-2xl: clamp(1.75rem, 3.4vw, 2.375rem);
+  --t-display: clamp(3.25rem, 11vw, 6.5rem);
+
+  /* space — 4px base */
+  --s-1: 0.25rem;  --s-2: 0.5rem;   --s-3: 0.75rem;  --s-4: 1rem;
+  --s-6: 1.5rem;   --s-8: 2rem;     --s-12: 3rem;    --s-16: 4rem;
+  --s-24: 6rem;    --s-32: 8rem;
+
+  --measure: 62ch;
+  --page: 68rem;
+  --gutter: clamp(1.25rem, 4vw, 3rem);
+
+  /* motion */
+  --dur-fast: 120ms;
+  --dur: 200ms;
+  --dur-slow: 280ms;
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+}
+
+/* ---------- layer 2: semantic ---------- */
+:root {
+  --bg: var(--steel-100);
+  --surface: #ffffff;
+  --surface-sunk: var(--steel-200);
+  --fg: var(--ink);
+  --muted: var(--steel-600);
+  --rule: var(--steel-300);
+  --rule-heavy: var(--ink);
+  --accent: var(--amber-500);
+  --accent-hover: var(--amber-600);
+  /* Amber as a *background* needs the darker step so light text clears 4.5:1. */
+  --accent-solid: var(--amber-600);
+  --rail: var(--rail-light);
+  --shadow: 0 1px 2px rgb(18 26 30 / 0.05), 0 4px 12px rgb(18 26 30 / 0.06);
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: var(--steel-950);
+    --surface: var(--steel-900);
+    --surface-sunk: var(--steel-800);
+    --fg: var(--chalk);
+    --muted: var(--steel-500);
+    --rule: var(--steel-800);
+    --rule-heavy: var(--chalk);
+    --accent: var(--amber-400);
+    --accent-hover: var(--amber-300);
+    /* On dark the bright amber already clears 4.5:1 behind dark text. */
+    --accent-solid: var(--amber-400);
+    --rail: var(--rail-dark);
+    --shadow: 0 1px 2px rgb(0 0 0 / 0.4), 0 4px 12px rgb(0 0 0 / 0.3);
+    color-scheme: dark;
+  }
+}
+
+/* Manual toggle must beat the media query in both directions. */
+:root[data-theme='dark'] {
+  --bg: var(--steel-950);
+  --surface: var(--steel-900);
+  --surface-sunk: var(--steel-800);
+  --fg: var(--chalk);
+  --muted: var(--steel-500);
+  --rule: var(--steel-800);
+  --rule-heavy: var(--chalk);
+  --accent: var(--amber-400);
+  --accent-hover: var(--amber-300);
+  /* On dark the bright amber already clears 4.5:1 behind dark text. */
+  --accent-solid: var(--amber-400);
+  --rail: var(--rail-dark);
+  --shadow: 0 1px 2px rgb(0 0 0 / 0.4), 0 4px 12px rgb(0 0 0 / 0.3);
+  color-scheme: dark;
+}
+:root[data-theme='light'] {
+  --bg: var(--steel-100);
+  --surface: #ffffff;
+  --surface-sunk: var(--steel-200);
+  --fg: var(--ink);
+  --muted: var(--steel-600);
+  --rule: var(--steel-300);
+  --rule-heavy: var(--ink);
+  --accent: var(--amber-500);
+  --accent-hover: var(--amber-600);
+  /* Amber as a *background* needs the darker step so light text clears 4.5:1. */
+  --accent-solid: var(--amber-600);
+  --rail: var(--rail-light);
+  --shadow: 0 1px 2px rgb(18 26 30 / 0.05), 0 4px 12px rgb(18 26 30 / 0.06);
+  color-scheme: light;
+}
+
+/* ---------- reset + base ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--f-body);
+  font-size: var(--t-base);
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--f-display);
+  font-weight: 600;
+  line-height: 1.05;
+  letter-spacing: -0.005em;
+  text-wrap: balance;
+  margin: 0;
+}
+
+p { margin: 0; }
+ul { margin: 0; padding: 0; list-style: none; }
+
+img, picture, svg { display: block; max-width: 100%; }
+
+a {
+  color: inherit;
+  text-decoration-color: var(--accent);
+  text-underline-offset: 0.2em;
+  text-decoration-thickness: 1px;
+  transition: color var(--dur-fast) var(--ease),
+              text-decoration-color var(--dur-fast) var(--ease);
+}
+a:hover { color: var(--accent-hover); text-decoration-color: currentColor; }
+
+:where(a, button, [tabindex]):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+button { font: inherit; color: inherit; }
+
+::selection { background: var(--accent-solid); color: var(--bg); }
+
+/* Skip link — visible only when focused. */
+.skip {
+  position: absolute;
+  left: var(--s-4);
+  top: -100vh;
+  z-index: 100;
+  padding: var(--s-3) var(--s-4);
+  background: var(--fg);
+  color: var(--bg);
+  font-family: var(--f-data);
+  font-size: var(--t-sm);
+  text-decoration: none;
+}
+.skip:focus { top: var(--s-4); }
+
+/* ---------- shared primitives ---------- */
+.wrap {
+  width: 100%;
+  max-width: var(--page);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+/* 11–13px tracked caps. The only place uppercase is allowed besides the
+   wordmark — see .ui-craft/tokens.md, "Casing rule". */
+.label {
+  font-family: var(--f-data);
+  font-size: var(--t-xs);
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.mono {
+  font-family: var(--f-data);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.01em;
+}
+
+.section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s-4);
+  padding-bottom: var(--s-3);
+  border-bottom: 3px solid var(--rule-heavy);
+  margin-bottom: var(--s-8);
+}
+.section-head h2 { font-size: var(--t-2xl); }
+
+/* ---------- motion ---------- */
+.reveal {
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity var(--dur-slow) var(--ease),
+              transform var(--dur-slow) var(--ease);
+}
+.reveal.is-in { opacity: 1; transform: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .reveal { opacity: 1; transform: none; }
+}

@@ -1,0 +1,115 @@
+---
+import { Image } from 'astro:assets';
+import headshot from '../assets/headshot.webp';
+import ThemeToggle from './ThemeToggle.astro';
+
+const path = Astro.url.pathname.replace(/\/$/, '') || '/';
+const links = [
+  { href: '/#work', label: 'Work' },
+  { href: '/side-projects', label: 'Side projects' },
+  { href: '/#contact', label: 'Contact' },
+];
+---
+
+<header class="nav">
+  <div class="wrap nav-in">
+    <a class="mark" href="/">
+      <Image
+        src={headshot}
+        alt=""
+        width={56}
+        height={56}
+        densities={[1, 2]}
+        loading="eager"
+        class="mark-photo"
+      />
+      <span class="mark-name">Arsenio Colón</span>
+    </a>
+
+    <nav aria-label="Primary">
+      <ul class="nav-links">
+        {
+          links.map((l) => (
+            <li>
+              <a href={l.href} aria-current={l.href === path ? 'page' : undefined}>
+                {l.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <ThemeToggle />
+  </div>
+</header>
+
+<style>
+  .nav {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .nav-in {
+    display: flex;
+    align-items: center;
+    gap: var(--s-6);
+    min-height: 3.5rem;
+  }
+
+  .mark {
+    display: flex;
+    align-items: center;
+    gap: var(--s-3);
+    margin-right: auto;
+    text-decoration: none;
+    min-width: 0;
+  }
+
+  /* Squared off, not circular — a circle fights the hard edges everywhere else. */
+  .mark-photo {
+    width: 1.75rem;
+    height: 1.75rem;
+    object-fit: cover;
+    flex: none;
+    filter: grayscale(1) contrast(1.05);
+    transition: filter var(--dur) var(--ease);
+  }
+  .mark:hover .mark-photo { filter: none; }
+
+  .mark-name {
+    font-family: var(--f-display);
+    font-weight: 600;
+    font-size: 1.0625rem;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: var(--s-6);
+    font-size: var(--t-sm);
+  }
+  .nav-links a {
+    text-decoration: none;
+    color: var(--muted);
+    padding-block: var(--s-2);
+    transition: color var(--dur-fast) var(--ease);
+  }
+  .nav-links a:hover,
+  .nav-links a[aria-current='page'] { color: var(--fg); }
+
+  @media (max-width: 34rem) {
+    .mark-name { font-size: 0.9375rem; }
+    .nav-in { gap: var(--s-4); }
+    .nav-links { gap: var(--s-4); font-size: 0.8125rem; }
+    /* The homepage anchor is redundant on small screens where the whole page
+       is a short scroll anyway. */
+    .nav-links li:first-child { display: none; }
+  }
+</style>

@@ -1,2 +1,13 @@
 .DS_Store
 **/.DS_Store
+
+# build output
+dist/
+.astro/
+
+# deps
+node_modules/
+
+# env
+.env
+.env.production

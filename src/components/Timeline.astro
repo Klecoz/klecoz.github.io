@@ -1,0 +1,211 @@
+---
+import { getCollection, render } from 'astro:content';
+
+const roles = (await getCollection('experience')).sort(
+  (a, b) => a.data.order - b.data.order
+);
+
+const rendered = await Promise.all(
+  roles.map(async (entry) => ({
+    ...entry,
+    Content: (await render(entry)).Content,
+  }))
+);
+---
+
+<ol class="rail">
+  {
+    rendered.map(({ data, Content }) => (
+      <li class="role reveal" data-current={data.current ? '' : undefined}>
+        <div class="when mono">
+          <time datetime={data.startISO}>{data.start}</time>
+          <span class="when-end">
+            {data.endISO ? <time datetime={data.endISO}>{data.end}</time> : data.end}
+          </span>
+        </div>
+
+        <div class="tick" aria-hidden="true" />
+
+        <div class="body">
+          <h3>{data.role}</h3>
+          <p class="org">
+            {data.org}
+            {data.current && <span class="now">Current</span>}
+          </p>
+          <p class="meta mono">
+            {[data.orgFull, data.employment, data.location].filter(Boolean).join(' · ')}
+          </p>
+          <div class="bullets">
+            <Content />
+          </div>
+        </div>
+      </li>
+    ))
+  }
+</ol>
+
+<style>
+  .rail {
+    position: relative;
+    display: grid;
+    gap: 0;
+  }
+
+  .role {
+    display: grid;
+    grid-template-columns: 8rem 1.25rem 1fr;
+    gap: 0 var(--s-4);
+    padding-block: var(--s-8);
+  }
+  .role + .role { border-top: 1px solid var(--rule); }
+
+  /* ---- the rail itself: a machined scale ---- */
+  .tick {
+    position: relative;
+  }
+  /* the continuous hairline */
+  .tick::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    transform: translateX(-50%);
+    background: var(--rail);
+  }
+  /* the boundary mark for this role */
+  .tick::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 0.5rem;
+    width: 0.625rem;
+    height: 1px;
+    transform: translateX(-50%);
+    background: var(--muted);
+  }
+
+  /* Current role: the hairline thickens into a filled amber block for exactly
+     the height of this entry. This is the one place the rail carries colour. */
+  .role[data-current] .tick::before {
+    width: 3px;
+    background: var(--accent);
+  }
+  .role[data-current] .tick::after {
+    width: 0.875rem;
+    height: 3px;
+    background: var(--accent);
+  }
+
+  /* end cap, so the scale terminates rather than dangling */
+  .rail::after {
+    content: '';
+    position: absolute;
+    left: calc(8rem + var(--s-4) + 0.625rem);
+    bottom: 0;
+    width: 0.625rem;
+    height: 1px;
+    transform: translateX(-50%);
+    background: var(--rail);
+  }
+
+  /* ---- dates ---- */
+  .when {
+    font-size: var(--t-sm);
+    line-height: 1.45;
+    color: var(--fg);
+    padding-top: 0.125rem;
+  }
+  .when-end {
+    display: block;
+    color: var(--muted);
+  }
+  .when-end::before {
+    content: '– ';
+  }
+
+  /* ---- body ---- */
+  .body h3 {
+    font-size: var(--t-xl);
+    margin-bottom: 0.125rem;
+  }
+  .org {
+    font-size: var(--t-lg);
+    font-weight: 500;
+    line-height: 1.3;
+  }
+  .now {
+    display: inline-block;
+    margin-left: var(--s-2);
+    padding: 0.0625rem 0.4375rem;
+    vertical-align: 0.15em;
+    font-family: var(--f-data);
+    font-size: 0.625rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--bg);
+    background: var(--accent-solid);
+  }
+  .meta {
+    margin-top: var(--s-2);
+    font-size: var(--t-xs);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .bullets {
+    margin-top: var(--s-4);
+    max-width: var(--measure);
+  }
+  .bullets :global(ul) {
+    display: grid;
+    gap: var(--s-3);
+  }
+  .bullets :global(li) {
+    position: relative;
+    padding-left: var(--s-4);
+    font-size: 0.96875rem;
+    line-height: 1.6;
+    color: var(--muted);
+  }
+  .bullets :global(li)::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.65em;
+    width: 0.4375rem;
+    height: 1px;
+    background: var(--rule);
+  }
+
+  /* ---- narrow ---- */
+  @media (max-width: 44rem) {
+    .role {
+      grid-template-columns: 1.25rem 1fr;
+      gap: 0 var(--s-3);
+    }
+    .when {
+      grid-column: 2;
+      grid-row: 1;
+      display: flex;
+      gap: 0.3em;
+      margin-bottom: var(--s-2);
+      font-size: var(--t-xs);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .when-end { display: inline; }
+    .tick {
+      grid-column: 1;
+      grid-row: 1 / span 2;
+    }
+    .body {
+      grid-column: 2;
+      grid-row: 2;
+    }
+    .rail::after { left: 0.625rem; }
+  }
+</style>

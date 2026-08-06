@@ -1,0 +1,86 @@
+---
+// Icons are inline SVG (Lucide sun / moon). No icon font, no emoji.
+---
+
+<button
+  class="toggle"
+  type="button"
+  data-theme-toggle
+  aria-label="Switch to dark theme"
+  aria-pressed="false"
+>
+  <svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"
+       stroke-linecap="round" aria-hidden="true">
+    <circle cx="12" cy="12" r="4" />
+    <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
+  </svg>
+  <svg class="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"
+       stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+  </svg>
+</button>
+
+<style>
+  .toggle {
+    display: grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    flex: none;
+    padding: 0;
+    background: none;
+    border: 1px solid var(--rule);
+    color: var(--muted);
+    cursor: pointer;
+    transition: color var(--dur-fast) var(--ease),
+                border-color var(--dur-fast) var(--ease);
+  }
+  .toggle:hover { color: var(--fg); border-color: var(--fg); }
+
+  .toggle svg { width: 1rem; height: 1rem; grid-area: 1 / 1; }
+
+  /* Show the icon for the theme you'd switch *to*. */
+  .i-moon { display: none; }
+  :global(:root[data-theme='dark']) .i-moon { display: none; }
+  :global(:root[data-theme='dark']) .i-sun { display: block; }
+  :global(:root[data-theme='light']) .i-sun { display: none; }
+  :global(:root[data-theme='light']) .i-moon { display: block; }
+
+  @media (prefers-color-scheme: dark) {
+    .i-sun { display: block; }
+    .i-moon { display: none; }
+  }
+  @media (prefers-color-scheme: light) {
+    .i-sun { display: none; }
+    .i-moon { display: block; }
+  }
+</style>
+
+<script>
+  const btn = document.querySelector<HTMLButtonElement>('[data-theme-toggle]');
+  const root = document.documentElement;
+
+  const current = () =>
+    root.dataset.theme ??
+    (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+
+  const sync = () => {
+    if (!btn) return;
+    const next = current() === 'dark' ? 'light' : 'dark';
+    btn.setAttribute('aria-label', `Switch to ${next} theme`);
+    btn.setAttribute('aria-pressed', String(current() === 'dark'));
+  };
+
+  btn?.addEventListener('click', () => {
+    const next = current() === 'dark' ? 'light' : 'dark';
+    root.dataset.theme = next;
+    try {
+      localStorage.setItem('theme', next);
+    } catch {
+      /* private mode — the toggle still works for this page view */
+    }
+    sync();
+  });
+
+  sync();
+</script>

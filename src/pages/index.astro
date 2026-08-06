@@ -1,0 +1,425 @@
+---
+import Base from '../layouts/Base.astro';
+import Timeline from '../components/Timeline.astro';
+import EmailReveal from '../components/EmailReveal.astro';
+
+const stack = [
+  { group: 'Languages', items: ['C#', 'SQL', 'JavaScript', 'C'] },
+  { group: 'Platforms', items: ['.NET 10', 'ASP.NET Core', 'Azure', 'Kubernetes', 'IIS'] },
+  { group: 'Tools', items: ['Azure DevOps', 'Datadog', 'Git', 'Claude Code', 'Unity'] },
+];
+
+const community = [
+  {
+    what: 'Secretary, Board of Directors',
+    where: 'Buffalo Game Space',
+    note: 'A 501(c)(3) supporting local game developers and digital artists.',
+    href: 'https://buffalogamespace.com',
+  },
+  {
+    what: 'Tech Talks and Tech Academy mentoring',
+    where: 'M&T Bank',
+    note: 'Ran internal workshops and mentored people moving into engineering.',
+  },
+  {
+    what: 'Cybersecurity Champions, Touchdown for Teachers',
+    where: 'M&T Bank',
+    note: 'Volunteer programs on security awareness and classroom support.',
+  },
+];
+---
+
+<Base
+  title="Arsenio Colón — .NET Engineer in Buffalo, NY"
+  description="Arsenio Colón is a .NET engineer in Buffalo, NY. Backend systems and internal platforms, currently at Seneca Gaming Corporation."
+  person
+>
+  {/* Old v1 links used hash fragments, which a server never sees. */}
+  <script is:inline>
+    (function () {
+      var h = window.location.hash;
+      if (h === '#projects' || h === '#games') {
+        window.location.replace('/side-projects');
+      }
+    })();
+  </script>
+
+  <!-- ============ HERO ============ -->
+  <section class="hero">
+    <div class="wrap">
+      <p class="label">Buffalo, NY</p>
+      <h1 class="hero-name">Arsenio<br />Colón</h1>
+      <p class="hero-role">.NET Engineer · Full Stack</p>
+
+      <div class="hero-grid">
+        <div class="hero-bio">
+          <p>
+            I&rsquo;m a .NET engineer in Buffalo. Most of my work is backend and internal
+            platforms, the kind of thing other teams end up depending on without thinking
+            about it. Right now I&rsquo;m at Seneca Gaming, where I own a platform end to end.
+          </p>
+          <p>
+            I got my start making games for jams, and did AR/VR work for a few years before
+            moving to backend. I still poke at Unity now and then, but it&rsquo;s not really
+            what I do anymore.
+          </p>
+          <div class="hero-cta">
+            <a class="btn-primary" href="#work">See the work</a>
+            <a class="btn-ghost" href="https://www.linkedin.com/in/arsenio-colon/">LinkedIn</a>
+          </div>
+        </div>
+
+        <div class="stack">
+          {
+            stack.map((row) => (
+              <div class="stack-row">
+                <p class="label">{row.group}</p>
+                <ul class="stack-items">
+                  {row.items.map((i) => (
+                    <li class="mono">{i}</li>
+                  ))}
+                </ul>
+              </div>
+            ))
+          }
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ HOW I WORK ============ -->
+  <section class="how">
+    <div class="wrap how-in">
+      <p class="label">How I work</p>
+      <p class="how-text">
+        I use AI tooling every day, mostly Claude Code. It&rsquo;s good for scaffolding, big
+        refactors, and finding my way around code I didn&rsquo;t write. I read everything
+        before it ships.
+      </p>
+    </div>
+  </section>
+
+  <!-- ============ WORK ============ -->
+  <section class="band" id="work">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Work</h2>
+        <p class="label">Six roles · 2018 to now</p>
+      </div>
+      <Timeline />
+    </div>
+  </section>
+
+  <!-- ============ EDUCATION + COMMUNITY ============ -->
+  <section class="band">
+    <div class="wrap pair">
+      <div>
+        <div class="section-head">
+          <h2>Education</h2>
+        </div>
+        <p class="mono edu-when">2015 – 2017</p>
+        <h3 class="edu-degree">B.S. Computer Information Systems</h3>
+        <p class="edu-school">State University of New York College at Buffalo</p>
+        <ul class="notes">
+          <li>
+            Teaching assistant for Database Systems (SQL and Oracle) and Intro to Computer
+            Information Processing.
+          </li>
+          <li>
+            Senior seminar capstone shipped as a playable game and was shown at three regional
+            conferences.
+          </li>
+        </ul>
+      </div>
+
+      <div>
+        <div class="section-head">
+          <h2>Community</h2>
+        </div>
+        <ul class="notes community">
+          {
+            community.map((c) => (
+              <li>
+                <p class="c-what">{c.what}</p>
+                <p class="c-where mono">
+                  {c.href ? <a href={c.href}>{c.where}</a> : c.where}
+                </p>
+                <p class="c-note">{c.note}</p>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SIDE PROJECTS TEASER ============ -->
+  <section class="teaser">
+    <div class="wrap teaser-in">
+      <div>
+        <p class="label">Side projects</p>
+        <h2 class="teaser-h">Eight games and a couple of client sites</h2>
+        <p class="teaser-p">
+          Unity games built for jams and hackathons between 2016 and 2023, including a VR tower
+          defense that took second place at ACV&rsquo;s hackathon. Most of them have source.
+        </p>
+      </div>
+      <a class="btn-primary" href="/side-projects">Browse them</a>
+    </div>
+  </section>
+
+  <!-- ============ CONTACT ============ -->
+  <section class="band" id="contact">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Contact</h2>
+      </div>
+      <div class="contact">
+        <p class="contact-p">
+          I&rsquo;m around if you want to talk about a role, or just about the work.
+        </p>
+        <EmailReveal />
+        <ul class="links">
+          <li>
+            <span class="label">LinkedIn</span>
+            <a class="mono" href="https://www.linkedin.com/in/arsenio-colon/">
+              /in/arsenio-colon
+            </a>
+          </li>
+          <li>
+            <span class="label">GitHub</span>
+            <a class="mono" href="https://github.com/Klecoz">github.com/Klecoz</a>
+          </li>
+          <li>
+            <span class="label">itch.io</span>
+            <a class="mono" href="https://klecoz.itch.io">klecoz.itch.io</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  /* ---------- hero ---------- */
+  .hero { padding-block: var(--s-16) var(--s-12); }
+
+  .hero-name {
+    font-size: var(--t-display);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: -0.01em;
+    /* 0.88 clipped the acute on the Ó against the line above. */
+    line-height: 0.94;
+    margin-block: var(--s-3) var(--s-4);
+  }
+
+  .hero-role {
+    font-family: var(--f-display);
+    font-size: var(--t-xl);
+    font-weight: 600;
+    color: var(--muted);
+    padding-bottom: var(--s-8);
+    border-bottom: 3px solid var(--rule-heavy);
+  }
+
+  /* Asymmetric: prose takes the wide column, the stack sits in a narrow rail. */
+  .hero-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr);
+    gap: var(--s-12);
+    padding-top: var(--s-8);
+  }
+
+  .hero-bio {
+    display: grid;
+    gap: var(--s-4);
+    max-width: var(--measure);
+  }
+  .hero-bio p { color: var(--muted); }
+
+  .hero-cta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-3);
+    margin-top: var(--s-4);
+  }
+
+  .stack { display: grid; gap: var(--s-6); align-content: start; }
+  .stack-row { display: grid; gap: var(--s-2); }
+  .stack-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-1) var(--s-3);
+    font-size: var(--t-sm);
+    color: var(--fg);
+  }
+  /* Separator rides on the *preceding* item so a wrapped line never starts
+     with an orphaned dot. */
+  .stack-items li:not(:last-child)::after {
+    content: '·';
+    color: var(--rail);
+    margin-left: var(--s-3);
+  }
+
+  /* ---------- buttons: one label per intent, site-wide ---------- */
+  .btn-primary,
+  .btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    padding: var(--s-3) var(--s-6);
+    font-family: var(--f-data);
+    font-size: var(--t-sm);
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background var(--dur-fast) var(--ease),
+                color var(--dur-fast) var(--ease),
+                border-color var(--dur-fast) var(--ease);
+  }
+  .btn-primary {
+    background: var(--fg);
+    color: var(--bg);
+    border: 1px solid var(--fg);
+  }
+  .btn-primary:hover {
+    background: var(--accent-solid);
+    border-color: var(--accent-solid);
+    color: var(--bg);
+  }
+  .btn-ghost {
+    border: 1px solid var(--rule);
+    color: var(--fg);
+  }
+  .btn-ghost:hover { border-color: var(--fg); color: var(--fg); }
+
+  /* ---------- how I work ---------- */
+  .how {
+    border-block: 1px solid var(--rule);
+    background: var(--surface);
+  }
+  .how-in {
+    display: grid;
+    grid-template-columns: 8rem minmax(0, 1fr);
+    gap: var(--s-4);
+    padding-block: var(--s-8);
+  }
+  .how-text {
+    max-width: var(--measure);
+    font-size: var(--t-lg);
+    line-height: 1.6;
+  }
+
+  /* ---------- generic band ---------- */
+  .band { padding-block: var(--s-16); }
+
+  /* ---------- education + community ---------- */
+  .pair {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr));
+    gap: var(--s-16) var(--s-12);
+  }
+  .edu-when {
+    font-size: var(--t-sm);
+    color: var(--muted);
+  }
+  .edu-degree {
+    font-size: var(--t-xl);
+    margin-block: var(--s-1) 0.125rem;
+  }
+  .edu-school { font-size: var(--t-lg); font-weight: 500; }
+
+  .notes {
+    display: grid;
+    gap: var(--s-4);
+    margin-top: var(--s-6);
+    max-width: 44ch;
+  }
+  .notes > li {
+    position: relative;
+    padding-left: var(--s-4);
+    font-size: 0.96875rem;
+    color: var(--muted);
+  }
+  .notes > li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.65em;
+    width: 0.4375rem;
+    height: 1px;
+    background: var(--rule);
+  }
+  .community > li { padding-left: 0; }
+  .community > li::before { display: none; }
+  .community > li + li {
+    padding-top: var(--s-4);
+    border-top: 1px solid var(--rule);
+  }
+  .c-what { color: var(--fg); font-weight: 500; line-height: 1.35; }
+  .c-where {
+    font-size: var(--t-xs);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-block: 0.125rem var(--s-1);
+  }
+  .c-note { font-size: 0.9375rem; }
+
+  /* ---------- teaser: full-bleed band breaks the stack ---------- */
+  .teaser {
+    background: var(--surface);
+    border-block: 1px solid var(--rule);
+  }
+  .teaser-in {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--s-8);
+    padding-block: var(--s-12);
+  }
+  .teaser-h {
+    font-size: var(--t-2xl);
+    margin-block: var(--s-2) var(--s-3);
+    max-width: 20ch;
+  }
+  .teaser-p {
+    max-width: 54ch;
+    color: var(--muted);
+  }
+
+  /* ---------- contact ---------- */
+  .contact { display: grid; gap: var(--s-6); justify-items: start; }
+  .contact-p {
+    font-size: var(--t-lg);
+    max-width: 46ch;
+  }
+  .links {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(13rem, max-content));
+    gap: var(--s-6) var(--s-12);
+    margin-top: var(--s-2);
+  }
+  .links li { display: grid; gap: 0.125rem; }
+  .links a { font-size: var(--t-base); }
+
+  /* ---------- narrow ---------- */
+  @media (max-width: 52rem) {
+    .hero-grid {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--s-8);
+    }
+    .how-in { grid-template-columns: minmax(0, 1fr); gap: var(--s-2); }
+    .hero { padding-block: var(--s-12) var(--s-8); }
+    .band { padding-block: var(--s-12); }
+  }
+
+  @media (max-width: 34rem) {
+    .hero-cta { display: grid; }
+    .btn-primary, .btn-ghost { justify-content: center; }
+  }
+</style>

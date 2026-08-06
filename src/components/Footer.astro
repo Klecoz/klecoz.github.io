@@ -1,0 +1,26 @@
+---
+const year = new Date().getFullYear();
+---
+
+<footer class="foot">
+  <div class="wrap foot-in">
+    <p class="mono">Arsenio Colón · Buffalo, NY</p>
+    <p class="mono dim">&copy; {year} · Built with Astro</p>
+  </div>
+</footer>
+
+<style>
+  .foot {
+    border-top: 1px solid var(--rule);
+    margin-top: var(--s-24);
+  }
+  .foot-in {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-2) var(--s-6);
+    justify-content: space-between;
+    padding-block: var(--s-8);
+    font-size: var(--t-sm);
+  }
+  .dim { color: var(--muted); }
+</style>

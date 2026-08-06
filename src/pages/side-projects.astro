@@ -1,0 +1,219 @@
+---
+import { getCollection, render } from 'astro:content';
+import { Image } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+
+const games = await Promise.all(
+  (await getCollection('games'))
+    .sort((a, b) => a.data.order - b.data.order)
+    .map(async (e) => ({ ...e, Content: (await render(e)).Content }))
+);
+
+const clients = await Promise.all(
+  (await getCollection('clients'))
+    .sort((a, b) => a.data.order - b.data.order)
+    .map(async (e) => ({ ...e, Content: (await render(e)).Content }))
+);
+---
+
+<Base
+  title="Side projects — Arsenio Colón"
+  description="Unity games built for game jams and hackathons between 2016 and 2023, plus a couple of client sites."
+>
+  <section class="head">
+    <div class="wrap">
+      <p class="label">Side projects</p>
+      <h1>Games and client work</h1>
+      <p class="intro">
+        Unity games I built for jams and hackathons between 2016 and 2023, plus two sites I made
+        for clients. Most of the games have source on GitHub.
+      </p>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Games</h2>
+        <p class="label">{games.length} projects</p>
+      </div>
+
+      <ul class="grid">
+        {
+          games.map(({ data, Content }) => (
+            <li class="card reveal">
+              <Image
+                src={data.image}
+                alt={`Screenshot from ${data.title}`}
+                widths={[320, 640]}
+                sizes="(max-width: 40rem) 100vw, (max-width: 64rem) 50vw, 21rem"
+                loading="lazy"
+                class="shot"
+              />
+              <div class="card-body">
+                <p class="card-tag mono">
+                  {data.vr && <span class="vr">VR</span>}
+                  {data.tag} · {data.year}
+                </p>
+                <h3>{data.title}</h3>
+                <div class="card-desc">
+                  <Content />
+                </div>
+                {data.links.length > 0 && (
+                  <ul class="card-links">
+                    {data.links.map((l) => (
+                      <li>
+                        <a class="mono" href={l.href}>
+                          {l.label}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <section class="band alt">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Client work</h2>
+        <p class="label">Older</p>
+      </div>
+
+      <ul class="grid grid-wide">
+        {
+          clients.map(({ data, Content }) => (
+            <li class="card reveal">
+              <Image
+                src={data.image}
+                alt={`Screenshot of the ${data.title} website`}
+                widths={[320, 640]}
+                sizes="(max-width: 40rem) 100vw, 25rem"
+                loading="lazy"
+                class="shot"
+              />
+              <div class="card-body">
+                <p class="card-tag mono">Client · {data.year}</p>
+                <h3>{data.title}</h3>
+                <div class="card-desc">
+                  <Content />
+                </div>
+                <ul class="card-links">
+                  <li>
+                    {data.live && data.href ? (
+                      <a class="mono" href={data.href}>
+                        Visit site
+                      </a>
+                    ) : (
+                      <span class="mono offline">Not online anymore</span>
+                    )}
+                  </li>
+                </ul>
+              </div>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="wrap">
+      <a class="back mono" href="/">Back to the main page</a>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .head { padding-block: var(--s-16) var(--s-8); }
+  .head h1 {
+    font-size: var(--t-2xl);
+    margin-block: var(--s-2) var(--s-4);
+  }
+  .intro {
+    max-width: var(--measure);
+    color: var(--muted);
+  }
+
+  .band { padding-block: var(--s-12); }
+  .alt {
+    background: var(--surface);
+    border-block: 1px solid var(--rule);
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+    gap: var(--s-8) var(--s-6);
+  }
+  .grid-wide {
+    grid-template-columns: repeat(auto-fill, minmax(22rem, 1fr));
+  }
+
+  .card {
+    display: grid;
+    grid-template-rows: auto 1fr;
+    gap: var(--s-4);
+  }
+
+  .shot {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 10;
+    object-fit: cover;
+    background: var(--surface-sunk);
+    border: 1px solid var(--rule);
+    transition: border-color var(--dur) var(--ease);
+  }
+  .card:hover .shot { border-color: var(--muted); }
+
+  .card-body { display: grid; gap: var(--s-2); align-content: start; }
+
+  .card-tag {
+    display: flex;
+    align-items: center;
+    gap: var(--s-2);
+    font-size: var(--t-xs);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .vr {
+    padding: 0.0625rem 0.375rem;
+    background: var(--fg);
+    color: var(--bg);
+    font-weight: 500;
+    letter-spacing: 0.1em;
+  }
+
+  .card h3 {
+    font-size: var(--t-xl);
+    line-height: 1.1;
+  }
+
+  .card-desc :global(p) {
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    color: var(--muted);
+  }
+
+  .card-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-4);
+    margin-top: var(--s-1);
+    font-size: var(--t-sm);
+  }
+  .offline { color: var(--muted); opacity: 0.75; }
+
+  .back {
+    font-size: var(--t-sm);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+</style>

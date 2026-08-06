@@ -1,0 +1,124 @@
+---
+// The address never appears in the served HTML. It is reversed, then base64'd,
+// then split across two attributes — so neither half is a valid address and the
+// whole thing isn't a recognisable string. Assembly happens on click, not load,
+// which also defeats scrapers that execute JS on page load.
+const address = 'arseniocolon@gmail.com';
+const encoded = Buffer.from([...address].reverse().join(''), 'utf8').toString('base64');
+const split = Math.ceil(encoded.length / 2);
+const head = encoded.slice(0, split);
+const tail = encoded.slice(split);
+---
+
+<div class="reveal-wrap" data-email-reveal data-a={head} data-b={tail}>
+  <button class="btn" type="button" data-email-show>
+    Show email
+  </button>
+
+  <noscript>
+    <p class="fallback">
+      Email needs JavaScript here, sorry — it's the only thing keeping the address off
+      the scrapers. <a href="https://www.linkedin.com/in/arsenio-colon/">LinkedIn</a> works
+      just as well.
+    </p>
+  </noscript>
+</div>
+
+<style>
+  .reveal-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--s-3);
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--s-2);
+    padding: var(--s-3) var(--s-6);
+    min-height: 2.75rem;
+    background: var(--fg);
+    color: var(--bg);
+    border: 1px solid var(--fg);
+    font-family: var(--f-data);
+    font-size: var(--t-sm);
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background var(--dur-fast) var(--ease),
+                color var(--dur-fast) var(--ease);
+  }
+  .btn:hover {
+    background: var(--accent-solid);
+    border-color: var(--accent-solid);
+    color: var(--bg);
+  }
+
+  .reveal-wrap :global(.addr) {
+    font-family: var(--f-data);
+    font-size: var(--t-base);
+    text-decoration-color: var(--accent);
+  }
+
+  .reveal-wrap :global(.copy) {
+    padding: var(--s-2) var(--s-3);
+    min-height: 2.25rem;
+    background: none;
+    color: var(--muted);
+    border: 1px solid var(--rule);
+    font-family: var(--f-data);
+    font-size: var(--t-xs);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: color var(--dur-fast) var(--ease),
+                border-color var(--dur-fast) var(--ease);
+  }
+  .reveal-wrap :global(.copy):hover {
+    color: var(--fg);
+    border-color: var(--fg);
+  }
+
+  .fallback {
+    font-size: var(--t-sm);
+    color: var(--muted);
+    max-width: 46ch;
+  }
+</style>
+
+<script>
+  const wrap = document.querySelector<HTMLElement>('[data-email-reveal]');
+  const show = wrap?.querySelector<HTMLButtonElement>('[data-email-show]');
+
+  show?.addEventListener('click', () => {
+    if (!wrap) return;
+    const { a = '', b = '' } = wrap.dataset;
+    const address = [...atob(a + b)].reverse().join('');
+
+    const link = document.createElement('a');
+    link.className = 'addr';
+    link.href = `mailto:${address}`;
+    link.textContent = address;
+
+    const copy = document.createElement('button');
+    copy.className = 'copy';
+    copy.type = 'button';
+    copy.textContent = 'Copy';
+    copy.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(address);
+        copy.textContent = 'Copied';
+      } catch {
+        copy.textContent = 'Press ⌘C';
+      }
+      setTimeout(() => (copy.textContent = 'Copy'), 2000);
+    });
+
+    show.replaceWith(link);
+    link.after(copy);
+    link.focus();
+  });
+</script>
