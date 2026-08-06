@@ -2,7 +2,6 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [master]
   workflow_dispatch:
 
 # Allow GITHUB_TOKEN to publish to Pages.
