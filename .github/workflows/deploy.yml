@@ -1,7 +1,11 @@
 name: Deploy to GitHub Pages
 
+# on:push is kept deliberately even though it does not currently fire —
+# see README, "Why a plain git push does not deploy". It costs nothing and
+# resumes working by itself if GitHub's side ever changes.
 on:
   push:
+    branches: [master]
   workflow_dispatch:
 
 # Allow GITHUB_TOKEN to publish to Pages.

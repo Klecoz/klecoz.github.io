@@ -15,12 +15,12 @@ npm run preview    # serve dist/ exactly as production will
 ## How deploys work
 
 ```bash
-git push origin master      # that's the deploy
-gh run watch                # follow it (~50s)
+npm run deploy      # push + start the build
+gh run watch        # follow it (~50s)
 ```
 
-`npm run deploy` does the same thing and also dispatches the workflow explicitly. Use it if
-a push ever fails to start a build.
+Use `npm run deploy`, not a bare `git push`. A push alone does **not** currently start a
+build — see below.
 
 ```
 .github/workflows/deploy.yml
@@ -33,38 +33,37 @@ a push ever fails to start a build.
 
 Also visible at **Actions → Deploy to GitHub Pages**.
 
-### If a push stops triggering a build
+### Why a plain `git push` does not deploy
 
-**This repo pushes over SSH on purpose.** Check first:
+**Push events do not start workflow runs on this repository.** GitHub receives and records
+the push; no run is ever created. `workflow_dispatch` works fine, which is why
+`npm run deploy` dispatches explicitly.
 
-```bash
-git remote get-url origin      # must be git@github.com:... not https://
-```
+This was isolated on 2026-08-06. What was ruled out:
 
-Over HTTPS, git authenticates through the `gh` CLI credential helper
-(`credential.https://github.com.helper` → `gh auth git-credential`, set globally on this
-machine). GitHub records the push but **suppresses the workflow run for that token**, so
-`on: push` silently never fires — no error, no build, stale site. That was the original
-setup here and it cost three pushes to spot.
+| Tried | Result |
+|---|---|
+| HTTPS push (via `gh` credential helper) | `PushEvent` recorded, no run |
+| SSH push (registered key, `ssh -T` greets by name) | `PushEvent` recorded, no run |
+| `branches: [master]` filter | no run |
+| No branch filter at all (bare `push:`) | no run |
+| A second, minimal workflow (`echo`, bare `push:`) | no run |
+| `workflow_dispatch` on both workflows | runs immediately, succeeds |
 
-To put it back:
+Also confirmed healthy: Actions enabled with `allowed_actions: all`, default workflow
+permissions `write`, both workflows `state: active`, no repository rulesets, repo not a
+fork, not archived, not disabled, `default_branch: master`, and the recorded `PushEvent`
+carries the correct `ref=refs/heads/master`.
 
-```bash
-git remote set-url origin git@github.com:Klecoz/klecoz.github.io.git
-ssh -T git@github.com          # should greet you by name
-```
+So everything in this repo is configured correctly and the cause is on GitHub's side. If
+you want to chase it, **Settings → Actions → General** in the web UI can expose policy that
+the REST API does not, and this is a reasonable thing to hand to GitHub Support — the
+minimal `echo`-only workflow is a clean reproduction.
 
-If the SSH key itself is gone (new machine, rotated key):
+Until then `npm run deploy` is the deploy command, and `on: push` stays in the workflow so
+it resumes working by itself if this ever clears.
 
-```bash
-gh auth refresh -h github.com -s admin:public_key    # needs a browser
-gh ssh-key add ~/.ssh/id_ed25519.pub --title "$(hostname -s)"
-```
-
-`npm run deploy` works regardless, since it dispatches the workflow explicitly.
-
-> Worth knowing: any *other* repo on this machine still uses the HTTPS + `gh` helper path.
-> If one of them relies on an `on: push` workflow, it has this same silent problem.
+> The SSH remote is worth keeping regardless — it just wasn't the cause.
 
 ### One-time setup (already done)
 
