@@ -14,25 +14,56 @@ npm run preview    # serve dist/ exactly as production will
 
 ## How deploys work
 
-**Push to `master` → GitHub Actions builds → Pages publishes.** That's the whole loop.
-There is nothing to run by hand and no `gh-pages` branch.
-
-```
-push to master
-   └─ .github/workflows/deploy.yml
-        ├─ npm ci
-        ├─ npm run build           → dist/
-        ├─ assert dist/CNAME       ← fails the build if the domain would break
-        ├─ upload-pages-artifact
-        └─ deploy-pages            → https://arseniocolon.com
+```bash
+npm run deploy      # push to master + kick off the build
+gh run watch        # follow it (~50s)
 ```
 
-Watch a run at **Actions → Deploy to GitHub Pages**, or `gh run watch`.
+That's it. `npm run deploy` pushes and then explicitly dispatches the workflow — the
+explicit dispatch is deliberate, see the gotcha below.
+
+```
+.github/workflows/deploy.yml
+   ├─ npm ci
+   ├─ npm run build           → dist/
+   ├─ assert dist/CNAME       ← fails the build if the domain would break
+   ├─ upload-pages-artifact
+   └─ deploy-pages            → https://arseniocolon.com
+```
+
+Also visible at **Actions → Deploy to GitHub Pages**.
+
+### Gotcha: a plain `git push` does not deploy
+
+On this machine, git authenticates through the `gh` CLI credential helper
+(`git config --global credential.https://github.com.helper` → `gh auth git-credential`).
+GitHub records the push, but **suppresses workflow runs triggered by that token**, so
+`on: push` never fires. Verified: three pushes, three `PushEvent`s, zero workflow runs.
+
+This is why `npm run deploy` dispatches the workflow explicitly. The `on: push` trigger is
+still in the workflow and costs nothing — it will simply start working on its own if the
+auth ever changes.
+
+**To get real push-to-deploy back**, register the SSH key that already exists at
+`~/.ssh/id_ed25519.pub` and switch the remote over:
+
+```bash
+gh ssh-key add ~/.ssh/id_ed25519.pub --title "$(hostname)"   # needs admin:public_key scope:
+                                                             # gh auth refresh -s admin:public_key
+git remote set-url origin git@github.com:Klecoz/klecoz.github.io.git
+ssh -T git@github.com                                        # should greet you by name
+```
+
+After that a plain `git push` deploys, and `npm run deploy` still works fine either way.
 
 ### One-time setup (already done)
 
 Settings → Pages → Source is set to **GitHub Actions**, not "Deploy from a branch."
-If that ever gets reset, every deploy fails until it's set back.
+If that ever gets reset, every deploy fails until it's set back. Confirm with:
+
+```bash
+gh api repos/Klecoz/klecoz.github.io/pages --jq '.build_type'   # → "workflow"
+```
 
 ### Rolling back
 
