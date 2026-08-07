@@ -7,6 +7,101 @@ Decisions Arsenio made himself are marked **[AC]**. Those don't get revisited wi
 
 ---
 
+## 2026-08-07 — visual polish pass
+
+### Hero accent: the rule under the role line leads in amber — **[AC]**
+
+The hero had zero amber in it (measured; see `findings.md`). Four options were built on a
+throwaway `/compare` route and screenshotted in both themes at 1280px.
+
+| | Option | Placements | Verdict |
+|---|---|---|---|
+| A | Baseline, no amber | 0 | rejected |
+| B | Amber tick before the `Buffalo, NY` eyebrow | 1 | rejected |
+| **C** | **3px rule leads with a 4rem amber segment, then ink** | **1** | **chosen** |
+| D | Primary CTA fills amber at rest, hover inverts to ink | 1 | rejected |
+
+C wins because it is the rail's own grammar — a hairline that thickens into amber to mark the
+one you're in now — rather than a new gesture. That makes it structure, which is the test the
+accent budget sets ("nothing decorative").
+
+**Rejected:** B reads as the same idea but quieter, and at 20px it is easy to miss entirely.
+D is the one worth recording, because it looks like the obvious answer and renders badly: amber
+is deliberately two different colours across the themes, so a filled 44px button is dark mustard
+on light and takes over the screen on dark. Fine as a 10px chip, not as the largest solid on the
+page. Its contrast was never the problem — 5.12:1 and 11.94:1, the same as the `Current` chip.
+
+**Implementation note.** Drawn as a `linear-gradient` background with hard stops, not a border,
+because a border takes one colour. The consequence is that it does not print — browsers drop
+backgrounds — so the `@media print` block in `index.astro` restates it as the border it used to
+be. `npm run snap` does not check this; the print render was looked at.
+
+### Stack separators: no character — **[AC]**
+
+The `·` between stack items rode the preceding item, which stopped a wrapped line *opening*
+with an orphan dot and left one hanging off the end instead. Three options rendered:
+
+| | Option | Verdict |
+|---|---|---|
+| S1 | Dot on the preceding item (shipped) | rejected — trailing orphan |
+| **S2** | **No character, column gap 12px → 24px** | **chosen** |
+| S3 | Dot on the following item | rejected — leading orphan |
+
+S2 is the only one that cannot orphan at any width, because there is no dot to orphan. It also
+reads more like a spec sheet, which is what the strip is meant to be.
+
+**Rejected:** S3 is what the original comment was written to avoid, and confirms the instinct —
+`· Kubernetes` opening line two is worse than `Azure ·` closing line one. S1 was kept in the
+comparison rather than assumed wrong; seeing the three together is what settled it.
+
+**The cost, named:** without a glyph, multi-word items lean entirely on 24px of gap to separate
+—`Azure DevOps   Datadog` rather than `Azure DevOps · Datadog`. Judged on the render and
+accepted. If it ever reads as ambiguous, S1 is the built alternative and the trailing dot is the
+price.
+
+### CTA labels are the destination's name — **[AC]**
+
+`See the work` → `Work`, and `Browse them` → `Side projects`. Arsenio's call, unprompted:
+"See the work" sounds lame. All three CTAs across the site now name where they go, which
+matches what the 404 already did (`Main page`, `Side projects`).
+
+**Named because it was raised and overruled:** the teaser's eyebrow already reads
+`Side projects` three lines above the button, so the words now appear twice in one block. The
+alternative offered was keeping `Browse them` as the one CTA with any warmth in it. He chose
+consistency. Not to be relitigated — but if the teaser ever reads as stuttering, that's why.
+
+### Card link rows are bottom-anchored, not top-packed
+
+`.card-body` became a flex column with `margin-top: auto` on `.card-links`. The grid already
+stretched cards in a row to equal height; only the content placement was uneven.
+
+**Rejected:** setting a `min-height` on `.card-desc` to even the descriptions out — it would
+fix the symptom at one viewport and reintroduce it at every other, and it puts a magic number
+where a layout rule belongs.
+
+### Project cards stagger on a cycle of three, not a running index
+
+40ms per step, capped at 80ms, via `.card:nth-child(3n + 2)` / `:nth-child(3n)`.
+
+**Rejected:** a running index (`--i` per card, delay = i × 40ms). It reads correctly at three
+columns and badly everywhere else — at one column the eighth card would carry a 280ms delay
+while entering the viewport alone, which is a visible stall, not a stagger. Cycling on three
+sweeps left-to-right at the wide layout and is short enough to be invisible at the narrow ones.
+The grid is `auto-fill`, so no CSS can know the real column count; a delay that is wrong at
+some widths should at least be wrong by a small amount.
+
+### Buttons live in `tokens.css`
+
+`.btn-primary` / `.btn-ghost` were duplicated in `index.astro` and `404.astro`, and had already
+drifted — the 404 copy lost `white-space: nowrap`. One definition now, in the shared primitives.
+Page-scoped rules still own layout and the narrow-width overrides; Astro's scoping gives those
+higher specificity, so they still win.
+
+**Rejected:** leaving them duplicated and just syncing the missing property. The drift already
+happened once with nobody noticing, which is the argument against doing it again.
+
+---
+
 ## 2026-08-07
 
 ### Control borders: a new token, at the lightest value that passes **[AC]**

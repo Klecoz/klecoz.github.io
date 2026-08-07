@@ -8,6 +8,95 @@ which is the part that saves the most time.
 
 ---
 
+## 2026-08-07 — visual polish pass
+
+Prompted by "anything we can do for some visual polish?". Everything below was measured
+against a `npm run preview` server driven by Playwright, not read off the source.
+
+### The hero had no accent on it at all
+
+Walked every element whose box intersects the first 900px of `/` and compared its computed
+`color`, `backgroundColor`, `borderTopColor`, `textDecorationColor` and `outlineColor`
+against all four amber primitives (`#a97400`, `#8a5e00`, `#ffc53d`, `#ffd470`).
+
+| Scope | Amber placements |
+|---|---|
+| First 900px, before | **0** |
+| First 900px, after | 1 |
+| Whole homepage | 16 |
+
+All 16 were below the fold: the date rail, the `Current` chip, the citation arrows and their
+borders, link underlines, and the pull-quote's left rule. `.ui-craft/tokens.md` budgets 3–5
+per viewport, so the highest-traffic screen on the site was spending none of it. Fixed by the
+rule inset — see `decisions.md`.
+
+Worth keeping the method: `--accent` and `--accent-solid` resolve to *different* hex values on
+light and the *same* one on dark, so a scan that only checks one theme's value under-counts.
+Check all four primitives.
+
+### The stack separator orphaned a dot at the end of wrapped lines
+
+`.stack-items li:not(:last-child)::after` set a `·` on the preceding item, with a comment
+saying this stopped a wrapped line opening with an orphan. It did, and produced the mirror
+image instead. Measured item rects at 1280px:
+
+```
+PLATFORMS   .NET 10 · ASP.NET Core · Azure ·      ← dot ends the line
+            Kubernetes · IIS
+TOOLS       Azure DevOps · Datadog · Git ·        ← same
+            Claude Code · Unity
+```
+
+Both wrapping groups showed it, in both themes, at 1280px and 390px. Rendered against a
+leading-dot variant, which just moves the orphan to the front of line two. Fixed by removing
+the character.
+
+### Card link rows sat on three different baselines
+
+`/side-projects`, first grid row. The cards were already equal height — the grid stretches
+them — but `.card-body` was `align-content: start`, so the link row landed wherever the
+description ended.
+
+| Card | `.card-links` top, before | After |
+|---|---|---|
+| Make Game On Real Table | 897px | 893px |
+| Repair the Shape | 825px | 893px |
+| Office Mistakes | 825px | 893px |
+
+Verified after the fix on all three rows: 893/893/893, 1370/1370/1370, 1822/1822.
+
+### Button rules were duplicated and had already drifted
+
+`.btn-primary` / `.btn-ghost` were defined in both `index.astro` and `404.astro`. The 404 copy
+was missing `white-space: nowrap`, so a button label could wrap on that page and nowhere else.
+Not a rendering defect at any width tested — a latent one. Both copies now removed in favour of
+one set in `tokens.css`.
+
+### `prefers-reduced-motion` zeroed duration but not delay
+
+`tokens.css` set `transition-duration: 0.01ms !important` without touching `transition-delay`.
+Harmless while nothing set a delay; the card stagger added one, and a delay left intact under
+reduced motion is a held pause rather than a shortened animation. `transition-delay: 0s
+!important` added to the same block.
+
+### Gate after the changes — all clean
+
+`npm run check` 0/0/0 · `npm run build` 632 KB, prune line present (10 assets, 1318 KB) ·
+`npm run axe` 12 scans clean · `npm run snap` 2 pages clean · `assert-cname.sh` ok.
+
+`npm run snap` matters more than usual this session: the hero rule is now painted as a
+`background`, and browsers drop backgrounds when printing. Left alone it would have vanished
+off the paper copy. The print block restates it as the border it used to be, and the print
+render confirms it survives.
+
+### Checked and found already correct
+
+- **Sticky nav does not cover the hero eyebrow at 390px.** Nav bottom 57px, eyebrow top 105px.
+  An element screenshot appears to show an overlap because taking one scrolls the element under
+  the sticky header — an artifact of the method, not a defect. Measure rects at `scrollY === 0`.
+
+---
+
 ## 2026-08-07
 
 ### Confirmed defects (all fixed this session)

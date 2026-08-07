@@ -311,6 +311,45 @@ button { font: inherit; color: inherit; }
 }
 .section-head h2 { font-size: var(--t-2xl); }
 
+/* Buttons — one label per intent, site-wide. These live here rather than in a
+   page's scoped block because they were duplicated in index.astro and 404.astro
+   and had already drifted: the 404 copy was missing white-space: nowrap, so a
+   label could wrap there and nowhere else. Page-scoped rules still own layout
+   (.hero-cta, .nf-cta) and the narrow-width full-bleed override. */
+.btn-primary,
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  padding: var(--s-3) var(--s-6);
+  font-family: var(--f-data);
+  font-size: var(--t-sm);
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background var(--dur-fast) var(--ease),
+              color var(--dur-fast) var(--ease),
+              border-color var(--dur-fast) var(--ease);
+}
+.btn-primary {
+  background: var(--fg);
+  color: var(--bg);
+  border: 1px solid var(--fg);
+}
+.btn-primary:hover {
+  background: var(--accent-solid);
+  border-color: var(--accent-solid);
+  color: var(--bg);
+}
+.btn-ghost {
+  /* --rule-control, not --rule: this border is the button's only boundary. */
+  border: 1px solid var(--rule-control);
+  color: var(--fg);
+}
+.btn-ghost:hover { border-color: var(--fg); color: var(--fg); }
+
 /* ---------- motion ---------- */
 .reveal {
   opacity: 0;
@@ -325,6 +364,9 @@ button { font: inherit; color: inherit; }
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+    /* Zeroing duration alone leaves a delay intact, which is a held pause
+       rather than a shortened animation. The card stagger sets one. */
+    transition-delay: 0s !important;
     scroll-behavior: auto !important;
   }
   .reveal { opacity: 1; transform: none; }

@@ -233,6 +233,14 @@ const itemListLd = {
     gap: var(--s-4);
   }
 
+  /* Every card in a row crosses the observer threshold on the same frame, so
+     the row lands as one slab. Cycling on 3 instead of a running index reads as
+     a left-to-right sweep at three columns and caps the delay at 80ms — short
+     enough to disappear at two columns and one, where the cards already enter
+     separately and a running index would leave the last one visibly late. */
+  .card:nth-child(3n + 2) { transition-delay: 40ms; }
+  .card:nth-child(3n) { transition-delay: 80ms; }
+
   /* 4/3 rather than a wider box because most of these screenshots are square —
      six of the ten sources are 400x400, and cover-cropping those to 16/10 threw
      away over a third of the image, which is what used to slice the Saimon Says
@@ -249,7 +257,11 @@ const itemListLd = {
   }
   .card:hover .shot { border-color: var(--muted); }
 
-  .card-body { display: grid; gap: var(--s-2); align-content: start; }
+  /* Column rather than a grid so the link row can take margin-top: auto. The
+     grid row above already stretches every card in a row to the same height;
+     without the auto margin the links sit wherever the description happens to
+     end, which puts three of them on three different baselines. */
+  .card-body { display: flex; flex-direction: column; gap: var(--s-2); }
 
   .card-tag {
     display: flex;
@@ -283,7 +295,10 @@ const itemListLd = {
     display: flex;
     flex-wrap: wrap;
     gap: var(--s-4);
-    margin-top: var(--s-1);
+    /* auto pins the row to the bottom of the card; the padding keeps the old
+       12px minimum when there is no slack left to absorb. */
+    margin-top: auto;
+    padding-top: var(--s-1);
     font-size: var(--t-sm);
   }
   /* No opacity: --muted is already the quiet step, and knocking it back another

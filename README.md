@@ -229,13 +229,20 @@ visual:
 
 `src/styles/tokens.css` implements them. Change colours there, not in components.
 
-Two rules that are easy to break by accident:
+`.btn-primary` and `.btn-ghost` live in `tokens.css`, not in a page. They used to be defined
+in both `index.astro` and `404.astro` and had already drifted apart.
+
+Three rules that are easy to break by accident:
 
 1. **Uppercase is limited to the wordmark and 11–13px tracked labels.** Caps on headings
    and job titles is the single fastest way to make a page read as machine-generated.
 2. **Amber gets 3–5 placements per screen**, and `--accent-solid` (not `--accent`) is the
    one to use when amber is a *background* — the lighter step doesn't clear 4.5:1 contrast
    behind light text.
+3. **Counting those placements means checking all four amber primitives.** `--accent` and
+   `--accent-solid` are different hex values on light and the same one on dark, so a scan
+   that resolves one theme under-counts. The homepage hero read as zero amber for a while
+   because nobody counted at all.
 
 ### The social cards
 
@@ -311,6 +318,26 @@ browser sees a blank page. Two things opt out:
 There's a third case that isn't a fix but a testing trap: axe reports `color-contrast` as
 *incomplete* on a transparent element, so an accessibility scan of this site passes while
 checking almost nothing unless it forces reduced motion first. `scripts/axe-scan.mjs` does.
+
+**The rule under the hero role line is a background, not a border.** It leads with 4rem of
+amber and then runs ink, which a `border-bottom` can't do — a border takes one colour. That
+makes it the one amber placement above the fold, and it's the reason `index.astro`'s print
+block restates `.hero-role` as a plain border: browsers drop backgrounds when printing, so
+left alone the rule disappears off the paper copy entirely. Same family of bug as the
+`.reveal` one below. `npm run snap` does not catch it — look at `print-shots/print-home.png`.
+
+**The stack strip has no separator characters.** `.stack-items` used to set a `·` on every
+item but the last, so a wrapped line would never *open* with an orphaned dot. It never did —
+it ended with one instead, on both Platforms and Tools at 1280px. A dot that can orphan on
+either side is a dot the layout can't place, so it's gone and 24px of column gap does the
+separating. The leading-dot alternative was rendered before choosing; see `decisions.md`.
+
+**Project cards stagger on a cycle of three.** `.card:nth-child(3n + 2)` and `:nth-child(3n)`
+carry 40ms and 80ms of `transition-delay`, which looks like it hard-codes a three-column grid.
+It doesn't — the grid is `auto-fill` and no CSS can know the real column count. Cycling caps
+the worst-case delay at 80ms, where a running index would leave the last card stalling 280ms
+in a single-column layout. Note `tokens.css` has to zero `transition-delay` under
+`prefers-reduced-motion` as well as duration; zeroing duration alone leaves the pause.
 
 **There is a print stylesheet, and it is load-bearing.** Same root cause: without the
 `@media print` block in `tokens.css` anyone who hit Cmd-P before scrolling got a page with
