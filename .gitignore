@@ -14,3 +14,13 @@ node_modules/
 
 # playwright-mcp scratch output
 .playwright-mcp/
+
+# lychee writes its report here when the link check runs
+lychee/
+
+# Lighthouse CI report output, if .lighthouserc.yml is ever run locally
+.lighthouseci/
+
+# Local Claude Code permissions. Already covered by the global ignore on this
+# machine; repeated here so the repo doesn't depend on that.
+.claude/settings.local.json

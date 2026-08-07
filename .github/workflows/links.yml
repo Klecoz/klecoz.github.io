@@ -1,0 +1,128 @@
+name: Link check
+
+# Outbound links rot silently. A university reorganises a Drupal file path, a
+# news article gets re-slugged, a 2016 game repo goes private — nothing on this
+# side changes, so nothing else would ever notice. There are 22 external URLs
+# across the two pages and one of them is a citation backing a claim about a
+# conference talk.
+#
+# Weekly, because these URLs change on a scale of months: daily would be seven
+# times the runs for the same signal and seven times the chance of catching a
+# transient 5xx. :17 rather than :00 because GitHub queues scheduled runs in a
+# burst on the hour and delays them.
+#
+# Note that GitHub disables scheduled workflows in a repository with no commits
+# for 60 days. If this ever goes quiet, check that first — silence from this job
+# is not the same as "no rot".
+on:
+  schedule:
+    - cron: '17 13 * * 1'
+  workflow_dispatch:
+
+# issues: write is only to file the report. This workflow publishes nothing and
+# deliberately has no pages or id-token permission.
+permissions:
+  contents: read
+  issues: write
+
+# Explicitly NOT `pages`. That group serialises publishing, which is a real
+# shared resource; a link check shares nothing with it, and joining it would let
+# this queue in front of — or cancel — a deploy.
+concurrency:
+  group: link-check
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      # Check the built HTML rather than src/. The links that matter are the
+      # ones that actually ship, and most of them come out of content
+      # collections rather than being literals in a page.
+      - run: npm run build
+
+      - name: Check outbound links
+        id: lychee
+        uses: lycheeverse/lychee-action@v2
+        with:
+          # --scheme https/http drops relative and file links. Internal routing
+          #   is already proven by the build, and `/side-projects` resolves to a
+          #   directory on disk, which is a false failure waiting to happen.
+          # --github-token (via `token` below) sends the eleven github.com links
+          #   through the API instead of scraping HTML. That is rate-limit-proof
+          #   from an Actions IP and, more usefully, tells "repo went private"
+          #   apart from "GitHub throttled us".
+          # --accept 429: a 429 means the host answered and throttled us. That
+          #   is not link rot, and calling it a failure is the main way these
+          #   jobs start crying wolf. 403 is deliberately NOT accepted globally
+          #   — the one host that always 403s is named in .lycheeignore instead,
+          #   so a real 403 anywhere else still fails.
+          # --max-concurrency 4: ten of these URLs share one itch.io host.
+          # --timeout 30: the Buffalo State link is a 12MB PDF behind a slow WAF.
+          # Fragments are not checked (lychee's default). `#page=39` on the PDF
+          #   is a viewer directive, and the #projects / #games hashes are
+          #   handled by a script at runtime — none of them exist in the HTML.
+          args: >-
+            --no-progress
+            --scheme https
+            --scheme http
+            --max-concurrency 4
+            --max-retries 3
+            --retry-wait-time 5
+            --timeout 30
+            --accept '200..=299,429'
+            --user-agent 'Mozilla/5.0 (compatible; arseniocolon.com link check; +https://arseniocolon.com)'
+            'dist/**/*.html'
+          # Never fails the run — see the next step for why.
+          fail: false
+          jobSummary: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      # The report is an issue, not a red X.
+      #
+      # A scheduled job that fails and stays failing turns the Actions tab red
+      # for weeks, and the Actions tab is where the deploy lives — the one red X
+      # that must never become background noise. An issue persists, holds the
+      # actual URL, shows on the repo homepage, and can be closed.
+      #
+      # One issue, re-commented rather than duplicated, so a link that stays
+      # broken for a month produces one thread instead of four.
+      - name: File or update the link-rot issue
+        if: steps.lychee.outputs.exit_code != 0
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          body=lychee/out.md
+          test -f "$body" || { echo "Link check failed but wrote no report."; body=/dev/null; }
+          gh label create link-rot --color d93f0b \
+            --description 'An outbound link stopped resolving' --force
+          existing=$(gh issue list --state open --label link-rot --limit 1 --json number --jq '.[0].number // empty')
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --body-file "$body"
+            echo "Still broken — commented on #$existing."
+          else
+            gh issue create \
+              --title 'Link check: an outbound link stopped resolving' \
+              --label link-rot \
+              --body-file "$body"
+          fi
+
+      # Closes the loop, so a fixed link doesn't leave a stale issue open.
+      - name: Close the link-rot issue if everything resolved
+        if: steps.lychee.outputs.exit_code == 0
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          existing=$(gh issue list --state open --label link-rot --limit 1 --json number --jq '.[0].number // empty')
+          if [ -n "$existing" ]; then
+            gh issue close "$existing" --comment 'All outbound links resolve again.'
+          fi

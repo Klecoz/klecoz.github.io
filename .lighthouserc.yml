@@ -1,0 +1,112 @@
+# Thresholds for the Lighthouse run in .github/workflows/audit.yml.
+#
+# The governing rule: hard-assert only what is deterministic on a shared runner.
+# Performance scores swing five to ten points on GitHub-hosted runners from CPU
+# contention alone, so scores are advisory and BYTES are what gate. Bytes don't
+# move with runner load, and this site's performance story is a byte story
+# anyway — inlined CSS, self-hosted fonts, a 363KB PNG that ships as ~15KB of
+# WebP.
+
+ci:
+  collect:
+    staticDistDir: ./dist
+
+    # Explicit, not auto-discovered. Globbing dist/**/*.html would also pick up
+    # dist/games/index.html and dist/projects/index.html — the ~335-byte
+    # meta-refresh stubs that rescue old v1 URLs. They have no <html lang> and
+    # no viewport, so accessibility would fail on the first run for something
+    # that isn't a defect. LHCI rewrites the origin to whatever port it starts
+    # on; only the paths below matter.
+    url:
+      - http://localhost/index.html
+      - http://localhost/side-projects/index.html
+
+    numberOfRuns: 3
+
+    settings:
+      # The GoatCounter tag is protocol-relative (//gc.zgo.at/count.js), so on
+      # an http localhost it becomes a real network request whose latency we
+      # don't control. Blocked because CI should not fail on a third party's
+      # slow day, and because the budgets below are meant to measure our bytes.
+      # Costs about 3KB of difference from a production run.
+      blockedUrlPatterns:
+        - '*gc.zgo.at*'
+
+  assert:
+    # Median of the three runs, not the optimistic one. Optimistic would hide a
+    # real regression behind one lucky pass.
+    aggregationMethod: median-run
+
+    assertions:
+      # --- Deterministic. These gate. ------------------------------------
+      # Axe-based, no timing dependence. Verified clean locally across both
+      # pages, the 404, and both themes via `npm run axe` before this was set
+      # to error — so a failure here is a regression, not a starting condition.
+      categories:accessibility: ['error', { minScore: 1 }]
+
+      # The stable half of SEO, asserted individually rather than through the
+      # category, because the category also contains `canonical`, which objects
+      # to a page served from localhost canonicalising to arseniocolon.com — a
+      # property of the harness, not of the page.
+      document-title: 'error'
+      meta-description: 'error'
+      http-status-code: 'error'
+      is-crawlable: 'error'
+      crawlable-anchors: 'error'
+      link-text: 'error'
+
+      # Catches a PNG dropped into public/ instead of src/assets/, which is the
+      # mistake the README explicitly warns about.
+      modern-image-formats: 'error'
+      uses-responsive-images: 'error'
+
+      # --- The real performance guard: bytes, not scores. ----------------
+      # Measured 2026-08-07 against a local preview, fully scrolled so every
+      # lazy image commits: /side-projects is the heavier page at ~194KB total
+      # (134KB images, 52KB fonts, 8KB document). 350KB leaves room for mobile
+      # emulation picking different srcset candidates than a desktop viewport
+      # does. Tighten toward observed-median + 25% once a few runs have logged
+      # real CI numbers.
+      total-byte-weight: ['error', { maxNumericValue: 350000 }]
+
+      # Seven self-hosted faces, latin subset, 104KB on disk — a page loads the
+      # five it uses, about 52KB. This ceiling catches an eighth face or a
+      # Google Fonts link, not normal variation.
+      resource-summary:font:size: ['error', { maxNumericValue: 120000 }]
+
+      # The site ships a couple of KB of inline JS and no chunks at all. This
+      # catches someone adding a framework island to a page that never needed
+      # one — which would also silently disable the asset prune, since that
+      # bails out when it sees a JS chunk (scripts/prune-assets.mjs).
+      resource-summary:script:size: ['error', { maxNumericValue: 25000 }]
+
+      # "No third-party request at runtime" is a stated design property; the one
+      # exception is GoatCounter, blocked above. Set to 1 rather than 0 because
+      # a blocked request may still be counted, and the difference between 0 and
+      # 1 here isn't worth a false failure. Anything genuinely new makes it 2.
+      resource-summary:third-party:count: ['error', { maxNumericValue: 1 }]
+
+      # --- Advisory. These print a number; they do not gate. --------------
+      # Runner noise makes a hard performance assertion a false-alarm machine.
+      # The deterministic half of performance is the byte budget above.
+      categories:performance: ['warn', { minScore: 0.9 }]
+
+      # Advisory for the `canonical` reason above; the sub-audits gate instead.
+      categories:seo: ['warn', { minScore: 1 }]
+
+      # The README records that this sits at 81 on localhost purely because it
+      # isn't HTTPS. 0.8 is the floor just below that known baseline, so a
+      # genuinely new best-practices regression still shows.
+      categories:best-practices: ['warn', { minScore: 0.8 }]
+
+      # --- Off, with reasons. ---------------------------------------------
+      # blockedUrlPatterns above produces ERR_BLOCKED_BY_CLIENT, which this
+      # audit would report as a console error on every single run.
+      errors-in-console: 'off'
+      # Objects to a localhost page canonicalising to the production domain.
+      canonical: 'off'
+      # LHCI's static server sets no cache headers. GitHub Pages does.
+      uses-long-cache-ttl: 'off'
+      # Stylesheets are inlined site-wide, so each page carries rules it does
+      # not use. That is the documented trade, not a regression.
+      unused-css-rules: 'off'

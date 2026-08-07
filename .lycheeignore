@@ -1,0 +1,24 @@
+# Hosts a link checker cannot get an honest answer from. These are excluded so
+# the weekly report stays worth reading — not because the links don't matter.
+#
+# Every entry below was probed on 2026-08-07 with a normal browser user-agent
+# from a residential IP, which is the friendliest case a checker ever gets. An
+# Actions runner does strictly worse: it comes from an Azure datacenter range.
+
+# LinkedIn returns 999 — their own non-standard block code — to anything that
+# isn't a signed-in browser, and hard-blocks datacenter ranges. Measured:
+#   /in/arsenio-colon/  -> 999
+#   the recommendation permalink -> 200 from residential, unreliable from CI
+# No user-agent fixes this. Both links get checked by hand when the bio or the
+# Community section changes.
+^https://www\.linkedin\.com/
+
+# WGRZ (TEGNA) sits behind bot protection. Measured: 403. This is the press
+# citation, so it is the one exclusion that genuinely costs something — if the
+# article ever moves, nothing here will notice. Worth re-probing by hand
+# occasionally rather than trusting silence.
+^https://www\.wgrz\.com/
+
+# Protocol-relative in Base.astro: //gc.zgo.at/count.js. Resolved against a
+# local file it isn't a URL at all, so it can only ever be a false failure.
+gc\.zgo\.at

@@ -1,0 +1,51 @@
+name: PR checks
+
+# Everything deploy.yml does before it starts touching Pages, run on the branch
+# instead of after the merge. Until this existed a pull request got no checks at
+# all — the only trigger anywhere was push-to-master.
+#
+# Deliberately does not build a Pages artifact and has no `pages` or `id-token`
+# permission: a pull request must not be able to publish, including one opened
+# from a fork.
+on:
+  pull_request:
+    branches: [master]
+
+permissions:
+  contents: read
+
+# Explicitly NOT `pages`. That group exists to serialise publishing, which is a
+# genuinely exclusive resource — two deploy-pages calls cannot safely overlap. A
+# PR build mutates nothing, so it has no business in that group, and joining it
+# would let a draft PR queue in front of a deploy or cancel one mid-publish.
+#
+# This group is per-branch, and unlike the deploy it DOES cancel in progress.
+# That is the opposite policy on purpose: only the newest commit on a PR is
+# worth building, and there is no half-finished publish to protect.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      # check before build so a type error fails in seconds rather than after a
+      # full build. Same order deploy.yml uses.
+      - run: npm run check
+
+      - run: npm run build
+
+      # deploy.yml asserts this too, but by then the change has already merged.
+      # Deleting public/CNAME is exactly the kind of thing that arrives in a pull
+      # request, so the assertion belongs here as well.
+      - run: bash scripts/assert-cname.sh

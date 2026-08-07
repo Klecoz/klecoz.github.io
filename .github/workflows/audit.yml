@@ -1,0 +1,78 @@
+name: Audit
+
+# Guards the claim in the README that both pages score 100 on accessibility and
+# SEO, and that page weight stays where the design decisions put it. Until now
+# nothing did.
+#
+# Runs on pull requests and on master. Master matters because `npm run deploy`
+# pushes straight to master — most changes here never see a pull request, so a
+# PR-only audit would guard almost nothing. On master this is detection rather
+# than prevention, which is the right trade: knowing in two minutes beats
+# knowing at the next manual Lighthouse run, whenever that happens to be.
+#
+# Deliberately a separate file from deploy.yml. A score must never be able to
+# block publishing, and this is the workflow most likely to be deleted if it
+# ever starts crying wolf — that should cost one file, not the deploy.
+on:
+  pull_request:
+    branches: [master]
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Same reasoning as pr.yml: not `pages`, and cancel-in-progress because only the
+# newest commit is worth auditing. The `github.workflow` prefix is what keeps
+# this group distinct from pr.yml's despite the identical `github.ref`.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm run build
+
+      # Lighthouse CI serves dist itself (staticDistDir in .lighthouserc.yml),
+      # so there is no server to start, no port to wait on, and nothing left
+      # running for the next step to trip over.
+      - name: Lighthouse
+        uses: treosh/lighthouse-ci-action@v12
+        with:
+          configPath: ./.lighthouserc.yml
+          # Reports land on the run as a private artifact. Deliberately NOT
+          # temporaryPublicStorage, which publishes every report to a public
+          # Google-hosted URL that then expires.
+          uploadArtifacts: true
+          temporaryPublicStorage: false
+
+      # axe covers the one thing Lighthouse structurally cannot: the dark theme.
+      # Lighthouse only ever measures the default colour scheme, and the token
+      # spine has a documented contrast trap (--accent vs --accent-solid), so
+      # dark-mode contrast is exactly where a regression would hide.
+      #
+      # Server, readiness poll and scan in one step on purpose: a process
+      # backgrounded in an earlier step outlives the shell that started it, and
+      # nothing would be left to kill it.
+      - name: axe — both pages, both themes
+        run: |
+          npm run preview -- --host 127.0.0.1 --port 4321 &
+          server=$!
+          trap 'kill $server 2>/dev/null || true' EXIT
+          for _ in $(seq 1 30); do
+            curl -sf http://127.0.0.1:4321/ >/dev/null && break
+            sleep 1
+          done
+          npm run axe
