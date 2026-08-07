@@ -8,6 +8,65 @@ which is the part that saves the most time.
 
 ---
 
+## 2026-08-07 — fourth session: provenance of the community and EquityOne claims
+
+Prompted by "where does the *Tech Talks and Tech Academy mentoring* claim come from?". Traced
+with `git log -S`, not by reasoning about it.
+
+### The claim is Arsenio's own writing, carried over from v1
+
+`git log -S "Tech Academy"` returns exactly two commits: `cbb9298` ("Update portfolio site",
+authored by Arsenio) and `3b2ee92` (the Astro rebuild). In `cbb9298` it is one bullet under the
+M&T job in `index.html:620`:
+
+> Volunteered for Cybersecurity Champions and Touchdown for Teachers programs, presenting Tech
+> Talks and mentoring through internal Tech Academy workshops.
+
+The rebuild split that single bullet into two Community entries. Two things changed in the
+split, neither recorded at the time:
+
+- **`Cybersecurity Champions` was dropped** and stays dropped — Arsenio deleted it deliberately
+  when v2 shipped. Do not restore it. See `decisions.md`.
+- **`Tech Talks and Tech Academy mentoring` is the only Community entry with no `href`, `quote`
+  or `cite`.** Buffalo Game Space carries the WGRZ quote, Touchdown for Teachers carries the
+  LinkedIn cite. These are internal M&T programs, so there may be nothing public to point at —
+  no web search was run, only the repo.
+
+### EquityOne was already on the site
+
+`git log -S "EquityOne"` gives the same two commits. It had survived the rebuild as the third
+bullet of `src/content/experience/4-mtb.md`, reworded to "Picked for EquityOne, M&T's
+sponsorship program for high-potential internal leaders." The question assumed it was missing;
+it was not. It has since been replaced with Arsenio's fuller wording — see `decisions.md`.
+
+### Markdown quotes are curled at build, not in source
+
+Content markdown uses straight `'` and `"` throughout; `src/pages/index.astro` uses curly
+characters directly. Both are correct: Astro's default SmartyPants runs over markdown bodies
+only. Confirmed by grepping the built output — `M&amp;T's` in source renders as `M&amp;T’s` in
+`dist/index.html`, and `"EquityOne"` renders as `“EquityOne”`. Write straight quotes in
+`src/content/`, curly ones in `.astro`.
+
+### The longer bullet renders clean, with one unavoidable widow
+
+Screenshotted against the preview server at 1280px and 390px with the reveals forced in. Three
+lines on desktop, six on mobile. `text-wrap: pretty` **is** applied to the bullet (computed
+style read in Chrome, not assumed) and still leaves the single word "development." on the last
+mobile line — `pretty` only reflows the tail of a paragraph and cannot fix a six-line one
+without hyphenation. Not a regression, and not worth editing his copy over.
+
+### Gates after the change
+
+| Gate | Result |
+|---|---|
+| `npm run check` | 0 errors, 0 warnings, 0 hints |
+| `npm run build` | `dist` 632 KB; prune removed 10 assets (1318 KB) |
+| `npm run axe` | 12 scans, no WCAG A/AA violations |
+| `npm run snap` | 2 pages, print stylesheet intact |
+| `scripts/assert-cname.sh` | ok — `arseniocolon.com` |
+
+---
+
 ## 2026-08-07 — mobile theme-toggle centring
 
 Prompted by "the dark/light/system toggle icon on mobile is off centre". It was. Measured

@@ -7,6 +7,42 @@ Decisions Arsenio made himself are marked **[AC]**. Those don't get revisited wi
 
 ---
 
+## 2026-08-07 — the EquityOne line
+
+### It stays in the M&T timeline entry; it does not move to Community — **[AC]**
+
+Arsenio supplied fuller wording for the EquityOne bullet and asked whether it belonged under
+Community. It does not, and the reason is what Community is *for*.
+
+| Option | Verdict |
+|---|---|
+| Expand the existing M&T timeline bullet | **chosen** |
+| Move it to Community as a fourth entry | rejected — Community is service *to others*: the Buffalo Game Space board seat, mentoring engineers, getting supplies into classrooms. EquityOne is something he was selected *for*. Mixing recognition into that list makes the section stop meaning one thing. |
+| Both places | rejected — reads as double-counting, and the two "mentoring"s are opposites: in EquityOne he was mentored; in Tech Academy he mentored. |
+
+### The racial-equity framing stays off the site — **[AC]**
+
+Arsenio also supplied context that EquityOne is a two-year, enterprise-wide initiative launched
+in fall 2020 to raise representation of Black, Brown and Latinx employees in senior leadership.
+Offered as an explicit framing option and declined; the bullet keeps "high-potential internal
+leaders".
+
+Worth asking rather than assuming, for two reasons: it discloses something about him the site
+says nowhere else, and it is the kind of claim that would need a public source — every other
+substantiated line on that page has one.
+
+A middle option (programme scale — two-year, enterprise-wide — without the demographics) was
+offered and also rejected: it adds facts without adding meaning.
+
+### The wording is his, restored verbatim
+
+The 2026 rebuild had paraphrased his v1 sentence into "Picked for EquityOne, M&T's sponsorship
+program for high-potential internal leaders." His supplied sentence now stands unedited, in
+straight quotes so SmartyPants curls them at build. This is the standing copy rule applied to a
+timeline bullet rather than to the bio — the rule is not scoped to the two prose blocks.
+
+---
+
 ## 2026-08-07 — visual polish pass
 
 ### Hero accent: the rule under the role line leads in amber — **[AC]**
@@ -378,6 +414,7 @@ was permanent or an unfilled gap, Arsenio said permanent. Not to be raised again
 | Pixel-diff baselines for the print check | See above — platform font rasterisation makes the threshold either useless or hostile. |
 | Testing the "legible in eight seconds" claim | **[AC]** It's a design intent, not an assertion. Treating it as testable over-formalises a two-page site. |
 | Verifying the analytics tag fires | Superseded, and the reason is instructive: this was declined as unnecessary, then the tag turned out to be pointing at a site that returns 400. Finding 9 in `findings.md`. |
+| Restoring `Cybersecurity Champions` to Community | **[AC]** Not an oversight of the rebuild — he cut it deliberately. Surfaced once on 2026-08-07 and declined. |
 | An inbound-link audit (LinkedIn, GitHub profiles) | **[AC]** Already handled by Arsenio when v2 shipped. |
 | Search Console verification and sitemap submission | **[AC]** Scoped to a read-only indexing check. Submission needs his Google login. |
 
