@@ -19,7 +19,7 @@ the build — so anything it reports is a real regression, not pre-existing nois
 ## How deploys work
 
 ```bash
-npm run deploy      # push + start the build
+npm run deploy      # push, then confirm a run actually started
 gh run watch        # follow it (~50s)
 ```
 
@@ -28,13 +28,19 @@ from a dirty tree or a non-master branch, and it confirms a run actually started
 leaving you to notice later that nothing happened.
 
 ```
+scripts/deploy.sh  ← npm run deploy
+   ├─ refuse a dirty tree or a non-master branch
+   ├─ git push origin master
+   └─ wait for the push-triggered run; dispatch only if none appears
+
 .github/workflows/deploy.yml
+   ├─ assert github.sha == tip of master  ← refuses to publish a stale commit
    ├─ npm ci
-   ├─ npm run check           ← typecheck; fails the build on a real regression
-   ├─ npm run build           → dist/
-   ├─ assert dist/CNAME       ← fails the build if the domain would break
+   ├─ npm run check                       ← typecheck; fails on a real regression
+   ├─ npm run build                       → dist/
+   ├─ assert dist/CNAME                   ← fails if the domain would break
    ├─ upload-pages-artifact
-   └─ deploy-pages            → https://arseniocolon.com
+   └─ deploy-pages                        → https://arseniocolon.com
 ```
 
 Also visible at **Actions → Deploy to GitHub Pages**.
@@ -46,9 +52,8 @@ which is why `npm run deploy` used to dispatch explicitly. They started working 
 same evening — first push-triggered run was `e64e788` at 22:19 UTC on 2026-08-06 — with no
 change on this side. Every commit since has produced one.
 
-`npm run deploy` no longer dispatches blindly. It pushes, waits for the push-triggered run
-to appear, and only dispatches if none shows up within 30s. See
-[the race below](#the-stale-deploy-race) for why blind dispatching was dangerous.
+The dispatch is now a fallback rather than the default, because doing it unconditionally
+turned out to be [actively dangerous](#the-stale-deploy-race).
 
 The original diagnosis is kept because the failure could recur. What was ruled out:
 
@@ -247,7 +252,7 @@ pointing at LinkedIn.
 the server, so this can't be a redirect — it's a small inline script in `src/pages/index.astro`.
 The `/games` and `/projects` *paths* are handled properly in `astro.config.mjs`.
 
-**Stylesheets are inlined** (`inlineStylesheets: 'always'`). About 20 KB, which buys back
+**Stylesheets are inlined** (`inlineStylesheets: 'always'`). About 22 KB, which buys back
 two render-blocking round trips and means fonts start loading during the first parse. That's
 also why there are no `<link rel="preload">` font hints — they'd be redundant and Chrome
 would warn about them.
@@ -262,6 +267,17 @@ light tokens, drops the nav and the CTAs, restates the amber `Current` chip as a
 (backgrounds don't print), and suppresses the citation URLs, which run past 100 characters.
 The brief rules out a resume PDF; this is the paper copy instead.
 
+**There are `&nbsp;` entities scattered through the content Markdown**, and one literal
+U+00A0 inside `'.NET 10'` in `index.astro`. They are deliberate. Body prose gets
+`text-wrap: pretty` in `tokens.css`, which stops a sentence ending with one word stranded
+on its own line — but Firefox doesn't support it, so the non-breaking spaces hold together
+the pairs that read wrong when split on any engine: `Meta Quest 2`, `M&T Bank`,
+`2,000 transactions`, `HTC Vive`, `Game Jam 2020`, the `·` separators, and the timeline
+dates (bound by a `bind()` helper in `Timeline.astro` rather than by editing frontmatter).
+Headings deliberately keep `text-wrap: balance` instead; the two are competing values and
+`balance` measures better on two or three short lines. When adding copy, a plain space is
+fine — `pretty` handles ordinary widows on its own.
+
 **The sitemap is generated**, by `@astrojs/sitemap`. `public/sitemap.xml` used to be
 hand-written with a frozen `lastmod` and was deleted. `robots.txt` points at
 `/sitemap-index.xml`. A `serialize` hook strips the trailing slash so the sitemap and the
@@ -275,8 +291,9 @@ Both pages score 100 on Lighthouse performance, accessibility and SEO. Worth re-
 after any significant change:
 
 ```bash
-npm run build && npm run preview          # then, in another shell:
-npx lighthouse http://localhost:4321/ --view
+npm run build
+npx astro preview --background            # `npm run preview` runs in the foreground,
+npx lighthouse http://localhost:4321/ --view   # which `preview stop` can't reach
 npx astro preview stop
 ```
 
