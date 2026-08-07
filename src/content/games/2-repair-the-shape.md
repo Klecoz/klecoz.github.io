@@ -12,4 +12,4 @@ links:
     href: https://github.com/Klecoz/Global-Game-Jam-2020
 ---
 
-Use your hands to repair the shape. That's the whole game. Built for Oculus Quest during Global Game Jam 2020.
+Use your hands to repair the shape. That's the whole game. Built for Oculus&nbsp;Quest during Global Game Jam&nbsp;2020.

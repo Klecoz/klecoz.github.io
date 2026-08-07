@@ -11,5 +11,5 @@ startISO: 2019-09
 endISO: 2020-02
 ---
 
-- Built AR/VR training modules for the U.S. Navy in Unity and C# with the XR Toolkit, putting instructional overlays on real equipment through object recognition on Microsoft HoloLens and HTC Vive.
+- Built AR/VR training modules for the U.S. Navy in Unity and C# with the XR Toolkit, putting instructional overlays on real equipment through object recognition on Microsoft&nbsp;HoloLens and HTC&nbsp;Vive.
 - Planned and estimated work in Atlassian tools alongside a cross-disciplinary team.

@@ -188,6 +188,16 @@ h1, h2, h3, h4 {
   margin: 0;
 }
 
+/* Headings balance; running prose gets `pretty`, which pulls a word down rather
+   than stranding one alone on the last line. Kept separate from the heading rule
+   because the two are competing values of `text-wrap-style` — `balance` reads
+   better on two or three short lines, `pretty` on a paragraph. Firefox has
+   `balance` but not `pretty`, so prose wraps plainly there; that's why the copy
+   also carries non-breaking spaces on the pairs that must never split. */
+p, li, blockquote, figcaption, dd {
+  text-wrap: pretty;
+}
+
 p { margin: 0; }
 ul { margin: 0; padding: 0; list-style: none; }
 

@@ -5,7 +5,10 @@ import EmailReveal from '../components/EmailReveal.astro';
 
 const stack = [
   { group: 'Languages', items: ['C#', 'SQL', 'JavaScript', 'C'] },
-  { group: 'Platforms', items: ['.NET 10', 'ASP.NET Core', 'Azure', 'Kubernetes', 'IIS'] },
+  // '.NET 10' holds a literal U+00A0 between the two halves, so the version
+  // never wraps away from the platform. Chips render through an expression,
+  // which escapes HTML, so a &nbsp; entity would print as text here.
+  { group: 'Platforms', items: ['.NET 10', 'ASP.NET Core', 'Azure', 'Kubernetes', 'IIS'] },
   { group: 'Tools', items: ['Azure DevOps', 'Datadog', 'Git', 'Claude Code', 'Unity'] },
 ];
 
@@ -71,7 +74,9 @@ const community: CommunityEntry[] = [
     <div class="wrap">
       <p class="label">Buffalo, NY</p>
       <h1 class="hero-name">Arsenio<br />Colón</h1>
-      <p class="hero-role">.NET Engineer · Full Stack</p>
+      {/* The middot binds to the word before it, same rule as .stack-items: a
+          wrapped line must never open with a separator. */}
+      <p class="hero-role">.NET Engineer&nbsp;· Full Stack</p>
 
       <div class="hero-grid">
         <div class="hero-bio">
@@ -131,7 +136,7 @@ const community: CommunityEntry[] = [
           nesting the two would stagger the same content twice. */}
       <div class="section-head reveal">
         <h2>Work</h2>
-        <p class="label">Six roles · 2018 to now</p>
+        <p class="label">Six roles&nbsp;· 2018 to now</p>
       </div>
       <Timeline />
     </div>
@@ -159,7 +164,7 @@ const community: CommunityEntry[] = [
               class="cite"
               href="https://undergraduateresearch.buffalostate.edu/sites/undergraduateresearch/files/documents/SRCC2017program.pdf#page=39"
             >
-              Buffalo State SRCC 2017 <span class="weight">· PDF 12MB</span>
+              Buffalo State SRCC&nbsp;2017 <span class="weight">·&nbsp;PDF&nbsp;12MB</span>
             </a>
           </li>
         </ul>

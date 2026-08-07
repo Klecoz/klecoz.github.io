@@ -11,6 +11,10 @@ const rendered = await Promise.all(
     Content: (await render(entry)).Content,
   }))
 );
+
+/** Keeps "Mar 2026" whole in the 8rem date rail, rather than editing six
+ *  frontmatter blocks to carry an invisible character. */
+const bind = (s: string) => s.replace(/ /g, ' ');
 ---
 
 <ol class="rail">
@@ -18,9 +22,9 @@ const rendered = await Promise.all(
     rendered.map(({ data, Content }) => (
       <li class="role reveal" data-current={data.current ? '' : undefined}>
         <div class="when mono">
-          <time datetime={data.startISO}>{data.start}</time>
+          <time datetime={data.startISO}>{bind(data.start)}</time>
           <span class="when-end">
-            {data.endISO ? <time datetime={data.endISO}>{data.end}</time> : data.end}
+            {data.endISO ? <time datetime={data.endISO}>{bind(data.end)}</time> : data.end}
           </span>
         </div>
 
