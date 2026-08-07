@@ -163,8 +163,15 @@ himself and seeing no hit is *not* evidence the tag is broken — which is exact
 conclusion to draw twice about the same feature. Verify from a different browser, or look for the
 `/deploy-verify` hit fired by hand during this session.
 
-The site-side facts are all confirmed. What remains is only reading the dashboard, which needs
-Arsenio's login.
+**Dashboard confirmed 2026-08-07.** The `/deploy-verify` hit is on `klecoz.goatcounter.com`, and
+the account's total for 2026-07-31 → 2026-08-07 is **1 visit** — that one. Independent
+confirmation of finding 9 from the other end: the site was live for a day and recorded nothing.
+
+One link is still unproven and should not be written up as though it were. That hit was fired by
+`curl` straight at `/count`, so what is verified is the account and the endpoint. The *script*
+path — `count.js` executing in a browser and calling `/count` itself — could not be exercised
+from here, because the only browser available blocks it (above). The first real visitor settles
+it; so does loading the site from a phone.
 
 ### WCAG 2.2 — measured, all four pass
 
