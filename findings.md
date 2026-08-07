@@ -126,6 +126,113 @@ to `/side-projects/`. That briefly looked like a missing deploy.
 
 ---
 
+## 2026-08-07 — second session
+
+### Confirmed defect
+
+| # | Finding | Evidence | Status |
+|---|---|---|---|
+| 9 | **The analytics tag posted to a GoatCounter site that does not exist.** Every pageview since the v2 launch was dropped | `Base.astro:176` read `arseniocolon.goatcounter.com/count`. `curl` to that host returns **400**; the real account, `klecoz.goatcounter.com`, returns **303** to login. Arsenio supplied the correct snippet — it was never going to be visible from inside the repo | fixed → `klecoz` |
+
+This is the sharpest example so far of why this file exists. The bug was invisible to every check
+the repo runs: `astro check` passes, the markup is valid, the byte budget is unaffected, and both
+CI blocks match `gc.zgo.at` (the *script* host, which was always correct) rather than the account.
+From the dashboard it is indistinguishable from a new site nobody has visited yet. Nothing short
+of resolving the host would have caught it.
+
+**Still unverified end to end:** a real hit landing on the `klecoz` dashboard. That needs a deploy
+plus Arsenio's login. Verified so far: the correct host reaches the built HTML, and the host
+answers 303 rather than 400.
+
+### WCAG 2.2 — measured, all four pass
+
+Method: `scripts/axe-scan.mjs` for the automated rules, plus one-off Playwright scripts driving
+real keyboard focus and geometry. Preview server on `127.0.0.1:4321` against a fresh `dist`.
+
+- **SC 2.4.11 Focus Not Obscured (Minimum) — pass.** Tabbed every focusable on both pages at
+  1280, 390 and 320px and compared each focused element's rect against the sticky nav's. **Zero
+  entirely covered.** The first pass flagged the skip link at 90% overlap, which is a **false
+  positive**: it compares geometry and ignores stacking. `.skip` is `z-index: 100` against the
+  nav's `20`, so it paints on top. Confirmed two ways — `document.elementFromPoint` at three
+  corners returns the skip link itself, and a screenshot shows it fully legible with its focus
+  ring. Geometry alone is not enough to judge this criterion.
+- **SC 2.5.8 Target Size (Minimum) — pass, via the spacing exception.** 18 of 24 targets on
+  `/side-projects` are under 24px (the `itch.io` / `Source` pairs are 56×17 and 48×17). They
+  qualify because a 24px-diameter circle on each touches nothing: the tightest pair is **60px**
+  centre to centre, and most are 68px. Checked at desktop and 390px. Naive size-only checking
+  reports this page as 18 failures; it is not.
+- **Mobile viewport — clean.** `axe-scan.mjs` gained a width axis (390×844 alongside 1280×720),
+  taking it from 6 scans to **12**. All 12 clean, so no reflow or contrast rule fails at narrow
+  width that passes at wide. A "found already correct" result: the responsive work holds up.
+- **`forced-colors: active` — pass, both themes, both pages.** Text legible, links keep their
+  affordance, the theme toggle and buttons keep visible boundaries. The date rail loses its amber
+  (expected — forced-colors overrides author backgrounds), but the information it encodes is not
+  rail-only: the current role is still tagged `CURRENT` in text, so nothing is conveyed by the
+  removed decoration alone.
+
+### The print check is automated now
+
+`scripts/snap.mjs` (`npm run snap`) replaces the manual Cmd-P step, wired into `audit.yml`.
+
+**It deliberately does not diff pixels.** macOS and `ubuntu-latest` disagree on font
+rasterisation, so a baseline gate would need a threshold wide enough to hide real regressions.
+Every failure mode the print block actually has is a computed-style question, and those are
+identical on both platforms. The renders are still uploaded, as artifacts to look at.
+
+Validated the way the axe `incomplete` trap was: the print rule at `tokens.css:379` was deleted
+on purpose, and the check went red (9/11 and 7/10 `.reveal` still transparent). Restored, green.
+
+Two traps found while writing it, both worth knowing before touching this file:
+
+- The script must **not** set `reducedMotion: 'reduce'` — the opposite of `axe-scan.mjs`.
+  `Base.astro` reveals every `.reveal` immediately under reduced motion, which is precisely the
+  state that hides the bug. Loading with motion live and never scrolling is what reproduces a
+  cold Cmd-P.
+- `emulateMedia({ media: 'print' })` *starts the 280ms opacity transition* rather than jumping,
+  so reading `getComputedStyle` immediately reports mid-flight values and every element looks
+  like a regression. Worse, `--dur-slow` is authored as `280ms` but Chrome hands it back as
+  `.28s`; a bare `parseFloat` waits 0.56 **milliseconds** and the whole suite fails for a reason
+  unrelated to printing.
+
+### Corrections to claims made earlier in this file
+
+- **"44px touch targets" was too broad.** Measured: only `.btn-primary` / `.btn-ghost` reach 44
+  (`min-height: 2.75rem`). The wordmark is 28px, the theme toggle **32×32**, contact links 27px,
+  and inline citation links 14–21px. Nothing is a defect — everything clears SC 2.5.8 by size or
+  spacing, as above — but the blanket claim was not accurate and would mislead the next audit.
+- **`--rule-control`'s documented grounds were mislabelled.** `.ui-craft/tokens.md` gave 3.14:1
+  light / 3.20:1 dark as the figures against `--bg`. Recomputed from `tokens.css`: those are the
+  **`--surface-sunk`** figures. Against `--bg` it is **3.45 / 3.92** — which is what this file
+  recorded for finding 4, so the two documents disagreed and `findings.md` was right. Fixed in
+  `tokens.md` (now a per-ground table) and in the three `tokens.css` comments.
+
+Everything else in the token docs re-derived exactly: `--amber-600` 5.12, `--amber-500` 3.64,
+`--amber-400` 11.94, `--focus` on `--surface-sunk` 3.31, rail 1.88 light / 1.94 dark, `--rule`
+1.29 / 1.23. **`--focus` clears 3:1 on every ground in both themes** (worst 3.31), so no token
+value changed.
+
+### Open — needs a decision, not a fix
+
+- **The canonical and the sitemap both advertise a URL that 301s.** Measured in production:
+  `/side-projects` → **301** → `/side-projects/` → 200. But `sitemap-0.xml` says
+  `https://arseniocolon.com/side-projects` and the page's own canonical says the same. So the URL
+  that returns 200 declares its canonical to be a URL that redirects back to it. This is the
+  "two URLs for one page, and the crawler picks" problem the `serialize` hook in
+  `astro.config.mjs:23` was written to prevent — the hook strips the slash, and Pages wants it.
+  Crawlers generally resolve this, so it is low urgency, but the hook currently points both
+  signals at the side the server does not serve. Reversing it would undo documented reasoning,
+  so it is Arsenio's call.
+- **A v1 resume PDF is still indexed.** `site:arseniocolon.com` surfaces
+  `arseniocolon.com/Arsenio_Colon_resume.pdf` with a snippet describing 2017-era content. The URL
+  is **404** in production, so nothing is being served — but a search result still points at it,
+  and the brief rules out a resume PDF entirely. It will age out of the index on its own; removing
+  it sooner needs a Search Console request, which needs Arsenio's Google login.
+- Indexing otherwise: `/` 200, `sitemap-index.xml` 200, `robots.txt` 200, `/no-such-page` 404,
+  and the `/games` and `/projects` stubs 301 to their slashed forms and then serve their redirect
+  pages. No dead v1 path other than the PDF surfaced.
+
+---
+
 ## Already correct — do not re-suggest
 
 Checked this session and found properly handled. Several of these look like obvious
@@ -145,12 +252,16 @@ by JS; fluid type via `clamp()`; intrinsic grids that don't side-scroll at 320px
 **Accessibility** — semantic landmarks throughout; `<ol>` for the timeline; `<time datetime>`
 on every date; skip link; `:focus-visible` rings; `prefers-reduced-motion` handled in both CSS
 and JS; decorative images correctly `alt=""`, content images described; ARIA used sparingly and
-correctly; 44px touch targets; heading hierarchy gapless on all three pages.
+correctly; target sizes clear SC 2.5.8 (by size on the controls, by spacing on the inline links —
+see the second 2026-08-07 section for the measured figures, and note the CTAs are the only 44px
+targets); heading hierarchy gapless on all three pages; clean under `forced-colors` and at a
+390px viewport.
 
 **SEO** — per-page title and description; canonical with trailing slash normalised; full
 OG/Twitter cards; per-route OG images; `Person` JSON-LD; generated sitemap with a `serialize`
-hook so it agrees with the canonicals; `robots.txt`; legacy `/games` and `/projects` rescued via
-config redirects, and the `#projects` / `#games` hash equivalents by an inline script.
+hook so it agrees with the canonicals — though both then disagree with what Pages serves, see
+"Open" above; `robots.txt`; legacy `/games` and `/projects` rescued via config redirects, and the
+`#projects` / `#games` hash equivalents by an inline script.
 
 **Print** — a genuinely serious `@media print` block: `@page` margins, token overrides to
 black/white, retuned scale, forced `.reveal` visibility, printed URLs with specificity carve-
@@ -181,7 +292,14 @@ Not defects, but worth knowing before someone rediscovers them.
   blast radius is one person, once.
 - **`:focus-visible` uses `:where()`**, giving it zero specificity. Nothing overrides it today,
   but any future `.btn:focus { outline: none }` would win trivially.
-- **`<h1>Arsenio<br>Colón</h1>`** extracts as `ArsenioColón`. Screen-reader handling of `<br>`
-  in an accessible name is inconsistent.
-- **The theme toggle uses `aria-pressed` on a tri-state concept** (light / dark / follow-OS).
-  Once toggled there's no way back to "system".
+- ~~**`<h1>Arsenio<br>Colón</h1>`** extracts as `ArsenioColón`.~~ **Resolved 2026-08-07** as a
+  side effect of the hero change: the full-width name sets on one line, so the `<br>` is gone and
+  the accessible name is now plain text. It was never fixed on purpose — worth noting because the
+  reverse is just as easy to reintroduce the next time the name needs to break.
+- ~~**The theme toggle uses `aria-pressed` on a tri-state concept**~~ **Resolved 2026-08-07.**
+  It now cycles system → light → dark → system with the current stop named, and `aria-pressed` is
+  gone. Verified by driving the real control in both OS preferences: returning to `system` clears
+  `localStorage` *and* `data-theme`, and restores each `theme-color` meta to its own per-media
+  value, so browser chrome tracks the OS again rather than staying pinned to the last choice.
+  Below 34rem the visible word is dropped and the control returns to its 2rem square — see
+  `decisions.md` for why.

@@ -1,97 +1,173 @@
 ---
-// Icons are inline SVG (Lucide sun / moon). No icon font, no emoji.
+// Icons are inline SVG (Lucide monitor / sun / moon). No icon font, no emoji.
+//
+// Three stops, not two. `system` is the absence of a stored preference, so it
+// has to be reachable — cycling system → light → dark → system is the whole
+// reason this isn't a boolean toggle, and why there's no `aria-pressed` here:
+// it can only say "pressed" or "not pressed" about something with three answers.
 ---
 
-<button
-  class="toggle"
-  type="button"
-  data-theme-toggle
-  aria-label="Switch to dark theme"
-  aria-pressed="false"
->
-  <svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"
-       stroke-linecap="round" aria-hidden="true">
-    <circle cx="12" cy="12" r="4" />
-    <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
-  </svg>
-  <svg class="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"
-       stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-    <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
-  </svg>
+<button class="toggle" type="button" data-theme-toggle data-state="system" aria-label="Colour theme: System">
+  <span class="t-i" aria-hidden="true">
+    <svg class="i-system" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"
+         stroke-linecap="round" stroke-linejoin="round">
+      <rect x="2" y="3" width="20" height="14" />
+      <path d="M8 21h8M12 17v4" />
+    </svg>
+    <svg class="i-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"
+         stroke-linecap="round">
+      <circle cx="12" cy="12" r="4" />
+      <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
+    </svg>
+    <svg class="i-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"
+         stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+    </svg>
+  </span>
+  <span class="t-l mono" data-theme-label>System</span>
 </button>
+
+{/* Runs at parse position, before paint, for the same reason the no-flash script
+    in Base.astro does: the server can't know which stop is stored, so it renders
+    `system`, and a returning visitor would otherwise watch the label correct
+    itself. `is:inline` keeps it out of the module graph so it isn't deferred. */}
+<script is:inline>
+  (function () {
+    var btn = document.querySelector('[data-theme-toggle]');
+    if (!btn) return;
+    try {
+      var t = localStorage.getItem('theme');
+      if (t !== 'dark' && t !== 'light') return;
+      btn.dataset.state = t;
+      var label = btn.querySelector('[data-theme-label]');
+      var name = t === 'dark' ? 'Dark' : 'Light';
+      if (label) label.textContent = name;
+      btn.setAttribute('aria-label', 'Colour theme: ' + name);
+    } catch (e) {}
+  })();
+</script>
 
 <style>
   .toggle {
-    display: grid;
-    place-items: center;
-    width: 2rem;
-    height: 2rem;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--s-2);
+    min-height: 2.25rem;
     flex: none;
-    padding: 0;
+    padding: 0 var(--s-3);
     background: none;
+    /* --rule-control, not --rule: this border is the control's only boundary. */
     border: 1px solid var(--rule-control);
-    color: var(--muted);
+    color: var(--fg);
     cursor: pointer;
     transition: color var(--dur-fast) var(--ease),
                 border-color var(--dur-fast) var(--ease);
   }
-  .toggle:hover { color: var(--fg); border-color: var(--fg); }
+  .toggle:hover { border-color: var(--fg); }
+  .toggle:hover .t-i { color: var(--fg); }
 
-  .toggle svg { width: 1rem; height: 1rem; grid-area: 1 / 1; }
+  .t-i { display: grid; color: var(--muted); transition: color var(--dur-fast) var(--ease); }
+  .t-i svg { width: 1rem; height: 1rem; grid-area: 1 / 1; }
 
-  /* Show the icon for the theme you'd switch *to*. */
-  .i-moon { display: none; }
-  :global(:root[data-theme='dark']) .i-moon { display: none; }
-  :global(:root[data-theme='dark']) .i-sun { display: block; }
-  :global(:root[data-theme='light']) .i-sun { display: none; }
-  :global(:root[data-theme='light']) .i-moon { display: block; }
-
-  @media (prefers-color-scheme: dark) {
-    .i-sun { display: block; }
-    .i-moon { display: none; }
+  .t-l {
+    font-size: var(--t-xs);
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
   }
-  @media (prefers-color-scheme: light) {
-    .i-sun { display: none; }
-    .i-moon { display: block; }
+
+  /* The icon names the stop you are *on*, which the visible label repeats. The
+     old two-state control showed the stop you'd move to; with three stops that
+     is ambiguous, since "next" is no longer the only other option. */
+  .i-system, .i-light, .i-dark { display: none; }
+  .toggle[data-state='system'] .i-system { display: block; }
+  .toggle[data-state='light'] .i-light { display: block; }
+  .toggle[data-state='dark'] .i-dark { display: block; }
+
+  /* Below 34rem the label costs about 66px the nav doesn't have — the wordmark
+     and three links already fill the row, and the label is what pushed "Side
+     projects" onto a second line at 320px. The control keeps all three stops
+     and its accessible name; only the visible word goes, so nothing here has to
+     satisfy SC 2.5.3 any more. Same 2rem square the two-state toggle had. */
+  @media (max-width: 34rem) {
+    .toggle {
+      gap: 0;
+      padding: 0;
+      width: 2rem;
+      min-height: 2rem;
+      place-items: center;
+    }
+    .t-l { display: none; }
   }
 </style>
 
 <script>
   const btn = document.querySelector<HTMLButtonElement>('[data-theme-toggle]');
+  const label = btn?.querySelector<HTMLElement>('[data-theme-label]');
   const root = document.documentElement;
 
-  const current = () =>
-    root.dataset.theme ??
-    (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  const ORDER = ['system', 'light', 'dark'] as const;
+  type Stop = (typeof ORDER)[number];
 
-  const sync = () => {
-    if (!btn) return;
-    const next = current() === 'dark' ? 'light' : 'dark';
-    btn.setAttribute('aria-label', `Switch to ${next} theme`);
-    btn.setAttribute('aria-pressed', String(current() === 'dark'));
+  const stored = (): Stop => {
+    try {
+      const t = localStorage.getItem('theme');
+      return t === 'dark' || t === 'light' ? t : 'system';
+    } catch {
+      return 'system';
+    }
   };
 
-  // The metas ship with media queries so no-JS visitors follow their OS. Once the
-  // toggle has an opinion, both get the same value or the chrome contradicts it.
-  // Mirrors --steel-100 / --steel-950 in tokens.css; keep them in step.
-  const paintChrome = (theme: string) => {
-    const colour = theme === 'dark' ? '#0d1215' : '#f1f3f4';
-    document
-      .querySelectorAll<HTMLMetaElement>('meta[name="theme-color"]')
-      .forEach((m) => m.setAttribute('content', colour));
+  const osDark = () => window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+  // Both metas ship with a `media` attribute so a JS-less visitor tracks their
+  // OS. Overriding writes the same colour to both; going back to `system`
+  // restores each one to the value its own media query is for, rather than
+  // leaving the chrome pinned to whichever theme was last chosen.
+  const paintChrome = (stop: Stop) => {
+    document.querySelectorAll<HTMLMetaElement>('meta[name="theme-color"]').forEach((m) => {
+      const forDark = m.media.includes('dark');
+      const own = forDark ? '#0d1215' : '#f1f3f4';
+      m.setAttribute('content', stop === 'system' ? own : stop === 'dark' ? '#0d1215' : '#f1f3f4');
+    });
+  };
+
+  const apply = (stop: Stop) => {
+    if (stop === 'system') {
+      delete root.dataset.theme;
+      try {
+        localStorage.removeItem('theme');
+      } catch {
+        /* private mode — the page still follows the OS for this view */
+      }
+    } else {
+      root.dataset.theme = stop;
+      try {
+        localStorage.setItem('theme', stop);
+      } catch {
+        /* private mode — the choice still holds for this page view */
+      }
+    }
+
+    paintChrome(stop);
+
+    if (btn) {
+      btn.dataset.state = stop;
+      const name = stop[0].toUpperCase() + stop.slice(1);
+      if (label) label.textContent = name;
+      // Keeps SC 2.5.3 satisfied: the visible word is inside the accessible name.
+      btn.setAttribute(
+        'aria-label',
+        stop === 'system' ? `Colour theme: System (following ${osDark() ? 'dark' : 'light'})` : `Colour theme: ${name}`
+      );
+    }
   };
 
   btn?.addEventListener('click', () => {
-    const next = current() === 'dark' ? 'light' : 'dark';
-    root.dataset.theme = next;
-    try {
-      localStorage.setItem('theme', next);
-    } catch {
-      /* private mode — the toggle still works for this page view */
-    }
-    paintChrome(next);
-    sync();
+    apply(ORDER[(ORDER.indexOf(stored()) + 1) % ORDER.length]);
   });
 
-  sync();
+  // The inline script above already set the label; this re-runs it through the
+  // same path so the "following light/dark" suffix is present from the start.
+  apply(stored());
 </script>

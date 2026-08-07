@@ -112,7 +112,8 @@
   --fg: var(--ink);
   --muted: var(--steel-600);
   --rule: var(--steel-300);
-  /* Dividers can be whisper-thin; a control's only edge cannot. 3.14:1 here. */
+  /* Dividers can be whisper-thin; a control's only edge cannot. 3.45:1 on
+     --bg, and 3.14:1 on --surface-sunk, which is the ground that decides it. */
   --rule-control: var(--steel-540);
   --rule-heavy: var(--ink);
   --accent: var(--amber-500);
@@ -132,7 +133,7 @@
     --fg: var(--chalk);
     --muted: var(--steel-500);
     --rule: var(--steel-800);
-    /* 3.20:1 — see the light block. */
+    /* 3.92:1 on --bg, 3.20:1 on --surface-sunk — see the light block. */
     --rule-control: var(--steel-560);
     --rule-heavy: var(--chalk);
     --accent: var(--amber-400);
@@ -153,7 +154,7 @@
   --fg: var(--chalk);
   --muted: var(--steel-500);
   --rule: var(--steel-800);
-  /* 3.20:1 — see the light block. */
+  /* 3.92:1 on --bg, 3.20:1 on --surface-sunk — see the light block. */
   --rule-control: var(--steel-560);
   --rule-heavy: var(--chalk);
   --accent: var(--amber-400);
@@ -171,7 +172,8 @@
   --fg: var(--ink);
   --muted: var(--steel-600);
   --rule: var(--steel-300);
-  /* Dividers can be whisper-thin; a control's only edge cannot. 3.14:1 here. */
+  /* Dividers can be whisper-thin; a control's only edge cannot. 3.45:1 on
+     --bg, and 3.14:1 on --surface-sunk, which is the ground that decides it. */
   --rule-control: var(--steel-540);
   --rule-heavy: var(--ink);
   --accent: var(--amber-500);

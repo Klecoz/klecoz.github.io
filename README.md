@@ -9,8 +9,11 @@ npm run dev        # http://localhost:4321, hot reload
 npm run check      # astro check — typechecks .astro files and content collections
 npm run build      # → dist/
 npm run preview    # serve dist/ exactly as production will
-npm run axe        # WCAG A/AA scan, both pages + the 404, light and dark
+npm run axe        # WCAG A/AA scan — 12 runs: both pages + the 404,
+                   # light and dark, at 1280px and 390px
                    # needs a preview server already running
+npm run snap       # print-stylesheet check, replaces the manual Cmd-P
+                   # also needs a preview server; writes print-shots/
 ```
 
 `npm run check` is currently clean at zero errors, warnings and hints, and CI runs it before
@@ -316,6 +319,14 @@ light tokens, drops the nav and the CTAs, restates the amber `Current` chip as a
 (backgrounds don't print), and suppresses the citation URLs, which run past 100 characters.
 The brief rules out a resume PDF; this is the paper copy instead.
 
+`npm run snap` guards it now, so Cmd-P is no longer the only thing standing between a broken
+print block and a deploy. Two things about that script are counter-intuitive and documented in
+its header: it deliberately does *not* force reduced motion (which would reveal every `.reveal`
+and hide the exact bug it exists to catch), and it waits out the opacity transition before
+reading computed styles, because switching to print media animates rather than jumps.
+It asserts computed styles rather than diffing pixels — see `decisions.md` for why baselines
+were rejected.
+
 **There are `&nbsp;` entities scattered through the content Markdown**, and one literal
 U+00A0 inside `'.NET 10'` in `index.astro`. They are deliberate. Body prose gets
 `text-wrap: pretty` in `tokens.css`, which stops a sentence ending with one word stranded
@@ -330,7 +341,31 @@ fine — `pretty` handles ordinary widows on its own.
 **The sitemap is generated**, by `@astrojs/sitemap`. `public/sitemap.xml` used to be
 hand-written with a frozen `lastmod` and was deleted. `robots.txt` points at
 `/sitemap-index.xml`. A `serialize` hook strips the trailing slash so the sitemap and the
-canonical tags agree on one URL per page.
+canonical tags agree on one URL per page. They agree with each other but not with the server:
+Pages 301s `/side-projects` to `/side-projects/`, so both signals point at the redirecting
+side. Measured, recorded in `findings.md`, and left alone pending a decision — reversing it
+means reversing the reasoning in `astro.config.mjs:18-23`.
+
+**The theme toggle's icon shows where you are, not where you're going**, which is the opposite
+of the two-state control it replaced. With three stops — system, light, dark — "next" is no
+longer the only other option, so an icon meaning "click for this" stops being unambiguous. The
+visible word beside it says the same thing, and both drop below 34rem where the label doesn't
+fit. `aria-pressed` was deliberately removed: it can only answer pressed or not-pressed about
+something with three states. Don't add it back.
+
+**"System" is the absence of a stored value.** There is no `theme=system` in `localStorage` —
+returning to that stop deletes the key and the `data-theme` attribute, which is what lets the
+media query take over again. It also rewrites both `theme-color` metas back to their own
+per-media values; setting them both to one colour is only correct while an override is active.
+
+**The analytics account is `klecoz`, not `arseniocolon`.** `Base.astro` posts to
+`https://klecoz.goatcounter.com/count`, which looks like a typo and is not — the GoatCounter
+site predates the domain, and renaming it there would orphan the history. This is worth being
+careful with: a GoatCounter host that doesn't exist answers **400** and drops every hit
+silently, which from the dashboard is indistinguishable from having no visitors. The site
+shipped that way and nothing in CI noticed, because both the Lighthouse block and the axe route
+abort match `gc.zgo.at` — the *script* host, which was always correct. Check the endpoint
+against the dashboard rather than reading it.
 
 ---
 
@@ -360,7 +395,10 @@ Best Practices sits at 81 on localhost purely because it isn't HTTPS. In product
 .github/workflows/audit.yml     ← pull requests and master
    ├─ Lighthouse CI             ← a11y 100 and the SEO audits gate; scores advise
    ├─ byte budgets              ← total weight, fonts, scripts, third parties
-   └─ npm run axe               ← both pages plus the 404, light theme and dark
+   ├─ npm run axe               ← 12 scans: both pages plus the 404, light and
+   │                              dark, at 1280px and 390px
+   ├─ npm run snap              ← print stylesheet, sharing the same server
+   └─ print renders artifact    ← for looking at; never a baseline diff
 
 .github/workflows/links.yml     ← Mondays
    └─ lychee over dist/         ← files an issue, never a red X
@@ -374,13 +412,21 @@ Performance, SEO and Best Practices are asserted as warnings so the number stays
 Measured 2026-08-07: `/side-projects` is the heavier page at about 194 KB fully scrolled,
 against a 350 KB ceiling.
 
-**axe exists for dark mode.** Lighthouse's accessibility category is axe-core already, but
-it only ever measures the default colour scheme — and `--accent` vs `--accent-solid` is a
-contrast trap that only bites on one theme. `npm run axe` scans both, against a preview
-server. It forces reduced motion so the `.reveal` sections are actually visible when
-contrast is measured; without that they sit at `opacity: 0` and axe reports every contrast
-check as *incomplete*, which passes by saying nothing. Same family as the print-stylesheet
-bug below.
+**axe exists for dark mode and narrow widths.** Lighthouse's accessibility category is
+axe-core already, but it only ever measures the default colour scheme at one width — and
+`--accent` vs `--accent-solid` is a contrast trap that only bites on one theme, while reflow
+and target size only fail once the layout is under pressure. `npm run axe` scans both themes
+at 1280px and 390px, against a preview server. It forces reduced motion so the `.reveal`
+sections are actually visible when contrast is measured; without that they sit at
+`opacity: 0` and axe reports every contrast check as *incomplete*, which passes by saying
+nothing. Same family as the print-stylesheet bug below — and note `npm run snap` needs the
+exact opposite setting, for the same underlying reason.
+
+**axe still can't see three things**, all measured by hand on 2026-08-07 and all passing:
+focus landing under the sticky nav (SC 2.4.11), target size (SC 2.5.8, which passes here via
+the spacing exception rather than by size), and `forced-colors`. Numbers and method are in
+`findings.md`. Worth re-running by hand after any layout change; automating them was judged
+not to pay for itself on a two-page site that changes rarely.
 
 To convince yourself it works, put `var(--rail)` back on `.cite .weight` in `index.astro`
 and re-run — it should fail on both themes.

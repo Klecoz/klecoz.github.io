@@ -73,45 +73,50 @@ const community: CommunityEntry[] = [
   <section class="hero">
     <div class="wrap">
       <p class="label">Buffalo, NY</p>
-      <h1 class="hero-name">Arsenio<br />Colón</h1>
+      {/* One line rather than a hard `<br>`. The break was doing two jobs and
+          neither survives this layout: it forced a two-line lockup the full
+          width no longer needs, and it made the accessible name extract as
+          "ArsenioColón" in some screen readers. */}
+      <h1 class="hero-name">Arsenio Colón</h1>
       {/* The middot binds to the word before it, same rule as .stack-items: a
           wrapped line must never open with a separator. */}
       <p class="hero-role">.NET Engineer&nbsp;· Full Stack</p>
 
-      <div class="hero-grid">
-        <div class="hero-bio">
-          <p>
-            I&rsquo;m a .NET engineer in Buffalo. Most of my work is backend and internal
-            platforms, the kind of thing other teams end up depending on without thinking
-            about it. Right now I&rsquo;m at Seneca Gaming, where I take ownership of our
-            internal SharePoint IAM platform, built a visual IT Reporting and Incident
-            Dashboard for leadership, and help out with Nintex/WEBCON workflows. My vision
-            is to be more proactive and less reactive.
-          </p>
-          <p>
-            I got my start making games for jams, and did AR/VR work for a few years while
-            weaving in front-end and backend web development in my day to day.
-          </p>
-          <div class="hero-cta">
-            <a class="btn-primary" href="#work">See the work</a>
-            <a class="btn-ghost" href="https://www.linkedin.com/in/arsenio-colon/">LinkedIn</a>
-          </div>
+      <div class="hero-bio">
+        <p>
+          I&rsquo;m a .NET engineer in Buffalo. Most of my work is backend and internal
+          platforms, the kind of thing other teams end up depending on without thinking
+          about it. Right now I&rsquo;m at Seneca Gaming, where I take ownership of our
+          internal SharePoint IAM platform, built a visual IT Reporting and Incident
+          Dashboard for leadership, and help out with Nintex/WEBCON workflows. My vision
+          is to be more proactive and less reactive.
+        </p>
+        <p>
+          I got my start making games for jams, and did AR/VR work for a few years while
+          weaving in front-end and backend web development in my day to day.
+        </p>
+        <div class="hero-cta">
+          <a class="btn-primary" href="#work">See the work</a>
+          <a class="btn-ghost" href="https://www.linkedin.com/in/arsenio-colon/">LinkedIn</a>
         </div>
+      </div>
 
-        <div class="stack">
-          {
-            stack.map((row) => (
-              <div class="stack-row">
-                <p class="label">{row.group}</p>
-                <ul class="stack-items">
-                  {row.items.map((i) => (
-                    <li class="mono">{i}</li>
-                  ))}
-                </ul>
-              </div>
-            ))
-          }
-        </div>
+      {/* Three columns rather than the old narrow rail. The stack reads as a
+          spec strip closing the hero, which is why it sits under a rule instead
+          of beside the prose. */}
+      <div class="stack">
+        {
+          stack.map((row) => (
+            <div class="stack-row">
+              <p class="label">{row.group}</p>
+              <ul class="stack-items">
+                {row.items.map((i) => (
+                  <li class="mono">{i}</li>
+                ))}
+              </ul>
+            </div>
+          ))
+        }
       </div>
     </div>
   </section>
@@ -256,11 +261,15 @@ const community: CommunityEntry[] = [
   .hero { padding-block: var(--s-16) var(--s-12); }
 
   .hero-name {
-    font-size: var(--t-display);
+    /* Own clamp rather than --t-display: the name now sets on one line, so it
+       is bounded by the measure of "ARSENIO COLÓN" at the page width, not by
+       how tall a two-line lockup is allowed to get. */
+    font-size: clamp(2.75rem, 8.5vw, 5.25rem);
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: -0.01em;
-    /* 0.88 clipped the acute on the Ó against the line above. */
+    /* 0.88 clipped the acute on the Ó against the line above. Still relevant:
+       the name wraps back to two lines below about 30rem. */
     line-height: 0.94;
     margin-block: var(--s-3) var(--s-4);
   }
@@ -274,18 +283,11 @@ const community: CommunityEntry[] = [
     border-bottom: 3px solid var(--rule-heavy);
   }
 
-  /* Asymmetric: prose takes the wide column, the stack sits in a narrow rail. */
-  .hero-grid {
-    display: grid;
-    grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr);
-    gap: var(--s-12);
-    padding-top: var(--s-8);
-  }
-
   .hero-bio {
     display: grid;
     gap: var(--s-4);
     max-width: var(--measure);
+    padding-top: var(--s-8);
   }
   .hero-bio p { color: var(--muted); }
 
@@ -296,8 +298,16 @@ const community: CommunityEntry[] = [
     margin-top: var(--s-4);
   }
 
-  .stack { display: grid; gap: var(--s-6); align-content: start; }
-  .stack-row { display: grid; gap: var(--s-2); }
+  .stack {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--s-8);
+    align-content: start;
+    margin-top: var(--s-12);
+    padding-top: var(--s-6);
+    border-top: 1px solid var(--rule);
+  }
+  .stack-row { display: grid; gap: var(--s-2); align-content: start; }
   .stack-items {
     display: flex;
     flex-wrap: wrap;
@@ -530,16 +540,21 @@ const community: CommunityEntry[] = [
     .teaser { background: none; }
 
     .hero { padding-block: 0 var(--s-8); }
-    .hero-grid { gap: var(--s-6); }
     .hero-role { padding-bottom: var(--s-4); }
+    /* On paper the strip is three narrow columns of hyphenated chips. One
+       column each reads, and the rule above it is redundant next to the
+       section rules the print block already draws. */
+    .stack {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--s-3);
+      margin-top: var(--s-6);
+      padding-top: var(--s-4);
+    }
   }
 
   /* ---------- narrow ---------- */
   @media (max-width: 52rem) {
-    .hero-grid {
-      grid-template-columns: minmax(0, 1fr);
-      gap: var(--s-8);
-    }
+    .stack { grid-template-columns: minmax(0, 1fr); gap: var(--s-6); margin-top: var(--s-8); }
     .how-in { grid-template-columns: minmax(0, 1fr); gap: var(--s-2); }
     .hero { padding-block: var(--s-12) var(--s-8); }
     .band { padding-block: var(--s-12); }

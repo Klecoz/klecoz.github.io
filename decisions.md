@@ -158,6 +158,94 @@ tell "a page mentioning someone" from "that person's own page".
 The projects `ItemList` is built from the same collections the cards render from, so markup and
 structured data can't drift. `VideoGame` for games, `WebSite` for the two client sites.
 
+## 2026-08-07 — second session
+
+### The print check asserts computed styles, not pixels
+
+`scripts/snap.mjs` replaces the manual Cmd-P step. The obvious implementation — screenshot both
+pages and diff against committed baselines — was written and then rejected before it shipped.
+
+Baselines rendered on a Mac disagree with `ubuntu-latest` on font rasterisation alone. That
+leaves two bad options: a threshold wide enough to absorb the difference, which is also wide
+enough to hide a real regression, or a gate that fails on every run until someone deletes it.
+Neither is worth having, and this repo already has a rule about checks that cry wolf.
+
+Every failure mode the print block actually has is a computed-style question — is `.reveal`
+opaque, is the header hidden, do external links carry their href, do the exempt ones stay
+exempt — and those answers are byte-identical on both platforms. The renders are still produced
+and uploaded as artifacts, because looking at them is useful; they just aren't the gate.
+
+**Rejected alternatives:** pixel diff with a threshold (hides regressions); generating baselines
+on the runner and committing them (a rebaseline on every intentional visual change, and the
+baseline is only as trustworthy as whoever eyeballed it); dropping the check and leaving Cmd-P
+manual (it is the only pre-ship step a human can silently skip).
+
+### Light and dark are equally canonical — **[AC]**
+
+Asked which theme a cold visitor sees, Arsenio said genuinely both, neither is primary.
+
+The cost is real and worth naming rather than discovering later: every visual comparison now gets
+built and reviewed twice, so hero variants, toggle mockups and any polish pass roughly double
+their screenshot surface. Accepted deliberately — the dark palette is a designed peer, not an
+inversion, and reviewing it second-class is how it would rot.
+
+### Hero: full-width name, stack as a spec strip — **[AC]**
+
+Arsenio said something about the hero was nagging without saying what, so four variants were
+built on a throwaway route and rendered light and dark at 1280 and 390 — describing them was not
+an option, per the standing rule. He picked **B**: the name sets on one line at its own
+`clamp(2.75rem, 8.5vw, 5.25rem)`, the bio keeps a single `--measure`, and the three stack groups
+drop below a hairline as a three-column strip.
+
+**Rejected:** A (the shipped asymmetric 1.65fr / 1fr rail); C, which carried the timeline's date
+rail up into the hero and scored highest on variance; D, which demoted the AR/VR sentence below
+the CTAs.
+
+**Recorded because it was argued and lost:** B leaves the right half of the bio row empty and
+reads as a more uniform vertical stack, which is the shape `brief.md` sets DESIGN_VARIANCE 8 to
+avoid. That objection was put to Arsenio with the render in front of him and he chose B anyway.
+It is his call and it is not to be relitigated — but if the hero ever feels flat, this is the
+reason, and C is the built alternative.
+
+Two things fell out of it: the `<br>` in the name is gone, which incidentally fixed the
+`ArsenioColón` accessible-name issue in `findings.md`; and `.hero-grid` no longer exists, so the
+print and narrow media queries now size `.stack` directly.
+
+### Theme toggle: cycling, with the stop named — **[AC]**
+
+Three treatments were rendered in all three states, light and dark, and Arsenio picked the
+cycling button: one control stepping system → light → dark → system, the current stop spelled out
+beside the icon.
+
+**Rejected:** the segmented three-stop control, which hides nothing but costs ~230px in a sticky
+nav already carrying a wordmark and three links; and the icon-only three-stop, which keeps the
+current 32px footprint but puts three states behind one unlabelled square.
+
+The icon now names the stop you are **on**, not the one you would move to. The old two-state
+control did the opposite, which stops making sense once "next" is no longer the only other
+option.
+
+**`aria-pressed` is gone and is not to be added back.** It can only say pressed or not-pressed
+about something with three answers. The accessible name carries the state instead, and includes
+the visible word so SC 2.5.3 still holds.
+
+### Dropping the toggle's label below 34rem
+
+The label costs about 66px. At 320px the nav does not have it — the wordmark and links already
+fill the row — so under 34rem the control returns to the 2rem square it used to be, keeping all
+three stops and its accessible name.
+
+Worth recording because of how it was found. The first attempt fixed the resulting collision by
+adding `white-space: nowrap` to the nav links, which looked obviously right and was wrong: the
+original nav *relies* on "Side projects" wrapping to two lines to fit at 320px. Measured before
+and after — `.mark` right edge at 124px, links left edge at 140px, a 16px gap — and `nowrap`
+turned that gap into an overlap. The geometry now matches the pre-change nav exactly.
+
+### Two pages, permanently — **[AC]**
+
+No notes section, no blog, no RSS, no `@astrojs/rss`. Asked directly whether the two-page shape
+was permanent or an unfilled gap, Arsenio said permanent. Not to be raised again.
+
 ### Deliberately not doing
 
 | Rejected | Why |
@@ -172,6 +260,12 @@ structured data can't drift. `VideoGame` for games, `WebSite` for the two client
 | Font preloads | Would genuinely save ~1 round trip. Left off because `font-display: swap` means fonts never block render. The *reasoning* previously recorded for this was wrong and has been corrected. |
 | Checking link fragments | `#page=39` is a PDF viewer directive; `#projects` / `#games` are handled at runtime. None exist in the HTML. |
 | axe `best-practice` / `experimental` tags | Flag opinionated non-defects (landmark uniqueness, region coverage) and would bury the WCAG failures that matter. |
+| A notes / blog section and an RSS feed | **[AC]** Two pages is the permanent shape, not a stage on the way to more. |
+| Pixel-diff baselines for the print check | See above — platform font rasterisation makes the threshold either useless or hostile. |
+| Testing the "legible in eight seconds" claim | **[AC]** It's a design intent, not an assertion. Treating it as testable over-formalises a two-page site. |
+| Verifying the analytics tag fires | Superseded, and the reason is instructive: this was declined as unnecessary, then the tag turned out to be pointing at a site that returns 400. Finding 9 in `findings.md`. |
+| An inbound-link audit (LinkedIn, GitHub profiles) | **[AC]** Already handled by Arsenio when v2 shipped. |
+| Search Console verification and sitemap submission | **[AC]** Scoped to a read-only indexing check. Submission needs his Google login. |
 
 ---
 

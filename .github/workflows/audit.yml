@@ -58,15 +58,21 @@ jobs:
           uploadArtifacts: true
           temporaryPublicStorage: false
 
-      # axe covers the one thing Lighthouse structurally cannot: the dark theme.
-      # Lighthouse only ever measures the default colour scheme, and the token
-      # spine has a documented contrast trap (--accent vs --accent-solid), so
-      # dark-mode contrast is exactly where a regression would hide.
+      # axe covers the two things Lighthouse structurally cannot: the dark theme
+      # and a narrow viewport. Lighthouse only ever measures the default colour
+      # scheme, and the token spine has a documented contrast trap (--accent vs
+      # --accent-solid), so dark-mode contrast is exactly where a regression
+      # would hide. Width is the second axis because reflow and target size only
+      # fail once the layout is under pressure.
       #
-      # Server, readiness poll and scan in one step on purpose: a process
+      # `npm run snap` shares this step's server rather than starting a second
+      # one. It checks the print stylesheet, which is load-bearing and used to be
+      # a manual Cmd-P in the README.
+      #
+      # Server, readiness poll and scans in one step on purpose: a process
       # backgrounded in an earlier step outlives the shell that started it, and
       # nothing would be left to kill it.
-      - name: axe — both pages, both themes
+      - name: axe and print — 3 pages, both themes, both widths
         run: |
           npm run preview -- --host 127.0.0.1 --port 4321 &
           server=$!
@@ -76,3 +82,17 @@ jobs:
             sleep 1
           done
           npm run axe
+          npm run snap
+
+      # The renders are for a human to look at when something looks off. They are
+      # deliberately not baselines: macOS and ubuntu-latest disagree on font
+      # rasterisation, so a pixel diff would need a threshold wide enough to hide
+      # real regressions. `npm run snap` asserts computed styles instead, which
+      # are identical on both platforms.
+      - name: Upload print renders
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: print-renders
+          path: print-shots/
+          if-no-files-found: warn

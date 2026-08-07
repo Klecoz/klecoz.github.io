@@ -171,9 +171,14 @@ const profilePageLd = {
       })();
     </script>
 
+    {/* The GoatCounter site code is `klecoz`, which is deliberately not the
+        domain — it predates arseniocolon.com and renaming it would orphan the
+        history. A host that doesn't exist answers 400 and drops every hit
+        silently, which is indistinguishable from having no visitors, so this
+        line is worth checking against the dashboard rather than reading. */}
     <script
       is:inline
-      data-goatcounter="https://arseniocolon.goatcounter.com/count"
+      data-goatcounter="https://klecoz.goatcounter.com/count"
       async
       src="//gc.zgo.at/count.js"></script>
   </head>

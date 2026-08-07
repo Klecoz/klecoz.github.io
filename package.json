@@ -9,7 +9,8 @@
     "preview": "astro preview",
     "check": "astro check",
     "deploy": "bash scripts/deploy.sh",
-    "axe": "node scripts/axe-scan.mjs"
+    "axe": "node scripts/axe-scan.mjs",
+    "snap": "node scripts/snap.mjs"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.3",

@@ -92,8 +92,18 @@ headings only.
 and fine, because WCAG doesn't govern decoration. The moment that same hairline becomes the *only*
 boundary of an interactive control it falls under SC 1.4.11 and needs 3:1, which `--rule` never
 met. So: dividers, card edges and section borders keep `--rule`; the ghost button, the theme
-toggle and the copy button use `--rule-control` (3.14:1 light, 3.20:1 dark against `--bg`; 3.14:1
-and 3.20:1 against the worst ground each theme puts behind a control).
+toggle and the copy button use `--rule-control`, which clears 3:1 against every ground either
+theme puts behind a control:
+
+| `--rule-control` on | Light | Dark |
+|---|---|---|
+| `--bg` | 3.45 | 3.92 |
+| `--surface` | 3.84 | 3.65 |
+| `--surface-sunk` | **3.14** | **3.20** |
+
+`--surface-sunk` is the worst ground in both themes and the only pair worth remembering — 3.14 and
+3.20 were previously written down here as the `--bg` figures, which they are not. Sinking a
+control's background any further breaks SC 1.4.11 before anything looks wrong.
 
 **Layout** — `--nav-h: 3.5rem` is the sticky header's height. It's a token rather than a local
 value because the header and the `scroll-margin-top` on `#main` / `#work` / `#contact` have to

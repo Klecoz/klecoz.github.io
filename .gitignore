@@ -21,6 +21,10 @@ lychee/
 # Lighthouse CI report output, if .lighthouserc.yml is ever run locally
 .lighthouseci/
 
+# Print renders from `npm run snap`. They are artifacts to look at, never
+# baselines to diff — see the header of scripts/snap.mjs for why.
+print-shots/
+
 # Local Claude Code permissions. Already covered by the global ignore on this
 # machine; repeated here so the repo doesn't depend on that.
 .claude/settings.local.json
