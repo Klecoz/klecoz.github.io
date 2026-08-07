@@ -97,6 +97,33 @@ violations while checking almost nothing.
 add `is-in` to every `.reveal` immediately. Verified by reintroducing finding #3 and confirming
 the scan failed on both themes; restoring it returned 6/6 clean.
 
+### Confirmed in CI and production (commit `07fca04`)
+
+The guardrails were designed against local measurements, so the first real run was the actual
+test. Both passed without tuning:
+
+- **`Deploy to GitHub Pages`** — success.
+- **`Audit`** — success. Lighthouse checked 2 URLs over 6 runs with no assertion failures, so
+  every gating budget cleared on the first try: the 350 KB total-weight ceiling, 120 KB fonts,
+  25 KB script, third-party count, accessibility at 1.0, and the SEO sub-audits.
+- **axe on the runner** — 6/6 clean. This also validated the `channel: 'chrome'` assumption in
+  `scripts/axe-scan.mjs`; `ubuntu-latest` has Chrome preinstalled, so `playwright-core` needs no
+  browser download.
+
+I had expected `resource-summary:third-party:count` to be the likely first failure, on the
+theory that a blocked request might still be counted. Capping it at 1 rather than 0 meant it
+never mattered either way.
+
+Production spot-check after the deploy: the `<noscript>` escape, `tabindex="-1"`,
+`scroll-margin-top`, `--rule-control`, `og:site_name`, per-page `og:image:alt`, `ProfilePage`
+and `rel="me"` are all live on `/`; the 4/3 ratio, the `ItemList` and the page-specific card
+alt are live on `/side-projects/`. The pruned originals return **404** and their derivatives
+return **200** — the prune is doing exactly what it claims on the real host.
+
+One measurement gotcha worth recording: `curl` without `-L` against `/side-projects` returns a
+162-byte redirect body, not the page. The site is `trailingSlash: 'ignore'` and Pages redirects
+to `/side-projects/`. That briefly looked like a missing deploy.
+
 ---
 
 ## Already correct — do not re-suggest
