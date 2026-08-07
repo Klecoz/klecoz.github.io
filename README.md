@@ -23,8 +23,9 @@ npm run deploy      # push + start the build
 gh run watch        # follow it (~50s)
 ```
 
-Use `npm run deploy`, not a bare `git push`. A push alone does **not** currently start a
-build — see below.
+A bare `git push` starts a build too. Prefer `npm run deploy` anyway: it refuses to publish
+from a dirty tree or a non-master branch, and it confirms a run actually started instead of
+leaving you to notice later that nothing happened.
 
 ```
 .github/workflows/deploy.yml
@@ -38,13 +39,18 @@ build — see below.
 
 Also visible at **Actions → Deploy to GitHub Pages**.
 
-### Why a plain `git push` does not deploy
+### Push triggers: broken 2026-08-06, working since
 
-**Push events do not start workflow runs on this repository.** GitHub receives and records
-the push; no run is ever created. `workflow_dispatch` works fine, which is why
-`npm run deploy` dispatches explicitly.
+**A plain `git push` deploys again.** Push events stopped creating runs on this repository,
+which is why `npm run deploy` used to dispatch explicitly. They started working again the
+same evening — first push-triggered run was `e64e788` at 22:19 UTC on 2026-08-06 — with no
+change on this side. Every commit since has produced one.
 
-This was isolated on 2026-08-06. What was ruled out:
+`npm run deploy` no longer dispatches blindly. It pushes, waits for the push-triggered run
+to appear, and only dispatches if none shows up within 30s. See
+[the race below](#the-stale-deploy-race) for why blind dispatching was dangerous.
+
+The original diagnosis is kept because the failure could recur. What was ruled out:
 
 | Tried | Result |
 |---|---|
@@ -60,15 +66,43 @@ permissions `write`, both workflows `state: active`, no repository rulesets, rep
 fork, not archived, not disabled, `default_branch: master`, and the recorded `PushEvent`
 carries the correct `ref=refs/heads/master`.
 
-So everything in this repo is configured correctly and the cause is on GitHub's side. If
-you want to chase it, **Settings → Actions → General** in the web UI can expose policy that
-the REST API does not, and this is a reasonable thing to hand to GitHub Support — the
-minimal `echo`-only workflow is a clean reproduction.
-
-Until then `npm run deploy` is the deploy command, and `on: push` stays in the workflow so
-it resumes working by itself if this ever clears.
+Everything in this repo was configured correctly and the cause was on GitHub's side, which
+is consistent with it clearing on its own. If it recurs, **Settings → Actions → General** in
+the web UI can expose policy the REST API does not, and it's a reasonable thing to hand to
+GitHub Support.
 
 > The SSH remote is worth keeping regardless — it just wasn't the cause.
+
+### The stale-deploy race
+
+On 2026-08-07 the site kept serving the previous build while Actions showed every check
+green. Two runs had been created a second apart:
+
+| Run | Commit | Trigger |
+|---|---|---|
+| `31133906085` | `90370ca` (new) | `push` |
+| `31133906050` | `9e931e7` (old) | `workflow_dispatch` |
+
+`npm run deploy` ran `git push && gh workflow run deploy.yml --ref master`. The push landed,
+but `--ref master` is resolved server-side, and it resolved before GitHub registered the
+push — so the dispatch built the *previous* commit. Both runs succeeded, and the stale one
+finished last, so its artifact is what Pages published.
+
+Two things prevent a repeat:
+
+- **`npm run deploy` no longer dispatches blindly** (`scripts/deploy.sh`). It pushes, waits
+  for the push-triggered run, and dispatches only if none appears — which can't race,
+  because by then the push has definitely landed.
+- **The workflow refuses to publish a non-tip commit.** Its first step compares `github.sha`
+  against the live tip of `master` and fails the run if they differ. Runs are not ordered by
+  commit and `concurrency` cannot order them, so this check — not cancellation — is what
+  guarantees the site matches `master`.
+
+`cancel-in-progress` is deliberately left `false`: interrupting `deploy-pages` mid-publish
+is worse than letting a superseded run finish and get rejected by the guard.
+
+If you ever see that guard fail, it is working. Check that a newer run is publishing the
+commit you expect.
 
 ### One-time setup (already done)
 

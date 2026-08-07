@@ -1,8 +1,9 @@
 name: Deploy to GitHub Pages
 
-# on:push is kept deliberately even though it does not currently fire —
-# see README, "Why a plain git push does not deploy". It costs nothing and
-# resumes working by itself if GitHub's side ever changes.
+# Push events were not creating runs when this was diagnosed on 2026-08-06;
+# they started working again the same evening (first push-triggered run:
+# e64e788, 22:19 UTC). push is the normal trigger now. workflow_dispatch stays
+# as a manual escape hatch and as a fallback if it ever stops again.
 on:
   push:
     branches: [master]
@@ -14,7 +15,9 @@ permissions:
   pages: write
   id-token: write
 
-# One deploy at a time; don't cancel a run that's mid-publish.
+# One deploy at a time. Deliberately NOT cancel-in-progress: interrupting
+# deploy-pages mid-publish is worse than letting it finish, and the staleness
+# guard below — not cancellation — is what keeps the wrong commit off the site.
 concurrency:
   group: pages
   cancel-in-progress: false
@@ -23,6 +26,23 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      # On 2026-08-07 a push and a `gh workflow run` raced: the dispatch
+      # resolved `master` to its pre-push value, so two runs built different
+      # commits, both went green, and the older one published last. The site
+      # served the previous build while Actions showed all checks passing.
+      # Runs are not ordered by commit, so this compares against the real tip
+      # and fails loudly rather than publishing something stale.
+      - name: Refuse to publish a stale commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tip=$(gh api "repos/${GITHUB_REPOSITORY}/commits/master" --jq .sha)
+          if [ "$tip" != "$GITHUB_SHA" ]; then
+            echo "::error::Refusing to publish ${GITHUB_SHA:0:7} — master is now ${tip:0:7}. A newer run should be publishing that instead."
+            exit 1
+          fi
+          echo "Building ${GITHUB_SHA:0:7}, which is the current tip of master."
+
       - uses: actions/checkout@v7
 
       - uses: actions/setup-node@v7

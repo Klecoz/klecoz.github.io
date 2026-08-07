@@ -8,7 +8,7 @@
     "build": "astro build",
     "preview": "astro preview",
     "check": "astro check",
-    "deploy": "git push origin master && gh workflow run deploy.yml --ref master && echo '\\nDeploy dispatched. Watch it with: gh run watch'"
+    "deploy": "bash scripts/deploy.sh"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.3",
