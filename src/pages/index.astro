@@ -342,7 +342,8 @@ const community: CommunityEntry[] = [
     color: var(--bg);
   }
   .btn-ghost {
-    border: 1px solid var(--rule);
+    /* --rule-control, not --rule: this border is the button's only boundary. */
+    border: 1px solid var(--rule-control);
     color: var(--fg);
   }
   .btn-ghost:hover { border-color: var(--fg); color: var(--fg); }
@@ -446,8 +447,11 @@ const community: CommunityEntry[] = [
   }
   .cite:hover { color: var(--fg); border-bottom-color: var(--accent); }
   .cite::after { content: '↗'; font-size: 0.9em; color: var(--accent); }
-  /* The file weight is a warning, not a label — 12MB on cellular is an ambush. */
-  .cite .weight { color: var(--rail); letter-spacing: 0.04em; }
+  /* The file weight is a warning, not a label — 12MB on cellular is an ambush.
+     Which is why it can't use --rail: that token is tuned for hairlines at about
+     1.9:1, and as text it left the warning as the least readable thing on the
+     page. --muted is the quietest step that still clears 4.5:1. */
+  .cite .weight { color: var(--muted); letter-spacing: 0.04em; }
 
   /* A board seat is easy to assert; this is someone else confirming it. The only
      third-party voice on the site, so it gets the accent rule. */

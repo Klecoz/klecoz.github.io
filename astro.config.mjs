@@ -1,6 +1,7 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
+import pruneAssets from './scripts/prune-assets.mjs';
 
 export default defineConfig({
   site: 'https://arseniocolon.com',
@@ -21,6 +22,11 @@ export default defineConfig({
       // an empty path is equivalent to "/" anyway.
       serialize: (item) => ({ ...item, url: item.url.replace(/\/$/, '') }),
     }),
+
+    // `image()` in the content schema makes Astro emit each screenshot's
+    // original alongside the WebP derivatives, and nothing links to them.
+    // Last in the list so it runs after everything that could emit an asset.
+    pruneAssets(),
   ],
 
   // Old v1 paths. The hash-fragment equivalents (#projects, #games) can't be

@@ -7,28 +7,35 @@ Light is the default; dark is a designed peer, not an inversion.
 
 **Steel neutrals** (cool, blue-biased grey — picked to sit under the amber, not inherited)
 
-| Token | Value |
-|---|---|
-| `--steel-50` | `#F7F9F9` |
-| `--steel-100` | `#F1F3F4` |
-| `--steel-200` | `#E4E9EB` |
-| `--steel-300` | `#D2D8DB` |
-| `--steel-500` | `#8B98A1` |
-| `--steel-600` | `#58656E` |
-| `--steel-800` | `#1E262B` |
-| `--steel-900` | `#141A1E` |
-| `--steel-950` | `#0D1215` |
-| `--ink` | `#121A1E` |
-| `--chalk` | `#E2E8EB` |
+| Token | Value | Note |
+|---|---|---|
+| `--steel-100` | `#F1F3F4` | |
+| `--steel-200` | `#E4E9EB` | |
+| `--steel-300` | `#D2D8DB` | |
+| `--steel-500` | `#8B98A1` | |
+| `--steel-540` | `#77848D` | control outlines, light |
+| `--steel-560` | `#67747D` | control outlines, dark |
+| `--steel-600` | `#58656E` | |
+| `--steel-800` | `#1E262B` | |
+| `--steel-900` | `#141A1E` | |
+| `--steel-950` | `#0D1215` | |
+| `--ink` | `#121A1E` | |
+| `--chalk` | `#E2E8EB` | |
 
 **Amber** (machinery / safety signal — the single accent)
 
 | Token | Value | Note |
 |---|---|---|
-| `--amber-600` | `#8A5E00` | hover on light |
-| `--amber-500` | `#A97400` | accent on light, 4.6:1 on `--steel-100` |
-| `--amber-400` | `#FFC53D` | accent on dark, 10.2:1 on `--steel-950` |
+| `--amber-600` | `#8A5E00` | hover on light; 5.12:1 on `--steel-100` |
+| `--amber-500` | `#A97400` | accent on light, **3.64:1** on `--steel-100` |
+| `--amber-400` | `#FFC53D` | accent on dark, **11.94:1** on `--steel-950` |
 | `--amber-300` | `#FFD470` | hover on dark |
+
+> The two amber ratios were recorded as 4.6:1 and 10.2:1. Measured, they are 3.64:1 and 11.94:1.
+> The first one matters: `--focus` is `--amber-500` on light, so the focus ring clears the 3:1
+> non-text bar by 0.64 — and only 3.31:1 against `--surface-sunk`. It passes, but there is no room
+> to darken a light background without re-checking it. `--amber-500` is also **not** usable as
+> body-text colour on light; `--accent-solid` (`--amber-600`, 5.12:1) is the step that is.
 
 ## Layer 2 — semantic
 
@@ -40,6 +47,7 @@ Light is the default; dark is a designed peer, not an inversion.
 | `--fg` | `--ink` | `--chalk` |
 | `--muted` | `--steel-600` | `--steel-500` |
 | `--rule` | `--steel-300` | `--steel-800` |
+| `--rule-control` | `--steel-540` | `--steel-560` |
 | `--rule-heavy` | `--ink` | `--chalk` |
 | `--accent` | `--amber-500` | `--amber-400` |
 | `--accent-hover` | `--amber-600` | `--amber-300` |
@@ -79,6 +87,17 @@ Mono carries dates, eyebrows and tags, always with `font-variant-numeric: tabula
 
 **Rules** — hairline `1px solid var(--rule)`; heavy `3px solid var(--rule-heavy)` under section
 headings only.
+
+**`--rule` vs `--rule-control`.** `--rule` is a divider at ~1.3:1 — deliberately near-invisible,
+and fine, because WCAG doesn't govern decoration. The moment that same hairline becomes the *only*
+boundary of an interactive control it falls under SC 1.4.11 and needs 3:1, which `--rule` never
+met. So: dividers, card edges and section borders keep `--rule`; the ghost button, the theme
+toggle and the copy button use `--rule-control` (3.14:1 light, 3.20:1 dark against `--bg`; 3.14:1
+and 3.20:1 against the worst ground each theme puts behind a control).
+
+**Layout** — `--nav-h: 3.5rem` is the sticky header's height. It's a token rather than a local
+value because the header and the `scroll-margin-top` on `#main` / `#work` / `#contact` have to
+agree; if they drift, every in-page jump lands underneath the nav.
 
 **Motion** — `--dur-fast: 120ms`, `--dur: 200ms`, `--dur-slow: 280ms`;
 `--ease: cubic-bezier(0.2, 0, 0, 1)`. Exits run at ~75% of entrance. All suppressed under

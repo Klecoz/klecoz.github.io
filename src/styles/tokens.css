@@ -46,6 +46,13 @@
   --steel-200: #e4e9eb;
   --steel-300: #d2d8db;
   --steel-500: #8b98a1;
+  /* Two steps between 500 and 600, added for control outlines. A hairline that
+     is the *only* boundary of a button has to clear 3:1 (WCAG 2.2 SC 1.4.11),
+     which --rule never did — it's tuned for dividers at about 1.3:1. These are
+     the lightest values on the ramp that clear it against the worst ground each
+     theme puts behind a control. */
+  --steel-540: #77848d;
+  --steel-560: #67747d;
   --steel-600: #58656e;
   --steel-800: #1e262b;
   --steel-900: #141a1e;
@@ -85,6 +92,11 @@
   --page: 68rem;
   --gutter: clamp(1.25rem, 4vw, 3rem);
 
+  /* The sticky header's height. Shared rather than component-local because two
+     things have to agree on it: the header itself, and the scroll offset that
+     keeps #work / #contact / #main from landing underneath it. */
+  --nav-h: 3.5rem;
+
   /* motion */
   --dur-fast: 120ms;
   --dur: 200ms;
@@ -100,6 +112,8 @@
   --fg: var(--ink);
   --muted: var(--steel-600);
   --rule: var(--steel-300);
+  /* Dividers can be whisper-thin; a control's only edge cannot. 3.14:1 here. */
+  --rule-control: var(--steel-540);
   --rule-heavy: var(--ink);
   --accent: var(--amber-500);
   --accent-hover: var(--amber-600);
@@ -118,6 +132,8 @@
     --fg: var(--chalk);
     --muted: var(--steel-500);
     --rule: var(--steel-800);
+    /* 3.20:1 — see the light block. */
+    --rule-control: var(--steel-560);
     --rule-heavy: var(--chalk);
     --accent: var(--amber-400);
     --accent-hover: var(--amber-300);
@@ -137,6 +153,8 @@
   --fg: var(--chalk);
   --muted: var(--steel-500);
   --rule: var(--steel-800);
+  /* 3.20:1 — see the light block. */
+  --rule-control: var(--steel-560);
   --rule-heavy: var(--chalk);
   --accent: var(--amber-400);
   --accent-hover: var(--amber-300);
@@ -153,6 +171,8 @@
   --fg: var(--ink);
   --muted: var(--steel-600);
   --rule: var(--steel-300);
+  /* Dividers can be whisper-thin; a control's only edge cannot. 3.14:1 here. */
+  --rule-control: var(--steel-540);
   --rule-heavy: var(--ink);
   --accent: var(--amber-500);
   --accent-hover: var(--amber-600);
@@ -217,6 +237,22 @@ a:hover { color: var(--accent-hover); text-decoration-color: currentColor; }
   outline: 2px solid var(--focus);
   outline-offset: 3px;
 }
+
+/* Every jump target on the site, and all of them sit under a sticky header.
+   Without this the heading you jumped to is hidden behind the nav — including
+   the skip link's own destination, which rather defeats the point. Listed by
+   name because there are only three; a blanket [id] would also offset things
+   nobody ever links to. */
+#main,
+#work,
+#contact {
+  scroll-margin-top: calc(var(--nav-h) + var(--s-4));
+}
+
+/* <main> carries tabindex="-1" so the skip link actually moves focus in Safari,
+   which otherwise scrolls and leaves focus behind in the nav. It's a
+   programmatic target, not something you can tab to, so it takes no ring. */
+#main:focus { outline: none; }
 
 button { font: inherit; color: inherit; }
 

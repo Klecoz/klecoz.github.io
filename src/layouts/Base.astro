@@ -13,14 +13,25 @@ interface Props {
    * scripts/make-og.mjs for why satori stays out of dependencies.
    */
   ogImage?: string;
+  /**
+   * What the card says. The cards are almost entirely type, so without this a
+   * screen-reader user on LinkedIn or Slack gets an unfurl with no content at
+   * all. Keep it to the words actually on the card in scripts/make-og.mjs.
+   */
+  ogImageAlt?: string;
 }
 
-const { title, description, person = false, ogImage = '/og.png' } = Astro.props;
+const {
+  title,
+  description,
+  person = false,
+  ogImage = '/og.png',
+  ogImageAlt = 'Arsenio Colón — .NET Engineer, Full Stack. Buffalo, NY.',
+} = Astro.props;
 const canonical = new URL(Astro.url.pathname, Astro.site).href.replace(/\/$/, '') || Astro.site!.href;
 const ogImageUrl = new URL(ogImage, Astro.site).href;
 
 const personLd = {
-  '@context': 'https://schema.org',
   '@type': 'Person',
   name: 'Arsenio Colón',
   alternateName: 'Arsenio Colon',
@@ -53,6 +64,24 @@ const personLd = {
     publisher: { '@type': 'Organization', name: 'WGRZ' },
   },
 };
+
+/**
+ * The Person above describes Arsenio; this describes the page *about* him, with
+ * the Person hanging off `mainEntity`. That's the shape schema.org documents for
+ * a personal site, and it's what lets a consumer tell "a page that mentions
+ * someone" apart from "that person's own page".
+ */
+const profilePageLd = {
+  '@context': 'https://schema.org',
+  '@type': 'ProfilePage',
+  '@id': canonical,
+  url: canonical,
+  name: title,
+  description,
+  primaryImageOfPage: ogImageUrl,
+  inLanguage: 'en-US',
+  mainEntity: personLd,
+};
 ---
 
 <!doctype html>
@@ -64,17 +93,31 @@ const personLd = {
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
 
+    <meta name="author" content="Arsenio Colón" />
+
     <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Arsenio Colón" />
+    <meta property="og:locale" content="en_US" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
     <meta property="og:image" content={ogImageUrl} />
+    <meta property="og:image:type" content="image/png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={ogImageAlt} />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImageUrl} />
+    <meta name="twitter:image:alt" content={ogImageAlt} />
+
+    {/* rel="me" is the cheap half of identity verification: it asserts from a
+        domain he controls that these accounts are his, which is the direction
+        `sameAs` in the JSON-LD can't prove on its own. */}
+    <link rel="me" href="https://www.linkedin.com/in/arsenio-colon/" />
+    <link rel="me" href="https://github.com/Klecoz" />
+    <link rel="me" href="https://klecoz.itch.io" />
 
     {/* Both variants ship so a JS-less visitor still follows their OS. Once a theme
         has been stored, the script below rewrites both to the same value — otherwise
@@ -90,10 +133,28 @@ const personLd = {
     <link rel="icon" type="image/svg+xml" href="/logo.svg" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-    {/* No font preloads: the stylesheet is inlined, so @font-face is already in
-        the first parse. Preloading on top of that just warns about unused hints. */}
+    {/* No font preloads — but not for the reason once recorded here. Inlining the
+        stylesheet puts @font-face in the first parse; it does not start the
+        *fetch*, because a browser waits until layout proves a face is used. A
+        preload for the two above-the-fold faces would genuinely save about one
+        round trip. It's left off because 97KB of woff2 with font-display: swap
+        never blocks render, and the hero is legible in the fallback either way. */}
 
-    {person && <script is:inline type="application/ld+json" set:html={JSON.stringify(personLd)} />}
+    {/* .reveal sits at opacity 0 until the observer at the bottom of this file
+        fires, so with JS off the page is a hero and nothing else — no timeline,
+        no contact block, no project cards. Same failure the print stylesheet
+        already guards against, and the same one-line shape of fix. */}
+    {/* is:inline is load-bearing: without it the compiler scopes this to
+        .reveal[data-astro-cid-…] and hoists it out of the <noscript>, which
+        would match nothing and silently do nothing. */}
+    <noscript>
+      <style is:inline>.reveal { opacity: 1 !important; transform: none !important; }</style>
+    </noscript>
+
+    {person && <script is:inline type="application/ld+json" set:html={JSON.stringify(profilePageLd)} />}
+
+    {/* Per-page <head> additions: extra JSON-LD, robots directives. */}
+    <slot name="head" />
 
     {/* Applies the stored theme before first paint so there's no flash, and pins the
         browser chrome to it so a dark page never sits under a white status bar. */}
@@ -120,7 +181,7 @@ const personLd = {
   <body>
     <a class="skip" href="#main">Skip to content</a>
     <Nav />
-    <main id="main">
+    <main id="main" tabindex="-1">
       <slot />
     </main>
     <Footer />

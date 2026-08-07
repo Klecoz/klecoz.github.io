@@ -6,6 +6,11 @@ import Base from '../layouts/Base.astro';
   title="Page not found — Arsenio Colón"
   description="That page doesn't exist on arseniocolon.com."
 >
+  {/* GitHub Pages serves this with a real 404 status, so it wouldn't be indexed
+      anyway — but the /games and /projects stubs say so explicitly and there's
+      no reason for this one to be the exception. */}
+  <meta slot="head" name="robots" content="noindex" />
+
   <section class="nf">
     <div class="wrap">
       <p class="label">404</p>
@@ -63,6 +68,6 @@ import Base from '../layouts/Base.astro';
     border-color: var(--accent-solid);
     color: var(--bg);
   }
-  .btn-ghost { border: 1px solid var(--rule); color: var(--fg); }
+  .btn-ghost { border: 1px solid var(--rule-control); color: var(--fg); }
   .btn-ghost:hover { border-color: var(--fg); }
 </style>
