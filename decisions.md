@@ -336,6 +336,25 @@ original nav *relies* on "Side projects" wrapping to two lines to fit at 320px. 
 and after — `.mark` right edge at 124px, links left edge at 140px, a 16px gap — and `nowrap`
 turned that gap into an overlap. The geometry now matches the pre-change nav exactly.
 
+### Centring the collapsed toggle with `justify-content`, not `place-items`
+
+The 2rem square below 34rem centred its icon vertically and not horizontally, because the rule
+used `place-items: center` on a flex container. Flexbox ignores the `justify-items` half of that
+shorthand, so only `align-items` landed.
+
+**Rejected:** switching `.toggle` to `display: grid` under the media query, which would have made
+the original `place-items` line work as written. It changes the box model of the control at one
+breakpoint only, for no gain — the desktop layout genuinely is a flex row of icon-then-label, and
+having the same element be flex at one width and grid at another is a trap for the next person
+editing it. `justify-content: center` is one property, works with the existing display mode, and
+leaves the two widths structurally identical.
+
+Also rejected: padding the square by hand. It would have centred the icon at exactly one border
+width and gone wrong the moment `--rule-control` or the icon size changed.
+
+The comment on the fix names the flexbox/`justify-items` interaction, because the broken version
+looked correct and would be rewritten back to `place-items` by anyone who did not know that rule.
+
 ### Two pages, permanently — **[AC]**
 
 No notes section, no blog, no RSS, no `@astrojs/rss`. Asked directly whether the two-page shape

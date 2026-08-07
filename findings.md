@@ -8,6 +8,57 @@ which is the part that saves the most time.
 
 ---
 
+## 2026-08-07 — mobile theme-toggle centring
+
+Prompted by "the dark/light/system toggle icon on mobile is off centre". It was. Measured
+against the running dev server with Playwright, reading `getBoundingClientRect()` on the button
+and on whichever icon `data-state` had visible.
+
+### The icon sat flush against the left border below 34rem
+
+| Width | Button | Icon gap left / right | Icon gap top / bottom |
+|---|---|---|---|
+| 320px, before | 32×32 | **1px / 15px** | 8px / 8px |
+| 320px, after | 32×32 | 8px / 8px | 8px / 8px |
+| 390px, after | 32×32 | 8px / 8px | 8px / 8px |
+| 430px, after | 32×32 | 8px / 8px | 8px / 8px |
+
+Vertical centring was always correct, which is why this reads as a subtle lean rather than an
+obviously broken control — `align-items: center` on the base `.toggle` rule was doing that job
+the whole time.
+
+**Cause.** The `max-width: 34rem` block collapsed the control to a 2rem square with
+`place-items: center`. `place-items` is shorthand for `align-items` + `justify-items`, and a
+flex container ignores `justify-items` outright — so the horizontal half silently did nothing
+and `justify-content` stayed at its `normal` initial value. Confirmed rather than assumed:
+computed style on the button read `justify-content: normal` and `justify-items: center`
+together, which is the fingerprint of exactly this mistake. The 16px icon in a 30px content box
+left all 14px of slack on the right.
+
+Fixed with `justify-content: center`. Checked in all three stops (`system` / `light` / `dark`),
+since each is a separate SVG and only one is `display: block` at a time — all three now report
+8/8 on both axes.
+
+### Things this did not break, checked because they were at risk
+
+- **Nav geometry below 34rem is byte-identical to what `decisions.md` pins.** `.mark` right
+  edge at 124.3px, nav-links left edge at 140.3px, the same 16px gap recorded when the label was
+  first dropped. The toggle still occupies 268–300px. `document.scrollWidth` equals
+  `clientWidth` at 320 / 390 / 430px, so nothing gained a horizontal scrollbar.
+- **The control is still a 32×32 target**, unchanged. Only the icon moved inside it.
+- `npm run axe` clean across all 12 scans, `npm run snap` clean on both pages, `astro check`
+  0/0/0, `dist` 632 KB.
+
+### A measurement trap worth recording
+
+A first pass checked centring at 560px too and reported three failures. Those were not real:
+560px is above the 34rem (544px) breakpoint, so the label is visible and the icon is *supposed*
+to sit left of the text with the pair centred as a unit. The square-button symmetry rule only
+applies below the breakpoint. Any future geometry check on this control has to be
+breakpoint-aware or it will cry wolf.
+
+---
+
 ## 2026-08-07 — visual polish pass
 
 Prompted by "anything we can do for some visual polish?". Everything below was measured

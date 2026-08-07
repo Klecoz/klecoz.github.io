@@ -380,6 +380,12 @@ visible word beside it says the same thing, and both drop below 34rem where the 
 fit. `aria-pressed` was deliberately removed: it can only answer pressed or not-pressed about
 something with three states. Don't add it back.
 
+The collapsed square centres its icon with `justify-content: center`, and that is not a
+long-hand someone forgot to shorten. `place-items` was there first and left the icon flush
+left: it expands to `align-items` + `justify-items`, and a flex container ignores
+`justify-items`. Changing it back re-breaks the alignment silently, since the vertical axis
+keeps working either way.
+
 **"System" is the absence of a stored value.** There is no `theme=system` in `localStorage` —
 returning to that stop deletes the key and the `data-theme` attribute, which is what lets the
 media query take over again. It also rewrites both `theme-color` metas back to their own

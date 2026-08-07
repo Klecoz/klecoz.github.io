@@ -95,7 +95,10 @@
       padding: 0;
       width: 2rem;
       min-height: 2rem;
-      place-items: center;
+      /* justify-content, not the justify-items half of `place-items`, which a
+         flex container ignores — that left the 16px icon flush against the
+         border with all 14px of slack on its right. */
+      justify-content: center;
     }
     .t-l { display: none; }
   }
