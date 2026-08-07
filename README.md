@@ -9,10 +9,25 @@ npm run dev        # http://localhost:4321, hot reload
 npm run check      # astro check — typechecks .astro files and content collections
 npm run build      # → dist/
 npm run preview    # serve dist/ exactly as production will
+npm run axe        # WCAG A/AA scan, both pages + the 404, light and dark
+                   # needs a preview server already running
 ```
 
 `npm run check` is currently clean at zero errors, warnings and hints, and CI runs it before
 the build — so anything it reports is a real regression, not pre-existing noise.
+
+### Where things are written down
+
+| File | What it holds |
+|---|---|
+| `README.md` | How to run, deploy, and edit this. The operational manual. |
+| `findings.md` | Measured facts about the site — what was checked, with numbers and dates. Read before re-auditing anything. |
+| `decisions.md` | Choices made and the alternatives rejected, with reasons. Read before changing something that looks arbitrary. |
+| `.ui-craft/brief.md` | Design direction, voice rules, banned phrases, and constraints from Arsenio. |
+| `.ui-craft/tokens.md` | The token spine, with contrast ratios and the casing rule. |
+
+`findings.md` and `decisions.md` exist because this repo has more decided-and-forgotten than
+it has code. Both get updated at the end of any working session — see `CLAUDE.md`.
 
 ---
 
@@ -253,16 +268,50 @@ the server, so this can't be a redirect — it's a small inline script in `src/p
 The `/games` and `/projects` *paths* are handled properly in `astro.config.mjs`.
 
 **Stylesheets are inlined** (`inlineStylesheets: 'always'`). About 22 KB, which buys back
-two render-blocking round trips and means fonts start loading during the first parse. That's
-also why there are no `<link rel="preload">` font hints — they'd be redundant and Chrome
-would warn about them.
+two render-blocking round trips.
+
+**There are no font preloads, but not for the reason once written here.** Inlining the
+stylesheet puts `@font-face` in the first parse; it does *not* start the fetch, because a
+browser waits until layout proves a face is used. A preload for the two above-the-fold
+faces would genuinely save about a round trip. It's left off because 104 KB of woff2 with
+`font-display: swap` never blocks render — not because it would be redundant.
+
+**The build deletes files it just emitted.** `scripts/prune-assets.mjs` removes anything in
+`dist/_astro/` that no built page references, and logs what it freed. This exists because
+`image()` in a content-collection schema makes Astro emit each screenshot's *original*
+alongside the `<Image>` derivatives — ten files, 1.3 MB, referenced by nothing, which was
+about 70% of the artifact. The headshot is the tell: it's a plain ESM import in `Nav.astro`
+rather than a collection field, and it has no orphan.
+
+Two consequences worth knowing. It bails out entirely if it finds a JS chunk in `_astro/`,
+since a chunk could build an asset URL at runtime and escape a static scan — so adding a
+framework island silently disables the prune, and the byte budget in `.lighthouserc.yml` is
+what would catch that. And **never reference `entry.data.image.src`**: that path *is* the
+original, so naming it anywhere pins all ten back into the build. The JSON-LD in
+`side-projects.astro` goes through `getImage()` with the same widths the cards request,
+which reuses a derivative that already ships.
 
 **Fonts are self-hosted** in `public/fonts/` (104 KB, seven faces, Latin subset). No Google
 Fonts request at runtime, by design.
 
-**There is a print stylesheet, and it is load-bearing.** `.reveal` elements sit at `opacity: 0`
-until IntersectionObserver fires, so without the `@media print` block in `tokens.css` anyone who
-hit Cmd-P before scrolling got a page with no timeline on it at all. The block also forces the
+**`.reveal` has two escape hatches, and both are load-bearing.** The class sits at
+`opacity: 0` until IntersectionObserver fires, which means anything that isn't a scrolling
+browser sees a blank page. Two things opt out:
+
+- **`<noscript>` in `Base.astro`.** With JS disabled the observer never runs, so the hero
+  rendered and *everything below it* — the whole timeline, Education, Community, Contact,
+  all ten project cards — was invisible. The `<style>` inside it carries `is:inline`; without
+  that the compiler scopes it to `.reveal[data-astro-cid-…]`, hoists it out of the
+  `<noscript>`, and it silently matches nothing.
+- **The print block**, below.
+
+There's a third case that isn't a fix but a testing trap: axe reports `color-contrast` as
+*incomplete* on a transparent element, so an accessibility scan of this site passes while
+checking almost nothing unless it forces reduced motion first. `scripts/axe-scan.mjs` does.
+
+**There is a print stylesheet, and it is load-bearing.** Same root cause: without the
+`@media print` block in `tokens.css` anyone who hit Cmd-P before scrolling got a page with
+no timeline on it at all. The block also forces the
 light tokens, drops the nav and the CTAs, restates the amber `Current` chip as an outline
 (backgrounds don't print), and suppresses the citation URLs, which run past 100 characters.
 The brief rules out a resume PDF; this is the paper copy instead.
@@ -287,8 +336,9 @@ canonical tags agree on one URL per page.
 
 ## Health check
 
-Both pages score 100 on Lighthouse performance, accessibility and SEO. Worth re-running
-after any significant change:
+Both pages score 100 on Lighthouse performance, accessibility and SEO. CI now guards the
+half of that which is deterministic; the rest is still worth re-running by hand after any
+significant change:
 
 ```bash
 npm run build
@@ -298,3 +348,57 @@ npx astro preview stop
 ```
 
 Best Practices sits at 81 on localhost purely because it isn't HTTPS. In production it's 100.
+
+### What CI checks
+
+```
+.github/workflows/pr.yml        ← pull requests only
+   ├─ npm run check
+   ├─ npm run build
+   └─ scripts/assert-cname.sh
+
+.github/workflows/audit.yml     ← pull requests and master
+   ├─ Lighthouse CI             ← a11y 100 and the SEO audits gate; scores advise
+   ├─ byte budgets              ← total weight, fonts, scripts, third parties
+   └─ npm run axe               ← both pages plus the 404, light theme and dark
+
+.github/workflows/links.yml     ← Mondays
+   └─ lychee over dist/         ← files an issue, never a red X
+```
+
+**Scores don't gate; bytes do.** Performance scores swing five to ten points on a shared
+runner, so a hard assertion on them would fail often enough to get the workflow deleted.
+What CI actually enforces is weight — total transfer, the fonts, the couple of KB of
+script, and no new third-party requests — because those numbers are the same on every run.
+Performance, SEO and Best Practices are asserted as warnings so the number stays visible.
+Measured 2026-08-07: `/side-projects` is the heavier page at about 194 KB fully scrolled,
+against a 350 KB ceiling.
+
+**axe exists for dark mode.** Lighthouse's accessibility category is axe-core already, but
+it only ever measures the default colour scheme — and `--accent` vs `--accent-solid` is a
+contrast trap that only bites on one theme. `npm run axe` scans both, against a preview
+server. It forces reduced motion so the `.reveal` sections are actually visible when
+contrast is measured; without that they sit at `opacity: 0` and axe reports every contrast
+check as *incomplete*, which passes by saying nothing. Same family as the print-stylesheet
+bug below.
+
+To convince yourself it works, put `var(--rail)` back on `.cite .weight` in `index.astro`
+and re-run — it should fail on both themes.
+
+**Link rot files an issue, it does not turn Actions red.** A scheduled job that stays
+failing makes a red Actions tab normal, and the deploy lives in that tab. `link-rot` is the
+label; one issue gets re-commented and auto-closed rather than duplicated weekly.
+
+**Two hosts are excluded and will stay excluded.** Probed 2026-08-07 with a browser
+user-agent from a residential IP — the friendliest case a checker ever gets:
+
+| Host | Result | Why it's ignored |
+|---|---|---|
+| `linkedin.com` | `999` on the profile | Their block code. Datacenter IPs are hard-blocked; no user-agent fixes it. |
+| `wgrz.com` | `403` | Bot protection. This is the press citation, so the exclusion genuinely costs something — re-probe it by hand now and then. |
+
+Everything else answered `200`/`206`, including the 12 MB Buffalo State PDF. See
+`.lycheeignore`.
+
+**GitHub disables scheduled workflows after 60 days without a commit.** If the link check
+goes quiet, check that first — silence is not the same as "no rot".
