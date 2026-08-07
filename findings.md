@@ -262,6 +262,59 @@ value changed.
 
 ---
 
+## 2026-08-07 — third session
+
+### Font hosting: verified local at runtime, not just in source
+
+Asked to confirm no font is fetched from a third party. Nothing was wrong and nothing changed;
+what this section adds is the *method*, because "no CDN" had only ever been asserted from
+reading `tokens.css`.
+
+Three independent checks, all clean:
+
+- **Source.** All seven `@font-face` rules (`src/styles/tokens.css:7-40`) use
+  `url('/fonts/*.woff2')`. A repo-wide grep for `fonts.googleapis`, `fonts.gstatic`, `typekit`,
+  `fontshare` and `@import` returns nothing. `Base.astro` has no `preconnect`, `dns-prefetch` or
+  stylesheet `<link>` to any font host — its only `<link>`s are canonical, three `rel="me"`, and
+  the three icons.
+- **Build output.** Every `url()` in the emitted HTML across all three pages resolves to
+  `/fonts/…woff2`; the seven files land in `dist/fonts/` and `file(1)` confirms each is a real
+  WOFF2 binary (10–16 KB), not a placeholder or an LFS pointer.
+- **Runtime.** Loaded `/`, `/side-projects` and `/no-such-page` in Chrome against
+  `npm run preview`, recorded every request, and forced all declared faces via
+  `document.fonts` so lazily-fetched weights would also appear. All 7 font requests went to
+  `127.0.0.1:4321/fonts/`; all 7 `FontFace` entries reported `loaded`; computed first-choice
+  families on rendered text were Barlow, Barlow Condensed and IBM Plex Mono — the local faces,
+  so nothing silently fell through to `system-ui`.
+
+The only off-origin request on any page is `gc.zgo.at/count.js`, the analytics script, which is
+expected. Worth noting for the next person: on `/` it appeared **twice**, as `http://` then
+`https://`. That is a scheme upgrade under a plain-HTTP preview server, not a duplicate tag —
+`Base.astro` carries one script element and production is HTTPS-only.
+
+The check script was scratch, not committed; it is ~50 lines of `playwright-core` and is cheap
+to rewrite.
+
+### Playwright's browsers were missing, and `npm run axe` was silently broken
+
+Writing the runtime check above turned this up as a side effect. `chromium.launch()` failed:
+the cache held build **1223**, while `playwright-core` 1.62 pins **1234**. The scratch check got
+past it with `channel: 'chrome'` (the system Chrome), but `npm run axe` has no such escape and
+was failing to launch at all — so the accessibility gate had been unrunnable locally, and would
+read as a tooling error rather than a violation.
+
+Fixed by `npx playwright install chromium` (~275 MB, Chrome for Testing 151 plus the headless
+shell). `npm run axe` then ran **12 scans clean, no WCAG A/AA violations** — unchanged from the
+last recorded run, so nothing regressed while the gate was down. CI was never affected; the
+audit workflow installs browsers on a fresh runner every time.
+
+Also corrected `CLAUDE.md`, which told the next session to expect **6 scans**. It has been 12
+since the mobile viewport was added as a third axis (see the second 2026-08-07 section);
+`README.md` already said 12 in both places. A checklist that under-reports its own coverage is
+how a half-run gate passes for "clean".
+
+---
+
 ## Already correct — do not re-suggest
 
 Checked this session and found properly handled. Several of these look like obvious
@@ -271,7 +324,7 @@ improvements from the outside.
 stylesheet); zero JS chunks, ~2 KB of inline module script; images through the Astro pipeline
 as WebP with explicit `widths`/`sizes`, `loading="lazy"`, and `width`/`height` set so there is
 no CLS; `aspect-ratio` reserved on card images; fonts self-hosted with `font-display: swap`,
-no CDN.
+no CDN — confirmed at runtime on 2026-08-07, see the third session above for how.
 
 **Design system** — a real three-layer token spine, documented separately; dark mode as a
 designed palette rather than an inversion, with `[data-theme]` correctly beating the media

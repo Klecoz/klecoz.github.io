@@ -59,7 +59,7 @@ rules and banned-phrase list are in `.ui-craft/brief.md`; the banned list includ
 npm run check                       # must be 0 errors, 0 warnings, 0 hints
 npm run build                       # watch the prune line; dist should be ~630 KB
 npm run preview -- --host 127.0.0.1 --port 4321 &
-npm run axe                         # 6 scans, must be clean
+npm run axe                         # 12 scans, must be clean
 bash scripts/assert-cname.sh
 ```
 
