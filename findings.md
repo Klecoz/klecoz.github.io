@@ -140,9 +140,31 @@ CI blocks match `gc.zgo.at` (the *script* host, which was always correct) rather
 From the dashboard it is indistinguishable from a new site nobody has visited yet. Nothing short
 of resolving the host would have caught it.
 
-**Still unverified end to end:** a real hit landing on the `klecoz` dashboard. That needs a deploy
-plus Arsenio's login. Verified so far: the correct host reaches the built HTML, and the host
-answers 303 rather than 400.
+**Deployed and spot-checked** at `ddb48ac`. Live HTML carries the `klecoz` endpoint, and
+`klecoz.goatcounter.com/count?p=/deploy-verify` returns **200**, so the account accepts hits.
+
+### Arsenio's own Chrome blocks the analytics script — a measurement trap
+
+Trying to confirm the fix end to end found a second, unrelated thing, and it is the more useful
+finding of the two because it will mislead anyone who checks this later:
+
+| Client, same machine and network | `https://gc.zgo.at/count.js` |
+|---|---|
+| `curl` | **200**, 9,213 bytes |
+| Chrome, fresh profile, no extensions loaded by the harness | **204**, 0 bytes |
+
+`window.goatcounter` is `undefined` after load, so the script never runs and no hit is sent.
+`navigator.doNotTrack` is `null`, so that is not the cause; the network trace also shows requests
+to random-looking first-party paths on `arseniocolon.com` that the site does not serve, which is
+blocker machinery rather than anything in `dist/`.
+
+**Consequence worth remembering: Arsenio does not appear in his own analytics.** Loading the site
+himself and seeing no hit is *not* evidence the tag is broken — which is exactly the wrong
+conclusion to draw twice about the same feature. Verify from a different browser, or look for the
+`/deploy-verify` hit fired by hand during this session.
+
+The site-side facts are all confirmed. What remains is only reading the dashboard, which needs
+Arsenio's login.
 
 ### WCAG 2.2 — measured, all four pass
 
