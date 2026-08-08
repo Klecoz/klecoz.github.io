@@ -7,6 +7,24 @@ Decisions Arsenio made himself are marked **[AC]**. Those don't get revisited wi
 
 ---
 
+## 2026-08-08 — the Work heading's role count
+
+### `Six roles` was removed; `2018 to now` stands alone — **[AC]**
+
+Arsenio asked for the count to go. It was a hardcoded literal that duplicated a number the
+content collection already knows, so removing it also removed a drift risk (see `findings.md`,
+sixth session).
+
+Rejected:
+
+- **Deriving the count from the collection** (`{roles.length} roles · 2018 to now`) — would have
+  fixed the drift while keeping the number. Not what was asked for; the ask was for the span to
+  stand on its own, not for a more correct count.
+- **Keeping the middot as a leading mark** (`· 2018 to now`) — a separator with nothing on its
+  left is decoration. Cut.
+
+---
+
 ## 2026-08-08 — the bio's last sentence
 
 ### The line was reworded, and nothing was added to it — **[AC]**

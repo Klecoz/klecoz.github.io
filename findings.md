@@ -8,6 +8,40 @@ which is the part that saves the most time.
 
 ---
 
+## 2026-08-08 — sixth session: dropping the role count from the Work heading
+
+One-word-scale copy change to `src/pages/index.astro:144`. The label read
+`Six roles&nbsp;· 2018 to now`; it now reads `2018 to now`. Everything below was run.
+
+### The full gate passed
+
+| Check | Result |
+|---|---|
+| `npm run check` | 16 files, 0 errors / 0 warnings / 0 hints |
+| `npm run build` | 3 pages, prune line: 10 assets (1318 KB) |
+| `du -sk dist` | 632 KB — unchanged from the previous session |
+| `npm run axe` | 12 scans, no WCAG A/AA violations |
+| `bash scripts/assert-cname.sh` | `CNAME ok: arseniocolon.com` |
+
+### The count was hardcoded and had no link to the data
+
+`Six roles` was a literal in `index.astro`, while the timeline renders from
+`src/content/experience/` — six files today (`1-seneca` … `6-campuslabs`). Verified by
+`ls src/content/experience/ | wc -l` → 6. So the number happened to be right, but nothing kept
+it right: adding a seventh entry file would have left the heading saying "Six roles" with seven
+rows under it. Removing the count removes that drift class entirely. **Do not re-add it as a
+literal** — if the count ever comes back it should be derived from the collection length, the
+way `/side-projects` already does it (`{games.length} projects`, `side-projects.astro:108`).
+
+### The `&nbsp;·` separator went with it
+
+The label was the only place on the index page using the `&nbsp;·` pattern to hold a separator
+against its left-hand word. With one segment left there is nothing to separate, so both the
+entity and the middot were removed rather than left dangling. The identical pattern elsewhere
+(`README.md`'s "looks like a bug but isn't" list) is untouched and still deliberate.
+
+---
+
 ## 2026-08-08 — fifth session: what a longer bio paragraph costs the hero
 
 Copy-only change to `src/pages/index.astro`. Everything below was run, not reasoned. The gate was
