@@ -82,6 +82,17 @@ Corrections from Arsenio, binding on all future work:
 - **The bio and How I work are his own words.** Both were supplied verbatim and go in unedited
   apart from proper-noun casing. *Why:* he wrote them himself; a rewrite pass would sand off the
   voice this brief exists to protect.
+- **New bio copy gets chosen, not written for him.** *Added 2026-08-08.* When he asks to extend
+  the prose, ask first — what the line has to mean, who it is aimed at, how long it runs — then
+  put full rendered drafts in front of him and let him pick. *Why:* it keeps the verbatim rule
+  intact while still letting the copy move; handing him a finished rewrite does not.
+- **The bio never says what kind of engineer he is.** *Added 2026-08-08.* It names systems and
+  lets those carry it. A drafted addition — "I'd rather find the problem before it gets reported
+  … than close the same ticket again next month. Some of that is already how I work" — was built
+  and then cut as cheesy. He named the three tells: the `I'd rather X than Y` contrast that costs
+  nothing to claim, the `already how I work` self-assessment, and the ticket set-piece that reads
+  like a LinkedIn post. Character claims, preferences and standards are the wrong shape for this
+  paragraph however they're worded. See `decisions.md`.
 - **No "open to work" banner and no resume PDF.** Contact links do that work, and `@media print`
   in `tokens.css` covers anyone who wants a paper copy. *Why:* a status line goes stale and a PDF
   drifts out of sync with the site — a print stylesheet can't.

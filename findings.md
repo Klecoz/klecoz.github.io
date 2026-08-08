@@ -8,6 +8,56 @@ which is the part that saves the most time.
 
 ---
 
+## 2026-08-08 — fifth session: what a longer bio paragraph costs the hero
+
+Copy-only change to `src/pages/index.astro`. Everything below was run, not reasoned. The gate was
+run twice — once on a five-sentence version of the paragraph that was then cut, once on the
+four-sentence version that shipped. Both passed identically; only the layout numbers moved.
+
+### The full gate passed on the shipped text
+
+| Check | Result |
+|---|---|
+| `npm run check` | 0 errors, 0 warnings, 0 hints (16 files) |
+| `npm run build` | `dist` 632 KB; prune line: 10 unreferenced assets, 1318 KB |
+| `npm run axe` | 12 scans clean, no WCAG A/AA violations |
+| `npm run snap` | 2 pages, print stylesheet intact |
+| `scripts/assert-cname.sh` | `CNAME ok: arseniocolon.com` |
+
+`npm run snap` was run even though nothing touched `.reveal`, layout or tokens — it is cheap and
+it is the check most likely to be skipped when a change "is only text".
+
+### Measured: one extra sentence pair costs 2 desktop lines and 3 mobile lines
+
+Chrome via playwright at 1440×900 and 390×844, `deviceScaleFactor: 2`, dividing the paragraph's
+`getBoundingClientRect().height` by its computed `line-height`:
+
+| Version of paragraph 1 | Desktop | Mobile |
+|---|---|---|
+| 4 sentences (**shipped**) | 6 lines · 163 px | 10 lines · 272 px |
+| 5 sentences (drafted, cut) | 8 lines · 218 px | 13 lines · 354 px |
+
+No horizontal overflow in either. This is the number to reach for if more bio prose is ever
+proposed: on mobile the five-sentence version pushed the Work/LinkedIn buttons a further 82 px
+down, and those buttons are the only conversion on the page. Two added sentences is roughly a
+30% taller hero paragraph on a phone.
+
+### `day-to-day` does not break across lines at either width
+
+Checked in the rendered screenshots, not assumed. A hyphenated compound is a legal break point in
+CSS, so `day-` could in principle end a line; at both tested widths it does not, and no
+`&nbsp;`-style intervention was added. If the type scale or wrap width changes, re-check — same
+failure mode that `.NET 10` and the `·` separators already carry fixes for.
+
+### Screenshotting from the scratchpad fails; run it from the repo root
+
+`node /path/to/scratchpad/shot.mjs` throws `ERR_MODULE_NOT_FOUND: playwright-core` — Node resolves
+bare imports upward from the *script's* directory, and the scratchpad has no `node_modules` above
+it. Copy the script into the repo root, run it, delete it. Applies to any throwaway script that
+imports a project dependency.
+
+---
+
 ## 2026-08-07 — fourth session: provenance of the community and EquityOne claims
 
 Prompted by "where does the *Tech Talks and Tech Academy mentoring* claim come from?". Traced

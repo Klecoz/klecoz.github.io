@@ -7,6 +7,66 @@ Decisions Arsenio made himself are marked **[AC]**. Those don't get revisited wi
 
 ---
 
+## 2026-08-08 — the bio's last sentence
+
+### The line was reworded, and nothing was added to it — **[AC]**
+
+The bio used to end "My vision is to be more proactive and less reactive." Arsenio asked to
+extend it and to be walked through the copy by question rather than handed a rewrite. Two
+sentences were drafted, chosen, built, screenshotted — and then cut. What shipped is his own
+sentence with two changes he picked:
+
+> …and help out with Nintex/WEBCON workflows. **I want to be more proactive and less reactive
+> with day-to-day engineering.**
+
+`day to day` → `day-to-day` (standard as a compound adjective) and `My vision is` → `I want`
+("vision" was the one corporate word in a paragraph that otherwise has none). Both were offered
+against an explicit "keep everything as written" option. He took them; they are not edits made
+on his behalf.
+
+### The addition was cut for sounding cheesy — **[AC]**
+
+The drafted pair was: *"I'd rather find the problem before it gets reported and fix what's
+underneath it than close the same ticket again next month. Some of that is already how I work,
+and I want to be more proactive and less reactive with day-to-day engineering."* He rendered it
+and called it cheesy. Asked which part, he named three:
+
+| Named as cheesy | Why it reads that way |
+|---|---|
+| `I'd rather X than Y` | Announces a virtue at no cost. Nobody claims the opposite, so the contrast is free. |
+| `already how I work` | Self-assessment. Tells the reader he's good at it instead of letting the named systems show it. |
+| `close the same ticket again next month` | A set-piece. Reads like a LinkedIn post, not like him. |
+
+**The binding rule:** the bio does not make claims about what kind of engineer he is. It names
+systems and lets those carry it. Any future addition that describes his character, his
+preferences, or his standards is the wrong shape for this paragraph no matter how it's worded.
+
+Three alternative rewrites were on the table and all were declined in favour of cutting: pointing
+back at the IAM platform and dashboard as the proof, defining "proactive" in a subordinate clause,
+and reverting outright so he could write the rest himself.
+
+### The seven questions, recorded so the ground isn't re-covered
+
+He asked to be guided by Q&A. His answers still stand even though the copy they produced was cut,
+and they constrain whatever gets written next:
+
+| Question | His answer |
+|---|---|
+| What does *proactive* mean concretely? | Catching it before it's reported · building so it doesn't come back · lowering the interrupt load. Not "getting into decisions earlier". |
+| Already true, or a direction? | Both. |
+| What should a hiring manager take away? | "He thinks in systems, not tickets" — over "cuts our firefighting", "brings things unasked", "owns it end to end". |
+| How long? | Two sentences — *later reversed to none.* |
+| Which draft? | A, the root-cause contrast — *later cut.* |
+| Keep the "already doing it" half? | Keep but flip — *later cut.* |
+| Mechanical calls | Hyphenate; drop "My vision is". **Both shipped.** |
+
+Consequence worth knowing: the page now reads `day-to-day engineering` in paragraph one and `in
+my day to day` in paragraph two. Both are standard (hyphenated as an adjective, open as a noun)
+and the second is his original v1 wording, so it was left alone rather than harmonised. Flagged
+to him; no instruction to change it.
+
+---
+
 ## 2026-08-07 — the EquityOne line
 
 ### It stays in the M&T timeline entry; it does not move to Community — **[AC]**
