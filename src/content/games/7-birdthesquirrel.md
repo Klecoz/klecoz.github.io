@@ -3,6 +3,7 @@ order: 7
 title: Bird the Squirrel
 tag: Platformer
 year: "2019"
+dimension: 2D
 image: ../../assets/games/birdthesquirrel.png
 links:
   - label: Press

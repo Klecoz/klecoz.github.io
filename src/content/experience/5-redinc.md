@@ -4,7 +4,7 @@ role: Software Developer
 org: RED-INC
 orgFull: Research and Engineering Development, Inc.
 location: Buffalo, NY
-employment: Full-time
+employment: Full-time · Hybrid
 start: Sep 2019
 end: Feb 2020
 startISO: 2019-09

@@ -105,48 +105,11 @@
 }
 
 /* ---------- layer 2: semantic ---------- */
-:root {
-  --bg: var(--steel-100);
-  --surface: #ffffff;
-  --surface-sunk: var(--steel-200);
-  --fg: var(--ink);
-  --muted: var(--steel-600);
-  --rule: var(--steel-300);
-  /* Dividers can be whisper-thin; a control's only edge cannot. 3.45:1 on
-     --bg, and 3.14:1 on --surface-sunk, which is the ground that decides it. */
-  --rule-control: var(--steel-540);
-  --rule-heavy: var(--ink);
-  --accent: var(--amber-500);
-  --accent-hover: var(--amber-600);
-  /* Amber as a *background* needs the darker step so light text clears 4.5:1. */
-  --accent-solid: var(--amber-600);
-  --focus: var(--amber-500);
-  --rail: var(--rail-light);
-  color-scheme: light;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: var(--steel-950);
-    --surface: var(--steel-900);
-    --surface-sunk: var(--steel-800);
-    --fg: var(--chalk);
-    --muted: var(--steel-500);
-    --rule: var(--steel-800);
-    /* 3.92:1 on --bg, 3.20:1 on --surface-sunk — see the light block. */
-    --rule-control: var(--steel-560);
-    --rule-heavy: var(--chalk);
-    --accent: var(--amber-400);
-    --accent-hover: var(--amber-300);
-    /* On dark the bright amber already clears 4.5:1 behind dark text. */
-    --accent-solid: var(--amber-400);
-    --focus: var(--amber-400);
-    --rail: var(--rail-dark);
-    color-scheme: dark;
-  }
-}
-
-/* Manual toggle must beat the media query in both directions. */
+/* Dark is the default and the OS gets no vote: the toggle has two stops, and a
+   cold visitor lands on dark whatever `prefers-color-scheme` says. Light is a
+   designed peer, not an inversion — it is one stored preference away, and it is
+   still reviewed and contrast-checked at the same standard. */
+:root,
 :root[data-theme='dark'] {
   --bg: var(--steel-950);
   --surface: var(--steel-900);
@@ -154,7 +117,9 @@
   --fg: var(--chalk);
   --muted: var(--steel-500);
   --rule: var(--steel-800);
-  /* 3.92:1 on --bg, 3.20:1 on --surface-sunk — see the light block. */
+  /* A hairline that is the *only* boundary of a control has to clear 3:1 (WCAG
+     2.2 SC 1.4.11), which --rule never did. 3.92:1 on --bg, 3.20:1 on
+     --surface-sunk, which is the ground that decides it. */
   --rule-control: var(--steel-560);
   --rule-heavy: var(--chalk);
   --accent: var(--amber-400);
@@ -165,6 +130,10 @@
   --rail: var(--rail-dark);
   color-scheme: dark;
 }
+
+/* The only stop that overrides the default, so it is the only attribute block
+   that has to exist. `data-theme` is always written explicitly, though — dark
+   as "the attribute is absent" was the trap the three-stop control shipped. */
 :root[data-theme='light'] {
   --bg: var(--steel-100);
   --surface: #ffffff;
@@ -172,8 +141,7 @@
   --fg: var(--ink);
   --muted: var(--steel-600);
   --rule: var(--steel-300);
-  /* Dividers can be whisper-thin; a control's only edge cannot. 3.45:1 on
-     --bg, and 3.14:1 on --surface-sunk, which is the ground that decides it. */
+  /* 3.45:1 on --bg, 3.14:1 on --surface-sunk — see the dark block. */
   --rule-control: var(--steel-540);
   --rule-heavy: var(--ink);
   --accent: var(--amber-500);
@@ -221,7 +189,12 @@ p, li, blockquote, figcaption, dd {
 }
 
 p { margin: 0; }
-ul { margin: 0; padding: 0; list-style: none; }
+/* `ol` as well as `ul`, and it is not decorative. The timeline is the only
+   ordered list on the site, and without it the UA's 40px `padding-inline-start`
+   survived: the whole rail sat 40px right of every section heading above it,
+   and `.rail::after` — which positions from the ol's padding box — left its end
+   cap stranded 40px to the left of the hairline it caps. Measured, both. */
+ul, ol { margin: 0; padding: 0; list-style: none; }
 
 img, picture, svg { display: block; max-width: 100%; }
 
@@ -382,7 +355,12 @@ button { font: inherit; color: inherit; }
 @media print {
   @page { margin: 1.5cm; }
 
-  :root {
+  /* `:root[data-theme]` as well as `:root`, and not for tidiness: a stored
+     preference sets the attribute, and `:root[data-theme='light']` at (0,2,0)
+     outranks a bare `:root` here. Without the second selector, anyone who has
+     touched the toggle prints their screen palette instead of black on white. */
+  :root,
+  :root[data-theme] {
     --bg: #fff;
     --surface: #fff;
     --surface-sunk: #fff;

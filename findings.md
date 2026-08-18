@@ -8,6 +8,169 @@ which is the part that saves the most time.
 
 ---
 
+## 2026-08-18 — seventh session: resume sync, and the two-stop theme toggle
+
+Two changes: the timeline and the surrounding sections were brought in line with
+`Arsenio-Colon-Resume-2026.pdf`, and the theme control dropped its `system` stop with dark
+becoming the default. Everything below was run.
+
+### The full gate passed
+
+| Check | Result |
+|---|---|
+| `npm run check` | 16 files, 0 errors / 0 warnings / 0 hints |
+| `npm run build` | 3 pages, prune line: 10 assets (1318 KB) |
+| `du -sk dist` | 628 KB after the theme change, **632 KB** at end of session |
+| `npm run axe` | 12 scans, no WCAG A/AA violations |
+| `npm run snap` | 2 pages, print stylesheet intact |
+| `bash scripts/assert-cname.sh` | `CNAME ok: arseniocolon.com` |
+
+The 4 KB drop is *reasoned, not measured*: the duplicated dark token block collapsed into one,
+and the monitor icon left `ThemeToggle.astro`. Nothing was measured against a HEAD build to
+confirm the split between them. The 4 KB that came back at the end **is** measured — regenerating
+`public/og.png` with the longer subtitle took it from 30,182 to 35,553 bytes
+(`git show HEAD:public/og.png | wc -c`).
+
+### The print stylesheet was losing to a stored theme — real defect, now fixed
+
+`@media print` set its tokens on a bare `:root` (0,1,0). The theme blocks are attribute
+selectors (0,2,0). So for anyone who had ever touched the toggle, the print overrides lost the
+cascade and Cmd-P rendered the screen palette.
+
+Reproduced in isolation rather than argued from the spec — a three-rule page with the same
+shape, `data-theme='dark'`, `emulateMedia({ media: 'print' })`:
+
+```
+old cascade, print with data-theme=dark → rgb(13, 18, 21)
+```
+
+That is `--steel-950`, i.e. a black page of ink. The fix is one extra selector:
+`:root, :root[data-theme]` on the print block. Re-measured after: white ground, black text, with
+both `light` and `dark` stored.
+
+**Why `npm run snap` never caught it, and still wouldn't:** `scripts/snap.mjs` sets no theme, so
+its context has nothing in `localStorage` and no `data-theme` attribute ever lands. The print
+checks it runs are about `.reveal` opacity, header visibility and printed hrefs — none of them
+read a colour. This was found by reading specificity, not by the suite.
+
+### The two-stop toggle behaves, including with JS off
+
+Driven through `playwright-core` against `npm run preview`, reading computed styles rather than
+looking at screenshots:
+
+| State | `data-theme` | `body` background | `theme-color` meta |
+|---|---|---|---|
+| Cold visit, OS set to **light** | `dark` | `rgb(13, 18, 21)` | `#0d1215` |
+| One click | `light` | `rgb(241, 243, 244)` | `#f1f3f4` |
+| Reload after that click | `light` | `rgb(241, 243, 244)` | `#f1f3f4` |
+| Click back, reload | `dark` | `rgb(13, 18, 21)` | `#0d1215` |
+| **JS disabled**, OS set to light | *(unset)* | `rgb(13, 18, 21)` | `#0d1215` |
+
+The last row is the one worth keeping: with the media query gone, a JS-less visitor gets dark
+from the stylesheet alone, so the single `theme-color` meta agrees with the page. Under the old
+media-split pair it would have advertised `#f1f3f4` over a dark page.
+
+`localStorage` now holds `dark` as well as `light`. Dark is the default, not the absence of a
+choice — if the default ever moves, someone who picked dark keeps dark.
+
+### The timeline was indented 40px, and that is what the stray dash was
+
+Arsenio flagged "this random dash below the Campus Labs job". It is `.rail::after`, the end cap
+that terminates the date rail — but it was 40px to the left of the hairline it caps. Both come
+from the same cause.
+
+`tokens.css` reset `ul { margin: 0; padding: 0; list-style: none; }`. `.rail` is an **`ol`** — the
+only ordered list on the site — so it kept the UA's `padding-inline-start: 40px`. Measured at
+1280px, before:
+
+| | x |
+|---|---|
+| `#work .section-head h2` left | 144 |
+| `.rail > li` left | **184** |
+| `.tick` centre (the hairline) | 338 |
+| `.rail::after` (end cap), absolute | **298** |
+
+So the entire timeline sat 40px right of every heading above it, and the end cap — which
+positions from the ol's *padding box*, not from the li grid — sat 40px left of the rail. The two
+errors were the same 40px pointing opposite ways, which is why neither looked like the other's
+symptom.
+
+`ul, ol` in the reset fixes both. Measured after: `li` left 144 (flush with the `h2`), end cap and
+tick centre both 298. Nothing else on the site is an `<ol>`, so no list lost its numbering —
+checked with `grep -rn "<ol" src/`.
+
+**Neither `npm run axe` nor `npm run snap` would ever have caught this.** It is not a contrast,
+target-size or print-visibility question — it is 40px of indentation that looks deliberate until
+you measure it against the heading above.
+
+### The new subtitle needed binding, and the social card needed a wider rule
+
+`Software Engineer - Backend & .NET Systems` is 42 characters against the old
+`.NET Engineer · Full Stack`'s 26, so two things moved:
+
+- **At 390px it wrapped to `…Backend &` / `.NET Systems`**, orphaning the ampersand at the end of
+  line one. Bound as `Backend&nbsp;&amp;&nbsp;.NET&nbsp;Systems`, so the break falls after the
+  dash instead: `Software Engineer -` / `Backend & .NET Systems`. Rendered at 390 and 320 to
+  confirm — the dash stays on line one, which is the same rule the old middot followed.
+- **On the OG card the sub line overran its rule.** The rule is a per-card literal in
+  `make-og.mjs`; at `620` it stopped ~170px short of the text it caps. Set to `790` and
+  re-rendered.
+
+### 2D/3D badges: every fill is an existing token, and all of them were measured
+
+Contrast computed from the token hexes (WCAG relative luminance, not sampled from a screenshot),
+text-on-fill in light / dark:
+
+| Badge | Fill | Ratio |
+|---|---|---|
+| `VR` | `--accent-solid` — `#8A5E00` / `#FFC53D` | **5.12:1** / 11.94:1 |
+| `3D` | `--fg` — `#121A1E` / `#E2E8EB` | 15.82:1 / 15.23:1 |
+| `2D` | `--muted` — `#58656E` / `#8B98A1` | 5.39:1 / 6.37:1 |
+
+The 5.12:1 is the floor and it is not a coincidence: `--accent-solid` exists precisely because
+`--amber-500` is 3.64:1 on light and cannot carry text. Confirmed live rather than trusting the
+CSS — computed styles read back `rgb(138, 94, 0)` on light and `rgb(255, 197, 61)` on dark.
+
+Two hues that were built and rejected are recorded in `decisions.md` with their ratios, so
+re-proposing them means re-arguing them, not re-measuring them.
+
+### The content-layer cache serves stale frontmatter across restarts
+
+Adding `dimension` to five markdown files and to `content.config.ts` did nothing in dev. The
+markup change hot-reloaded fine — `class="badge vr"` appeared immediately — while `data.dimension`
+stayed `undefined` through **two** full dev-server restarts. `npm run build` was correct the whole
+time, which is what made it look like a template bug rather than a cache.
+
+`.astro/data-store.json` is the content layer's store. Deleting it and restarting fixed it
+instantly. Worth knowing because the symptom points at the wrong file: the page renders, no error
+appears, and the field is simply absent.
+
+### Resume sync — what changed, and what was checked and left alone
+
+Against `Arsenio-Colon-Resume-2026.pdf` (dated 2026, read in full):
+
+- **Seneca** — location `Buffalo-Niagara Falls Area` → `Niagara Falls, NY`; SQLite added to the
+  platform bullet along with what the dashboard is *for* (it complements the monthly emailed Word
+  report); CI/CD bullet gained the automated-tests-on-push and approval-gate detail; the
+  SharePoint access-control migration split out into its own bullet. `TopDesk` → `TOPdesk`, the
+  vendor's own casing.
+- **Acara** — the row is now `M&T Bank`, with `Contract through Acara Solutions · Hybrid` in the
+  meta line, matching how the resume frames it. The single bullet split in two.
+- **ACV** — `NewRelic` → `New Relic`; the hackathon prototype is a tower-defense, which the site
+  never said.
+- **M&T** — `.NET Core code-first` → `Entity Framework Core code-first`.
+- **RED-INC** — `employment` gained `· Hybrid`.
+- **Campus Labs** — read against the resume, already correct, changed nothing.
+
+Do not re-suggest, both checked this session:
+
+- **`Cybersecurity Champions` still stays out.** The resume lists it; the site does not. That is
+  the standing **[AC]** call from 2026-08-07, re-confirmed rather than quietly reversed.
+- **The `Assistant Vice President` half of the M&T title stays off.** Offered with the resume in
+  hand on 2026-08-18 and declined — the timeline keeps engineering titles.
+
+---
+
 ## 2026-08-08 — sixth session: dropping the role count from the Work heading
 
 One-word-scale copy change to `src/pages/index.astro:144`. The label read

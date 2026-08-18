@@ -3,6 +3,7 @@ order: 5
 title: SAIMON SAYS
 tag: Arcade
 year: "2020"
+dimension: 2D
 image: ../../assets/games/saimonsays.png
 links:
   - label: itch.io

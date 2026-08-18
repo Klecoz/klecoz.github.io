@@ -4,11 +4,11 @@ import Timeline from '../components/Timeline.astro';
 import EmailReveal from '../components/EmailReveal.astro';
 
 const stack = [
-  { group: 'Languages', items: ['C#', 'SQL', 'JavaScript', 'C'] },
+  { group: 'Languages', items: ['C#', 'SQL', 'JavaScript'] },
   // '.NET 10' holds a literal U+00A0 between the two halves, so the version
   // never wraps away from the platform. Chips render through an expression,
   // which escapes HTML, so a &nbsp; entity would print as text here.
-  { group: 'Platforms', items: ['.NET 10', 'ASP.NET Core', 'Azure', 'Kubernetes', 'IIS'] },
+  { group: 'Platforms', items: ['.NET 10', 'ASP.NET Core', 'EF Core', 'SQLite', 'Azure', 'Kubernetes', 'IIS'] },
   { group: 'Tools', items: ['Azure DevOps', 'Datadog', 'Git', 'Claude Code', 'Unity'] },
 ];
 
@@ -28,7 +28,7 @@ const community: CommunityEntry[] = [
   {
     what: 'Secretary, Board of Directors',
     where: 'Buffalo Game Space',
-    note: 'A 501(c)(3) supporting local game developers and digital artists.',
+    note: 'A 501(c)(3) supporting local game developers and digital artists. Organized workshops and mentored Unity and C# developers.',
     href: 'https://buffalogamespace.com',
     // WGRZ prints "Colon" without the accent. Quoted text stays as printed.
     quote: {
@@ -51,12 +51,17 @@ const community: CommunityEntry[] = [
       href: 'https://www.linkedin.com/posts/lindsay-gorman-480907224_thank-you-to-our-colleagues-arsenio-col%C3%B3n-share-6885293169357926400-4Ned/',
     },
   },
+  {
+    what: 'Teaching computer science to middle schoolers',
+    where: 'Code.org curriculum',
+    note: 'Designed and delivered an eight-week course introducing students to computer science.',
+  },
 ];
 ---
 
 <Base
-  title="Arsenio Colón — .NET Engineer in Buffalo, NY"
-  description="Arsenio Colón is a .NET engineer in Buffalo, NY. Backend systems and internal platforms, currently at Seneca Gaming Corporation."
+  title="Arsenio Colón — Software Engineer, Backend & .NET Systems"
+  description="Arsenio Colón is a software engineer in Buffalo, NY. Backend and .NET systems, internal platforms, currently at Seneca Gaming Corporation."
   person
 >
   {/* Old v1 links used hash fragments, which a server never sees. */}
@@ -80,7 +85,7 @@ const community: CommunityEntry[] = [
       <h1 class="hero-name">Arsenio Colón</h1>
       {/* The middot binds to the word before it, same rule as .stack-items: a
           wrapped line must never open with a separator. */}
-      <p class="hero-role">.NET Engineer&nbsp;· Full Stack</p>
+      <p class="hero-role">Software Engineer&nbsp;- Backend&nbsp;&amp;&nbsp;.NET&nbsp;Systems</p>
 
       <div class="hero-bio">
         <p>
@@ -156,7 +161,7 @@ const community: CommunityEntry[] = [
         </div>
         <p class="mono edu-when">2015 – 2017</p>
         <h3 class="edu-degree">B.S. Computer Information Systems</h3>
-        <p class="edu-school">State University of New York College at Buffalo</p>
+        <p class="edu-school">SUNY Buffalo State University</p>
         <ul class="notes">
           <li>
             Teaching assistant for Database Systems (SQL and Oracle) and Intro to Computer
@@ -213,14 +218,13 @@ const community: CommunityEntry[] = [
   <section class="teaser">
     <div class="wrap teaser-in reveal">
       <div>
-        <p class="label">Side projects</p>
-        <h2 class="teaser-h">Eight games and a couple of client sites</h2>
+        <h2 class="teaser-h">Side Projects</h2>
         <p class="teaser-p">
           Unity games built for jams and hackathons between 2016 and 2023, including a VR tower
           defense that took second place at ACV&rsquo;s hackathon.
         </p>
       </div>
-      <a class="btn-primary" href="/side-projects">Side projects</a>
+      <a class="btn-primary" href="/side-projects">See all</a>
     </div>
   </section>
 
@@ -232,7 +236,7 @@ const community: CommunityEntry[] = [
       </div>
       <div class="contact">
         <p class="contact-p">
-          I&rsquo;m around if you want to talk about a role, or just about the work.
+          I&rsquo;m around if you want to talk about a role.
         </p>
         <EmailReveal />
         <ul class="links">

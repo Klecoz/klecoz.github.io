@@ -69,8 +69,10 @@ const CARDS = [
     out: 'public/og.png',
     eyebrow: 'BUFFALO, NY',
     display: 'ARSENIO COLÓN',
-    rule: 620,
-    sub: '.NET Engineer · Full Stack',
+    // Tuned to the sub line under it, which is now 42 characters rather than 26
+    // — at 620 the rule stopped 170px short of the text it was meant to cap.
+    rule: 790,
+    sub: 'Software Engineer - Backend & .NET Systems',
     url: 'arseniocolon.com',
   },
   {

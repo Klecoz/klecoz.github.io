@@ -1,19 +1,14 @@
 ---
-// Icons are inline SVG (Lucide monitor / sun / moon). No icon font, no emoji.
+// Icons are inline SVG (Lucide sun / moon). No icon font, no emoji.
 //
-// Three stops, not two. `system` is the absence of a stored preference, so it
-// has to be reachable — cycling system → light → dark → system is the whole
-// reason this isn't a boolean toggle, and why there's no `aria-pressed` here:
-// it can only say "pressed" or "not pressed" about something with three answers.
+// Two stops. There is no `system` stop: dark is the default a cold visitor
+// lands on regardless of `prefers-color-scheme`, and light is one click away.
+// The server renders `dark` because that is what an unvisited browser gets;
+// the inline script below corrects a returning visitor before paint.
 ---
 
-<button class="toggle" type="button" data-theme-toggle data-state="system" aria-label="Colour theme: System">
+<button class="toggle" type="button" data-theme-toggle data-state="dark" aria-label="Colour theme: Dark">
   <span class="t-i" aria-hidden="true">
-    <svg class="i-system" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"
-         stroke-linecap="round" stroke-linejoin="round">
-      <rect x="2" y="3" width="20" height="14" />
-      <path d="M8 21h8M12 17v4" />
-    </svg>
     <svg class="i-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"
          stroke-linecap="round">
       <circle cx="12" cy="12" r="4" />
@@ -24,25 +19,24 @@
       <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
     </svg>
   </span>
-  <span class="t-l mono" data-theme-label>System</span>
+  <span class="t-l mono" data-theme-label>Dark</span>
 </button>
 
 {/* Runs at parse position, before paint, for the same reason the no-flash script
     in Base.astro does: the server can't know which stop is stored, so it renders
-    `system`, and a returning visitor would otherwise watch the label correct
-    itself. `is:inline` keeps it out of the module graph so it isn't deferred. */}
+    `dark`, and a returning visitor on light would otherwise watch the label
+    correct itself. `is:inline` keeps it out of the module graph so it isn't
+    deferred. */}
 <script is:inline>
   (function () {
     var btn = document.querySelector('[data-theme-toggle]');
     if (!btn) return;
     try {
-      var t = localStorage.getItem('theme');
-      if (t !== 'dark' && t !== 'light') return;
-      btn.dataset.state = t;
+      if (localStorage.getItem('theme') !== 'light') return;
+      btn.dataset.state = 'light';
       var label = btn.querySelector('[data-theme-label]');
-      var name = t === 'dark' ? 'Dark' : 'Light';
-      if (label) label.textContent = name;
-      btn.setAttribute('aria-label', 'Colour theme: ' + name);
+      if (label) label.textContent = 'Light';
+      btn.setAttribute('aria-label', 'Colour theme: Light');
     } catch (e) {}
   })();
 </script>
@@ -76,19 +70,19 @@
     text-transform: uppercase;
   }
 
-  /* The icon names the stop you are *on*, which the visible label repeats. The
-     old two-state control showed the stop you'd move to; with three stops that
-     is ambiguous, since "next" is no longer the only other option. */
-  .i-system, .i-light, .i-dark { display: none; }
-  .toggle[data-state='system'] .i-system { display: block; }
+  /* The icon names the stop you are *on*, which the visible label repeats. That
+     stays as it was under three stops: it is the reading the label enforces, and
+     flipping it back to "click for this" now would silently invert the meaning
+     of an icon people have already learned. */
+  .i-light, .i-dark { display: none; }
   .toggle[data-state='light'] .i-light { display: block; }
   .toggle[data-state='dark'] .i-dark { display: block; }
 
   /* Below 34rem the label costs about 66px the nav doesn't have — the wordmark
      and three links already fill the row, and the label is what pushed "Side
-     projects" onto a second line at 320px. The control keeps all three stops
-     and its accessible name; only the visible word goes, so nothing here has to
-     satisfy SC 2.5.3 any more. Same 2rem square the two-state toggle had. */
+     projects" onto a second line at 320px. The control keeps both stops and its
+     accessible name; only the visible word goes, so nothing here has to satisfy
+     SC 2.5.3 any more. */
   @media (max-width: 34rem) {
     .toggle {
       gap: 0;
@@ -109,68 +103,41 @@
   const label = btn?.querySelector<HTMLElement>('[data-theme-label]');
   const root = document.documentElement;
 
-  const ORDER = ['system', 'light', 'dark'] as const;
-  type Stop = (typeof ORDER)[number];
+  type Stop = 'dark' | 'light';
 
   const stored = (): Stop => {
     try {
-      const t = localStorage.getItem('theme');
-      return t === 'dark' || t === 'light' ? t : 'system';
+      return localStorage.getItem('theme') === 'light' ? 'light' : 'dark';
     } catch {
-      return 'system';
+      return 'dark';
     }
   };
 
-  const osDark = () => window.matchMedia('(prefers-color-scheme: dark)').matches;
-
-  // Both metas ship with a `media` attribute so a JS-less visitor tracks their
-  // OS. Overriding writes the same colour to both; going back to `system`
-  // restores each one to the value its own media query is for, rather than
-  // leaving the chrome pinned to whichever theme was last chosen.
-  const paintChrome = (stop: Stop) => {
-    document.querySelectorAll<HTMLMetaElement>('meta[name="theme-color"]').forEach((m) => {
-      const forDark = m.media.includes('dark');
-      const own = forDark ? '#0d1215' : '#f1f3f4';
-      m.setAttribute('content', stop === 'system' ? own : stop === 'dark' ? '#0d1215' : '#f1f3f4');
-    });
-  };
-
+  // Dark is written to storage as well as light. It is not the absence of a
+  // preference — it is the default, and if the default ever changes, a visitor
+  // who chose dark should keep dark rather than inherit the new one.
   const apply = (stop: Stop) => {
-    if (stop === 'system') {
-      delete root.dataset.theme;
-      try {
-        localStorage.removeItem('theme');
-      } catch {
-        /* private mode — the page still follows the OS for this view */
-      }
-    } else {
-      root.dataset.theme = stop;
-      try {
-        localStorage.setItem('theme', stop);
-      } catch {
-        /* private mode — the choice still holds for this page view */
-      }
+    root.dataset.theme = stop;
+    try {
+      localStorage.setItem('theme', stop);
+    } catch {
+      /* private mode — the choice still holds for this page view */
     }
 
-    paintChrome(stop);
+    document
+      .querySelector<HTMLMetaElement>('meta[name="theme-color"]')
+      ?.setAttribute('content', stop === 'dark' ? '#0d1215' : '#f1f3f4');
 
     if (btn) {
+      const name = stop === 'dark' ? 'Dark' : 'Light';
       btn.dataset.state = stop;
-      const name = stop[0].toUpperCase() + stop.slice(1);
       if (label) label.textContent = name;
       // Keeps SC 2.5.3 satisfied: the visible word is inside the accessible name.
-      btn.setAttribute(
-        'aria-label',
-        stop === 'system' ? `Colour theme: System (following ${osDark() ? 'dark' : 'light'})` : `Colour theme: ${name}`
-      );
+      btn.setAttribute('aria-label', `Colour theme: ${name}`);
     }
   };
 
   btn?.addEventListener('click', () => {
-    apply(ORDER[(ORDER.indexOf(stored()) + 1) % ORDER.length]);
+    apply(stored() === 'dark' ? 'light' : 'dark');
   });
-
-  // The inline script above already set the label; this re-runs it through the
-  // same path so the "following light/dark" suffix is present from the start.
-  apply(stored());
 </script>

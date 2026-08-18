@@ -26,7 +26,7 @@ const {
   description,
   person = false,
   ogImage = '/og.png',
-  ogImageAlt = 'Arsenio Colón — .NET Engineer, Full Stack. Buffalo, NY.',
+  ogImageAlt = 'Arsenio Colón — Software Engineer, Backend & .NET Systems. Buffalo, NY.',
 } = Astro.props;
 const canonical = new URL(Astro.url.pathname, Astro.site).href.replace(/\/$/, '') || Astro.site!.href;
 const ogImageUrl = new URL(ogImage, Astro.site).href;
@@ -46,8 +46,11 @@ const personLd = {
     addressCountry: 'US',
   },
   alumniOf: {
+    // The name it carries now. He graduated when it was still "State University
+    // of New York College at Buffalo"; the visible Education block says the same
+    // thing, and the two are not allowed to disagree.
     '@type': 'CollegeOrUniversity',
-    name: 'State University of New York College at Buffalo',
+    name: 'SUNY Buffalo State University',
   },
   knowsAbout: ['C#', '.NET', 'ASP.NET Core', 'SQL', 'Azure DevOps', 'Unity'],
   // Profiles he controls. Press coverage is `subjectOf`, not this.
@@ -119,12 +122,11 @@ const profilePageLd = {
     <link rel="me" href="https://github.com/Klecoz" />
     <link rel="me" href="https://klecoz.itch.io" />
 
-    {/* Both variants ship so a JS-less visitor still follows their OS. Once a theme
-        has been stored, the script below rewrites both to the same value — otherwise
-        the browser chrome keeps tracking the OS and disagrees with the toggle.
-        Mirrors --steel-100 / --steel-950 in tokens.css; keep them in step. */}
-    <meta name="theme-color" content="#f1f3f4" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#0d1215" media="(prefers-color-scheme: dark)" />
+    {/* One value, no `media` attribute, because the page no longer follows the OS:
+        dark is the default a JS-less visitor gets, so a media-split meta would pin
+        the chrome light under a dark page. The script below rewrites it when light
+        is stored. Mirrors --steel-950 / --steel-100 in tokens.css; keep them in step. */}
+    <meta name="theme-color" content="#0d1215" />
 
     {/* SVG first for anything modern; the 32px PNG covers Safari and the older
         engines that ignore an SVG icon. iOS masks apple-touch-icon into a
@@ -157,16 +159,18 @@ const profilePageLd = {
     <slot name="head" />
 
     {/* Applies the stored theme before first paint so there's no flash, and pins the
-        browser chrome to it so a dark page never sits under a white status bar. */}
+        browser chrome to it so a light page never sits under a dark status bar.
+        Only `light` does any work — dark is what the CSS already renders — but the
+        attribute is written either way so `data-theme` always states the theme
+        rather than implying it by absence. */}
     <script is:inline>
       (function () {
         try {
-          var t = localStorage.getItem('theme');
-          if (t !== 'dark' && t !== 'light') return;
+          var t = localStorage.getItem('theme') === 'light' ? 'light' : 'dark';
           document.documentElement.dataset.theme = t;
-          var c = t === 'dark' ? '#0d1215' : '#f1f3f4';
-          var metas = document.querySelectorAll('meta[name="theme-color"]');
-          for (var i = 0; i < metas.length; i++) metas[i].setAttribute('content', c);
+          if (t !== 'light') return;
+          var m = document.querySelector('meta[name="theme-color"]');
+          if (m) m.setAttribute('content', '#f1f3f4');
         } catch (e) {}
       })();
     </script>

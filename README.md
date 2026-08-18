@@ -186,6 +186,10 @@ current: true
 
 The body is a plain Markdown list. That's the bullets.
 
+`employment` is the whole engagement line, not just the work mode — the M&T Bank row for the
+2024 contract carries `Contract through Acara Solutions · Hybrid`, with `org: M&T Bank`. Client
+first, agency in the meta line.
+
 ### A new game or client project
 
 Same idea in `src/content/games/` or `src/content/clients/`. Put the screenshot in
@@ -210,6 +214,11 @@ links:
 
 A sentence or two about it.
 ```
+
+Each card carries **one** badge or none. `vr: true` gets the amber `VR`; everything else takes
+`dimension: 2D` or `dimension: 3D`, which renders as a neutral chip. The VR entries deliberately
+have no `dimension` — they are 3D by definition, and a second chip would double up on three cards
+and nowhere else.
 
 ### Everything else
 
@@ -253,7 +262,9 @@ route, so a link to `/side-projects` doesn't preview as the homepage:
 npm install --no-save satori && node scripts/make-og.mjs && npm uninstall satori
 ```
 
-Only needed if a title or the palette changes. satori stays out of `dependencies` deliberately,
+Only needed if a title or the palette changes. The `rule` width on each card is a hand-tuned
+literal sized to the `sub` line under it — change the subtitle and that number needs re-checking,
+which is how the homepage card ended up with a rule 170px shorter than its own text. satori stays out of `dependencies` deliberately,
 which is also why the cards are committed rather than built — see the header comment in
 `scripts/make-og.mjs`. Pages pick their card with the `ogImage` prop on `Base.astro`.
 
@@ -373,12 +384,19 @@ Pages 301s `/side-projects` to `/side-projects/`, so both signals point at the r
 side. Measured, recorded in `findings.md`, and left alone pending a decision — reversing it
 means reversing the reasoning in `astro.config.mjs:18-23`.
 
-**The theme toggle's icon shows where you are, not where you're going**, which is the opposite
-of the two-state control it replaced. With three stops — system, light, dark — "next" is no
-longer the only other option, so an icon meaning "click for this" stops being unambiguous. The
-visible word beside it says the same thing, and both drop below 34rem where the label doesn't
-fit. `aria-pressed` was deliberately removed: it can only answer pressed or not-pressed about
-something with three states. Don't add it back.
+**The theme toggle's icon shows where you are, not where you're going.** The moon means "you
+are on dark", not "click for dark", and the visible word beside it says the same thing. That
+reading came in with the three-stop control and stayed when the toggle went back to two stops
+(dark/light) — flipping it now would silently invert an icon people have already learned. Both
+icon and word drop below 34rem where the label doesn't fit. `aria-pressed` stays off: the
+control names a state rather than offering an action, and the accessible name already carries
+it.
+
+**`ul, ol` in the reset — the `ol` half is load-bearing.** The timeline is the site's only
+ordered list. Without `ol` there it keeps the browser's 40px `padding-inline-start`, which puts
+the whole rail 40px right of every section heading *and* strands `.rail::after` — the end cap,
+which positions from the ol's padding box — 40px left of the hairline it caps. Both shipped that
+way for a while and read as design. Measured, see `findings.md`.
 
 The collapsed square centres its icon with `justify-content: center`, and that is not a
 long-hand someone forgot to shorten. `place-items` was there first and left the icon flush
@@ -386,10 +404,18 @@ left: it expands to `align-items` + `justify-items`, and a flex container ignore
 `justify-items`. Changing it back re-breaks the alignment silently, since the vertical axis
 keeps working either way.
 
-**"System" is the absence of a stored value.** There is no `theme=system` in `localStorage` —
-returning to that stop deletes the key and the `data-theme` attribute, which is what lets the
-media query take over again. It also rewrites both `theme-color` metas back to their own
-per-media values; setting them both to one colour is only correct while an override is active.
+**Dark is the default and the OS gets no vote.** There is no `prefers-color-scheme` query in
+`tokens.css` any more: the dark palette sits on bare `:root`, and `:root[data-theme='light']` is
+the only block that overrides it. A visitor whose machine is set to light still lands on dark.
+`data-theme` is always written explicitly, dark included — the old control encoded a stop as the
+*absence* of the attribute, and that is the trap this avoids. Consequences worth knowing:
+
+- There is **one** `theme-color` meta with no `media` attribute. A media-split pair would pin the
+  browser chrome to light under a dark page for anyone who hasn't touched the toggle.
+- The print block's tokens are scoped `:root, :root[data-theme]`, and that second selector is
+  load-bearing. `:root[data-theme='light']` scores (0,2,0) against a bare `:root`'s (0,1,0), so
+  without it anyone with a stored preference prints their screen palette. Measured, see
+  `findings.md`.
 
 **The analytics account is `klecoz`, not `arseniocolon`.** `Base.astro` posts to
 `https://klecoz.goatcounter.com/count`, which looks like a typo and is not — the GoatCounter

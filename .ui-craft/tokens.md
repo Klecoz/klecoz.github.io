@@ -54,7 +54,14 @@ Light is the default; dark is a designed peer, not an inversion.
 | `--focus` | `--amber-500` | `--amber-400` |
 
 **Accent budget: 3–5 placements per viewport.** Spent on: the current-role block on the date rail,
-link underlines, the primary CTA, and focus rings. Nothing decorative.
+link underlines, the primary CTA, focus rings, and the `VR` badge on `/side-projects`. Nothing
+decorative.
+
+> The VR badge is the one placement that can exceed the budget on its own: three VR cards plus
+> the link underlines already put `/side-projects` at the top of the range. It earns it by being
+> categorical — amber marks the games that need a headset, the same way it marks the role he is
+> in now. `3D` and `2D` are deliberately *not* accented; they separate by neutral weight
+> (`--fg` and `--muted`), which is what keeps the count from climbing with the grid.
 
 ## Layer 3 — type, space, motion
 

@@ -3,6 +3,7 @@ order: 6
 title: Trance Mission
 tag: Jam
 year: "2020"
+dimension: 3D
 image: ../../assets/games/trance-mission.png
 links:
   - label: itch.io

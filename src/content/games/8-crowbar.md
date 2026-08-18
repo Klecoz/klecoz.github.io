@@ -3,6 +3,7 @@ order: 8
 title: Crowbar Puncher 9000
 tag: Jam
 year: "2016"
+dimension: 3D
 image: ../../assets/games/crowbar.png
 links:
   - label: itch.io

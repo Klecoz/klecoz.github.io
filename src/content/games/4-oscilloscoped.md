@@ -3,6 +3,7 @@ order: 4
 title: Oscilloscope'd
 tag: Global Game Jam
 year: "2017"
+dimension: 3D
 image: ../../assets/games/oscilloscoped.png
 links:
   - label: itch.io

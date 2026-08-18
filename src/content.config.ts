@@ -33,6 +33,9 @@ const games = defineCollection({
       tag: z.string(),
       year: z.string(),
       vr: z.boolean().default(false),
+      /** 2D or 3D. Optional: the Quest builds are tagged `vr` instead, which
+       *  already implies 3D, and a card carries one badge or none. */
+      dimension: z.enum(['2D', '3D']).optional(),
       image: image(),
       links: z
         .array(z.object({ label: z.string(), href: z.url() }))

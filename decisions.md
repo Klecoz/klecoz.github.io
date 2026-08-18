@@ -7,6 +7,177 @@ Decisions Arsenio made himself are marked **[AC]**. Those don't get revisited wi
 
 ---
 
+## 2026-08-18 — two-stop theme, and the 2026 resume
+
+### The toggle is Dark/Light, with Dark as the default — **[AC]**
+
+Arsenio asked for the `system` stop to go and for dark to be what a cold visitor sees.
+
+**This supersedes two earlier [AC] decisions**, both from the rebuild, and they are recorded as
+superseded rather than deleted:
+
+- *"Light and dark are equally canonical"* — asked which theme a cold visitor saw, he had said
+  genuinely both. He has now picked one. What survives is the working rule underneath it: dark is
+  a designed palette, not an inversion, and light is still reviewed and contrast-checked at the
+  same standard. `npm run axe` still scans both.
+- *"Theme toggle: cycling, with the stop named"* — the cycle is now a two-way switch.
+
+What that meant in the CSS: `prefers-color-scheme` is gone from `tokens.css` entirely and the
+dark palette sits on bare `:root`. The OS is not consulted at all.
+
+**Rejected:** keeping the media query so a light-OS visitor lands on light and only the toggle's
+*stops* change. It is the smaller diff and it is not what "dark is the default" means — it would
+leave the default depending on the visitor's machine, which is the thing being removed.
+
+`data-theme` is now written for both stops, and `localStorage` stores `dark` as well as `light`.
+**Rejected:** treating dark as the absence of the attribute, which would have been a two-line
+change and is exactly the trap the old `system` stop set — a stored `dark` would silently follow
+any future change of default.
+
+The icon still names the stop you are **on**. Under three stops that was forced; under two it is
+a genuine choice, and it stays because the visible word says the same thing and because inverting
+a learned icon to save nothing is not an improvement. `aria-pressed` stays off for the same
+reason: this control reports a state, it does not offer an action.
+
+### The print block now outranks the theme blocks
+
+Not a design call — a defect, measured and written up in `findings.md`. `@media print` set its
+tokens on a bare `:root`, which loses to `:root[data-theme='…']` on specificity, so anyone with a
+stored theme printed their screen palette. Now `:root, :root[data-theme]`.
+
+**Rejected:** `!important` on the print tokens (works, and buries the reason); and moving the
+print block below the theme blocks (it already is — source order does not beat specificity, which
+is the whole point of the bug).
+
+### 2D/3D badges, filled, amber for VR only — **[AC]**
+
+Arsenio asked for 2D/3D tags alongside the existing VR one. Five schemes were built and rendered
+in both themes on a throwaway `/compare` route — never described — and he chose in two passes:
+first the filled treatment over the outlined one, then **C1** for colour.
+
+| | VR | 3D | 2D |
+|---|---|---|---|
+| **C1 (shipped)** | `--accent-solid` | `--fg` | `--muted` |
+| C2 | `--accent-solid` | teal `#0F5560` / `#7CD6E3` | `--fg` |
+| C3 | `--accent-solid` | teal | violet `#4A3F7D` / `#BCB0F2` |
+
+**Rejected:** the outlined 2D/3D chip, which kept solid exclusive to VR and read as a weaker
+class of information rather than a different one. And C2/C3 — both cleared AA (ratios in
+`findings.md`), and both introduce a hue the brief does not have. The brief's line is "machinery
+amber as the single accent"; C3 would have put three hues on one grid and read as generic tag
+colour rather than Steel. C1 needs **no new primitive at all** — amber, ink and steel were
+already in the palette, so the scheme inverts with the theme for free.
+
+**One badge per card, and VR carries no `dimension`.** The three VR entries are 3D by definition;
+tagging them would double the chip on three cards and nowhere else. Recorded because the
+frontmatter now *looks* incomplete on those three, and it is not.
+
+`.ui-craft/tokens.md` gained the VR badge in its accent-placement list, with the note that it is
+the one placement that can blow the 3–5 budget on its own.
+
+### The hero subtitle is the resume headline — **[AC]**
+
+`.NET Engineer · Full Stack` → `Software Engineer - Backend & .NET Systems`, Arsenio's own string
+from the 2026 resume, hyphen and all. It is copy, so it went in as written; the only thing added
+is `&nbsp;` binding, which changes where it breaks and not what it says.
+
+He also chose to carry it into the three places that repeated the old line: the `<title>`, the
+meta description, the card alt text, and the generated `og.png` (regenerated through the
+documented `npm install --no-save satori` flow — `package.json` and the lockfile verified
+byte-identical afterwards).
+
+**The cost, named:** the `<title>` no longer contains "Buffalo, NY". It read
+`Arsenio Colón — .NET Engineer in Buffalo, NY` and now reads
+`Arsenio Colón — Software Engineer, Backend & .NET Systems`, because the location on the end of
+the resume headline pushed it past any useful length. Buffalo is still in the meta description,
+the hero eyebrow, the JSON-LD `address` and the card itself. If local search ever matters more
+than the headline, that is the trade to reverse.
+
+**Rejected:** changing only the visible subtitle and leaving the title, description and card
+saying `.NET Engineer · Full Stack`. Offered explicitly; he took all of them.
+
+### The side-projects teaser: heading, and `See all` — **[AC]**
+
+`Eight games and a couple of client sites` → `Side Projects`. He said the old heading "seems like
+a lot of explaining". The eyebrow label above it was deleted in the same move — it already said
+`Side projects`, and keeping both would have put the same two words on consecutive lines.
+
+The button under it became `See all`, which **supersedes the [AC] decision "CTA labels are the
+destination's name"** for this one button. That decision recorded the teaser stutter as raised
+and overruled, with the note *"if the teaser ever reads as stuttering, that's why"*. With the
+heading now carrying the section name, it stuttered, and he changed it. The 404's CTAs are
+untouched and still name their destinations.
+
+**Rejected:** `All projects`, and leaving it as `Side projects`.
+
+### The rail's end cap stays, now that it lands on the rail — **[AC]**
+
+Arsenio called it "this random dash". It was random: 40px off, for the reason in `findings.md`.
+Shown aligned, he kept it. **Rejected:** deleting `.rail::after`, which was the other option put
+to him.
+
+### `ol` joined the reset
+
+Not a design call. `ul` was reset and `ol` was not, so the timeline — the only `<ol>` on the
+site — carried the UA's 40px `padding-inline-start` and sat 40px right of every heading above it.
+Measured both ways in `findings.md`.
+
+**Rejected:** zeroing the padding on `.rail` alone. It would have fixed the visible symptom and
+left the next `<ol>` anyone adds with the same 40px, in a file whose whole job is to make the
+defaults predictable.
+
+### The 2024 contract row is M&T Bank, not Acara — **[AC]**
+
+The 2026 resume frames it as "M&T Bank — Contract through Acara Solutions", so the timeline does
+too: `org: M&T Bank`, with `Contract through Acara Solutions · Hybrid` in the meta line. The
+client is the recognisable name and it makes the two M&T stints read as related.
+
+`orgFull` was dropped from that entry — it held "Acara Solutions, An Aleron Company", and the
+holding company is noise once the agency is a contracting detail rather than the employer.
+
+**Rejected:** adding a `via:` field to the collection schema. `employment` is already the
+engagement line; a second field for the same sentence is a schema change earning nothing.
+
+### `Assistant Vice President` stays off the M&T title — **[AC]**
+
+Offered with the resume in hand. He declined: it is a bank-internal grade that reads oddly beside
+`Software Developer II`. **Rejected alternatives, both offered:** the full
+`Software Engineer I · Assistant Vice President` role line, and demoting it to a bullet.
+
+### Community gains the Code.org teaching and the Buffalo Game Space detail — **[AC]**
+
+Both come from the resume's Leadership & Community block. The teaching entry has no `href` — the
+resume names no venue, and a link to code.org would assert an affiliation with the curriculum's
+publisher rather than a place he taught.
+
+`Ran workshops` was reworded to `Organized workshops` after rendering it: the M&T entry directly
+below already opens "Ran internal workshops and mentored…", and the two read as a copy-paste.
+
+**Not added, and still not to be added:** `Cybersecurity Champions`, which the resume lists. That
+remains the **[AC]** cut from 2026-08-07.
+
+### Education reads SUNY Buffalo State University — **[AC]**
+
+The visible line and the `alumniOf` in the JSON-LD both move to the current name, matching the
+resume. **Rejected:** keeping "State University of New York College at Buffalo", the name it
+carried when he graduated in 2017 — accurate to the era, but it makes the site and the resume
+disagree on the school, and the JSON-LD claim is about the institution, not about 2017.
+
+### Hero stack chips: `C` out, `EF Core` and `SQLite` in — **[AC]**
+
+The resume dropped C and added Entity Framework Core and SQLite. Rendered at 1280 and 390 in both
+themes before shipping, per the standing rule: Platforms is a seven-item column that wraps to two
+lines against Languages' one, which the strip already did for Tools.
+
+**Rejected:** spelling it `Entity Framework Core` in the chip. Every other chip is at most two
+short words; the full name would be the longest item in the strip by half again.
+
+**Rejected:** rebalancing the three columns by moving Azure/Kubernetes/IIS into Tools to even out
+the wrap. It would put a cloud platform under a heading that otherwise means "things he opens",
+for a visual gain the render did not show.
+
+---
+
 ## 2026-08-08 — the Work heading's role count
 
 ### `Six roles` was removed; `2018 to now` stands alone — **[AC]**
@@ -173,7 +344,11 @@ comparison rather than assumed wrong; seeing the three together is what settled 
 accepted. If it ever reads as ambiguous, S1 is the built alternative and the trailing dot is the
 price.
 
-### CTA labels are the destination's name — **[AC]**
+### CTA labels are the destination's name — **[AC]** *(partly superseded 2026-08-18)*
+
+**Superseded for the teaser button only:** it is now `See all`, because the teaser heading became
+`Side Projects` and the stutter predicted below actually happened. The 404's CTAs still name
+their destinations.
 
 `See the work` → `Work`, and `Browse them` → `Side projects`. Arsenio's call, unprompted:
 "See the work" sounds lame. All three CTAs across the site now name where they go, which
@@ -389,7 +564,11 @@ on the runner and committing them (a rebaseline on every intentional visual chan
 baseline is only as trustworthy as whoever eyeballed it); dropping the check and leaving Cmd-P
 manual (it is the only pre-ship step a human can silently skip).
 
-### Light and dark are equally canonical — **[AC]**
+### Light and dark are equally canonical — **[AC]** *(superseded 2026-08-18)*
+
+**Superseded:** dark is now the default and `prefers-color-scheme` is gone from `tokens.css`. See
+the 2026-08-18 entry. The half of this that still holds is the review standard: dark is designed,
+not inverted, and light is checked just as hard.
 
 Asked which theme a cold visitor sees, Arsenio said genuinely both, neither is primary.
 
@@ -420,7 +599,11 @@ Two things fell out of it: the `<br>` in the name is gone, which incidentally fi
 `ArsenioColón` accessible-name issue in `findings.md`; and `.hero-grid` no longer exists, so the
 print and narrow media queries now size `.stack` directly.
 
-### Theme toggle: cycling, with the stop named — **[AC]**
+### Theme toggle: cycling, with the stop named — **[AC]** *(superseded 2026-08-18)*
+
+**Superseded:** the `system` stop is gone and the control is a two-way switch. See the
+2026-08-18 entry. The icon-names-the-current-stop reading survives; so does the `aria-pressed`
+ban, for a different reason.
 
 Three treatments were rendered in all three states, light and dark, and Arsenio picked the
 cycling button: one control stepping system → light → dark → system, the current stop spelled out
