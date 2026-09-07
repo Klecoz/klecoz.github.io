@@ -57,6 +57,13 @@ jobs:
           # --scheme https/http drops relative and file links. Internal routing
           #   is already proven by the build, and `/side-projects` resolves to a
           #   directory on disk, which is a false failure waiting to happen.
+          # --root-dir is what makes that filter reachable. lychee resolves a
+          #   link before it applies --scheme, so without a root dir every
+          #   root-relative href in the built HTML — every font, every hashed
+          #   asset, every nav link — failed at resolution and never got as far
+          #   as being filtered out. That was all 87 "errors" in every weekly
+          #   report from 2026-08-10 on, while the 30 real URLs passed each
+          #   time. It must be an absolute path, hence github.workspace.
           # --github-token (via `token` below) sends the eleven github.com links
           #   through the API instead of scraping HTML. That is rate-limit-proof
           #   from an Actions IP and, more usefully, tells "repo went private"
@@ -75,6 +82,7 @@ jobs:
             --no-progress
             --scheme https
             --scheme http
+            --root-dir '${{ github.workspace }}/dist'
             --max-concurrency 4
             --max-retries 3
             --retry-wait-time 5
