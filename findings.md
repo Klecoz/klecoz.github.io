@@ -8,6 +8,81 @@ which is the part that saves the most time.
 
 ---
 
+## 2026-09-07 — eighth session: the link checker was reporting 87 failures and had never found one
+
+Four weekly emails about "outbound link failures". None of them was about an outbound link.
+
+### Every error in every report was the same lychee config bug
+
+`links.yml` passes `--scheme https --scheme http` on the stated theory that this "drops
+relative and file links". It does — but lychee *resolves* a link before it applies `--scheme`,
+and a root-relative href in a local file cannot be resolved without `--root-dir`. So every
+`/fonts/...`, every `/_astro/...` hashed asset and every nav link failed at the resolution step
+and never reached the filter that was supposed to discard it.
+
+Counted rather than eyeballed — all four comment bodies on issue #1 parsed and every error line
+classified:
+
+| Report | Error lines | Root-relative | Anything else |
+|---|---|---|---|
+| 2026-08-17 | 87 | 87 | **0** |
+| 2026-08-24 | 87 | 87 | **0** |
+| 2026-08-31 | 87 | 87 | **0** |
+| 2026-09-07 | 87 | 87 | **0** |
+
+Each report also says `Unique 30` / `Successful 31`. The 30 real URLs passed every single week.
+The checker has a 100% false-positive rate and has never once caught rot.
+
+### Reproduced and fixed locally against the real binary
+
+lychee 0.24.2 (the release `lychee-action@v2` resolves to), run over a local `npm run build`
+with the workflow's exact arguments:
+
+| Run | Root-relative errors |
+|---|---|
+| Workflow args as they were | **87** — byte-for-byte the same list as the issue |
+| Same args plus `--root-dir "$PWD/dist"` | **0** |
+
+The fix was then verified against the *shipped* config rather than a retyped command: the
+committed YAML is parsed, the `args` string pulled out of it, `${{ github.workspace }}`
+substituted, and lychee run on the result. Still 0.
+
+`--root-dir` **must be absolute** — `lychee --help`: *"This must be an absolute path (i.e., one
+beginning with `/`)."* Hence `${{ github.workspace }}/dist` and not `dist`.
+
+Remaining errors in the local run are all this sandbox's egress proxy refusing outbound
+requests (itch.io, buffalostate.edu, and github.com 403s). Those are **not** evidence about the
+real links — the evidence that they are healthy is the `Successful 31` in four consecutive CI
+reports, which ran from a real runner.
+
+### Broken since the day it was added
+
+`git log --diff-filter=A -- .github/workflows/links.yml` → one commit, `31c9fea`, 2026-08-06.
+The first scheduled run was 2026-08-10 and filed issue #1. There is no regression here and no
+lychee upgrade to blame: **this workflow has never had a green run.** The `--scheme` comment was
+reasoned about and never checked against output, which is the exact failure mode `CLAUDE.md`
+warns about.
+
+### The rest of the gate, run this session
+
+Nothing outside `.github/workflows/links.yml` changed, so `dist` is unaffected — but the gate
+was run rather than assumed:
+
+| Check | Result |
+|---|---|
+| `npm run check` | 16 files, 0 errors / 0 warnings / 0 hints |
+| `npm run build` | 3 pages, prune line: 10 assets (1318 KB), `du -sh dist` 656K |
+| `npm run axe` | 12 scans, no WCAG A/AA violations |
+| `bash scripts/assert-cname.sh` | `CNAME ok: arseniocolon.com` |
+
+`npm run axe` does not run unmodified in this container: `scripts/axe-scan.mjs` pins
+`channel: 'chrome'` and the image ships Playwright's Chromium instead. It was run from a
+scratch copy with `executablePath` pointed at `/opt/pw-browsers/chromium-1194/...`; the repo
+script was left alone. `npm run snap` was **not** run — same missing-Chrome reason, and no
+print-affecting code was touched.
+
+---
+
 ## 2026-08-18 — seventh session: resume sync, and the two-stop theme toggle
 
 Two changes: the timeline and the surrounding sections were brought in line with

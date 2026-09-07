@@ -494,6 +494,14 @@ and re-run — it should fail on both themes.
 failing makes a red Actions tab normal, and the deploy lives in that tab. `link-rot` is the
 label; one issue gets re-commented and auto-closed rather than duplicated weekly.
 
+**`--root-dir` is load-bearing in `links.yml`.** lychee resolves a link before it applies
+`--scheme`, so without `--root-dir` every root-relative href in the built HTML — fonts, hashed
+`_astro/` assets, nav links — fails at resolution and is reported as an error, drowning the
+real result. That is what issue #1 was: four weekly reports, 87 "errors" each, all of them this,
+and the 30 real URLs passing every time. Fixed 2026-09-07. It must be an **absolute** path,
+which is why it reads `${{ github.workspace }}/dist` and not `dist`. If you ever see a link
+report where the error count dwarfs the unique-link count, check this argument first.
+
 **Two hosts are excluded and will stay excluded.** Probed 2026-08-07 with a browser
 user-agent from a residential IP — the friendliest case a checker ever gets:
 

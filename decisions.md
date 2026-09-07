@@ -505,6 +505,23 @@ throttled us — not rot. Accepting 403 globally would mask the status code that
 The WGRZ exclusion is the one that costs something — it's the press citation, and nothing will
 now notice if the article moves.
 
+**`--root-dir` rather than a broader exclusion (2026-09-07).** The checker had spent four weeks
+reporting 87 failures a week, all of them the same thing: lychee resolves a link *before* it
+applies `--scheme`, so root-relative hrefs in local files died at resolution and never reached
+the `https`/`http` filter that was meant to drop them. Rejected alternatives: excluding `^/`
+by pattern (the failure happens at resolution, so a pattern never gets consulted), and dropping
+`--scheme` in favour of letting lychee check the files on disk (that reintroduces exactly the
+`/side-projects`-is-a-directory false failure the `--scheme` line was written to avoid).
+`--root-dir` is the one option that makes resolution succeed so the existing, deliberate filter
+can finally do its job. The original intent is unchanged — internal routing is still proven by
+the build, not by this workflow.
+
+**The alarm being wrong is worse here than the alarm being absent.** This is the same argument
+as `fail: false` and `--accept 429`, and it lost anyway: a job that cries wolf weekly trains you
+to filter its email, so a real failure in week five would have been read as more of the same.
+Four reports of 87 errors that were 100% false is a stronger case for fixing the checker than
+any single broken link would have been.
+
 ### `audit.yml` is separate from `deploy.yml`
 
 A score must never be able to block publishing. Keeping them apart also means the audit stays
