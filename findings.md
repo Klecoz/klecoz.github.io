@@ -8,6 +8,22 @@ which is the part that saves the most time.
 
 ---
 
+## 2026-11-02 — dependency audit, and what it changed in `dist/`
+
+`npm audit` went from 11 advisories (1 critical, 9 high, 1 moderate) to 0 after `npm audit fix`.
+The upgrades were all in build tooling: Astro's compiler bindings went 0.3.2 → 0.5.2, internal-helpers
+0.10.2 → 0.13.0, and some Babel patches.
+
+Method: built HEAD in a scratch worktree, built the patched tree, diffed `dist/` with the HTML split per tag.
+
+| Check | Result |
+|---|---|
+| `npm run check` | 0 errors / 0 warnings / 0 hints |
+| Markup and text | identical on all 3 pages |
+| CSS | 4 unused `[data-astro-image-pos]` rules dropped (`bottom-top`, `left-right`, `right-left`, `top-bottom`); `-webkit-print-color-adjust` added beside `print-color-adjust` in the print block |
+| sitemap | only `lastmod` changed |
+
+The added `-webkit-` prefix means Safari now honors the print rule for the timeline ticks too.
 ## 2026-09-07 — eighth session: the link checker was reporting 87 failures and had never found one
 
 Four weekly emails about "outbound link failures". None of them was about an outbound link.

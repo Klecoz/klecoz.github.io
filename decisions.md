@@ -7,6 +7,17 @@ Decisions Arsenio made himself are marked **[AC]**. Those don't get revisited wi
 
 ---
 
+## 2026-11-02 — security patch to the build tooling
+
+### `npm audit fix` only, no major bumps
+
+The site is static, so the 11 advisories (1 critical, 9 high, 1 moderate) were all in the Astro build
+chain, not in anything a visitor loads. `npm audit fix` cleared all of them while staying
+inside the existing semver ranges. Rejected: `npm audit fix --force`, because it was not
+needed and it allows major bumps.
+
+---
+
 ## 2026-08-18 — two-stop theme, and the 2026 resume
 
 ### The toggle is Dark/Light, with Dark as the default — **[AC]**
